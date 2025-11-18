@@ -34,8 +34,6 @@
         content="See how shadows move across your garden or yard throughout the day and year.">
   <meta name="twitter:image" content="https://shadowcalculator.com/social-preview.png">
 
-
-
   <!--
     Shadow Calculator
     ------------------
@@ -71,6 +69,7 @@
       height: 100%;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text-main);
+      background-color: --bg;
       background-color: var(--bg);
     }
 
@@ -99,6 +98,10 @@
       overflow-y: auto;
     }
 
+    .panel-header {
+      position: relative; /* so the close button can sit in the corner */
+    }
+
     .panel-header h1 {
       font-size: 1.4rem;
       margin: 0 0 4px;
@@ -108,6 +111,34 @@
       margin: 0;
       font-size: 0.9rem;
       color: var(--text-muted);
+    }
+
+    .panel-header .panel-about {
+      margin-top: 4px;
+      font-size: 0.8rem;
+    }
+
+    .panel-header .panel-about a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .panel-header .panel-about a:hover {
+      text-decoration: underline;
+    }
+
+    /* Mobile-only close button for settings overlay */
+    #mobile-settings-close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      border: none;
+      background: transparent;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 6px;
+      display: none; /* shown in media query on mobile */
     }
 
     .panel-section {
@@ -200,7 +231,8 @@
     #mobile-settings-toggle {
       position: absolute;
       top: 8px;
-      left: 8px;
+      right: 8px;
+      left: auto;
       padding: 4px 8px;
       font-size: 0.75rem;
       border-radius: 4px;
@@ -208,7 +240,7 @@
       background: rgba(255,255,255,0.9);
       cursor: pointer;
       z-index: 10000;
-      display: none; /* shown only on mobile */
+      display: none; /* shown only on mobile via media query */
     }
 
     /* Shadow length + grid info bar at bottom */
@@ -254,47 +286,51 @@
       max-height: 40vh;
     }
 
-	.panel-header .panel-about {
-	  margin-top: 4px;
-	  font-size: 0.8rem;
-	}
-
-	.panel-header .panel-about a {
-	  color: var(--accent);
-	  text-decoration: none;
-	}
-
-	.panel-header .panel-about a:hover {
-	  text-decoration: underline;
-	}
-
-    /* Mobile layout: stack sidebar above view */
+    /* Mobile layout: full-screen settings overlay */
     @media (max-width: 768px) {
       #app {
         grid-template-columns: 1fr;
-        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
       }
-      #control-panel {
-        grid-column: 1;
-        grid-row: 1;
-        max-height: 55vh;
-      }
+
       #view-panel {
         grid-column: 1;
-        grid-row: 2;
-        min-height: 45vh;
+        grid-row: 1;
+        min-height: 100vh;
+      }
+
+      #scene-container {
+        min-height: 100vh;
+      }
+
+      /* Settings panel becomes an overlay on top of everything */
+      #control-panel {
+        position: fixed;
+        inset: 0;
+        max-width: none;
+        max-height: none;
+        height: 100vh;
+        z-index: 15000;
+        overflow-y: auto;
+        border-right: none;
+        box-shadow: 0 0 16px rgba(0,0,0,0.25);
+      }
+
+      /* Hidden state when in "scene" mode */
+      #control-panel.hidden-mobile {
+        display: none;
       }
 
       #mobile-settings-toggle {
         display: inline-block;
       }
 
-      /* Compact mode: when showing scene, hide all sections except time */
-      #control-panel.compact .panel-section:not(#time-section) {
-        display: none;
+      #mobile-settings-close {
+        display: inline-block;
       }
     }
   </style>
+
 </head>
 <body>
   <div id="app">
@@ -304,8 +340,9 @@
         <h1>Shadow Calculator</h1>
         <p>Visualize human and object shadows by time, date, and location.</p>
         <p class="panel-about">
-		  <a href="about.html">About</a>
-	    </p>
+          <a href="about.html">About</a>
+        </p>
+        <button id="mobile-settings-close" type="button" aria-label="Close settings">×</button>
       </header>
 
       <!-- Human controls -->
@@ -420,11 +457,7 @@
   <script>
     /* ----------------------------------------------------------------------
        Cities & objects
-       ----------------------------------------------------------------------
-       CITIES: approximate lat/lon + IANA time zone.
-       OBJECTS: typical garden / yard objects with representative heights.
-       All heights here are in meters; human height is tracked in inches/cm.
-    */
+       ---------------------------------------------------------------------- */
     const CITIES = [
       { name: "New York, USA",        lat: 40.7128,  lon: -74.006,   tz: "America/New_York" },
       { name: "Los Angeles, USA",     lat: 34.0522,  lon: -118.2437, tz: "America/Los_Angeles" },
@@ -445,7 +478,7 @@
     const appState = {
       units: "imperial",
       humanVisible: true,
-      humanHeight: 68,      // inches (default ~median adult)
+      humanHeight: 68,      // inches
       objectVisible: false,
       selectedObjectId: null,
       timeMinutes: 12 * 60, // noon local time
@@ -536,6 +569,7 @@
       dom.viewPanel             = document.getElementById("view-panel");
 
       dom.mobileSettingsToggle  = document.getElementById("mobile-settings-toggle");
+      dom.mobileSettingsClose   = document.getElementById("mobile-settings-close");
     }
 
     function initEventHandlers() {
@@ -552,11 +586,6 @@
           syncHumanHeightInputFromState();
           updateAll();
         }
-      });
-
-      dom.humanHeightInput.addEventListener("change", () => {
-        const val = Number(dom.humanHeightInput.value);
-        if (!Number.isNaNaN(val)) return;
       });
 
       dom.humanHeightInput.addEventListener("change", () => {
@@ -592,7 +621,6 @@
       dom.dateInput.addEventListener("change", () => {
         const val = dom.dateInput.value;
         if (val) {
-          // Interpret selected date at local 12:00 (time slider chooses hour)
           appState.date = new Date(val + "T12:00:00");
           updateAll();
         }
@@ -602,7 +630,6 @@
         const idx = Number(dom.citySelect.value);
         appState.city = appState.cities[idx] || null;
 
-        // Rebuild compass so N/S arrow labels swap for hemispheres
         if (threeScene) {
           buildCompass3D();
         }
@@ -627,11 +654,21 @@
         updateUrlFromState();
       });
 
-      dom.mobileSettingsToggle.addEventListener("click", () => {
-        if (!isMobile()) return;
-        mobileMode = (mobileMode === "scene") ? "settings" : "scene";
-        updateMobileLayout();
-      });
+      if (dom.mobileSettingsToggle) {
+        dom.mobileSettingsToggle.addEventListener("click", () => {
+          if (!isMobile()) return;
+          mobileMode = (mobileMode === "scene") ? "settings" : "scene";
+          updateMobileLayout();
+        });
+      }
+
+      if (dom.mobileSettingsClose) {
+        dom.mobileSettingsClose.addEventListener("click", () => {
+          if (!isMobile()) return;
+          mobileMode = "scene";
+          updateMobileLayout();
+        });
+      }
     }
 
     function isMobile() {
@@ -639,21 +676,32 @@
     }
 
     function updateMobileLayout() {
+      const panel = dom.controlPanel;
+
+      // Desktop / tablet: no overlay, sidebar always visible
       if (!isMobile()) {
-        dom.controlPanel.classList.remove("compact");
-        dom.viewPanel.style.display = "flex";
-        dom.mobileSettingsToggle.textContent = "Settings";
+        if (panel) panel.classList.remove("hidden-mobile");
+        if (dom.mobileSettingsToggle) dom.mobileSettingsToggle.style.display = "none";
+        if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "none";
+        if (dom.viewPanel) dom.viewPanel.style.display = "flex";
         return;
       }
 
+      // Mobile: scene always present underneath, settings overlay on demand
+      if (dom.mobileSettingsToggle) {
+        dom.mobileSettingsToggle.style.display = "inline-block";
+      }
+
+      if (!panel) return;
+
       if (mobileMode === "scene") {
-        dom.controlPanel.classList.add("compact");
-        dom.viewPanel.style.display = "flex";
-        dom.mobileSettingsToggle.textContent = "Settings";
+        panel.classList.add("hidden-mobile");
+        if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "none";
+        if (dom.viewPanel) dom.viewPanel.style.display = "flex";
       } else {
-        dom.controlPanel.classList.remove("compact");
-        dom.viewPanel.style.display = "none";
-        dom.mobileSettingsToggle.textContent = "Scene";
+        panel.classList.remove("hidden-mobile");
+        if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "inline-block";
+        if (dom.viewPanel) dom.viewPanel.style.display = "flex"; // scene stays behind overlay
       }
     }
 
@@ -799,7 +847,6 @@
     function inchesToCm(inches) { return inches * 2.54; }
     function cmToInches(cm) { return cm / 2.54; }
 
-    // Round to nearest 0.1 in, then decompose into feet + remaining inches
     function formatShadowImperialFromMeters(m) {
       const inchesRaw = m / 0.0254;
       const inchesRounded = Math.round(inchesRaw * 10) / 10;
@@ -809,7 +856,7 @@
     }
 
     /* ----------------------------------------------------------------------
-       Time zone helpers (build local date in the selected city's zone)
+       Time zone helpers
        ---------------------------------------------------------------------- */
 
     function getZonedDateParts(date, timeZone) {
@@ -843,8 +890,6 @@
         return new Date(year, monthIndex, day, hour, minute, 0);
       }
 
-      // Iteratively adjust a UTC guess so that when formatted in the target
-      // time zone, its clock time matches (year,month,day,hour,minute).
       let guess = new Date(Date.UTC(year, monthIndex, day, hour, minute, 0));
 
       for (let i = 0; i < 5; i++) {
@@ -863,7 +908,7 @@
     }
 
     /* ----------------------------------------------------------------------
-       URL state (sharing link encodes city, date, time, etc.)
+       URL state (sharing)
        ---------------------------------------------------------------------- */
 
     function applyStateFromQuery(search) {
@@ -978,7 +1023,6 @@
       updateUrlFromState();
     }
 
-    // Build a Date in the selected city's local time zone for current UI date/time
     function buildCurrentDateTime() {
       const dateStr = dom.dateInput.value;
       if (!dateStr) return null;
@@ -1065,7 +1109,6 @@
       return getObjectHeightMeters();
     }
 
-    // Core formula: L = H / tan(α)
     function computeShadowLengthM(heightM, solar) {
       if (!solar || solar.altitudeDeg <= 0 || !heightM) return 0;
       const altRad = solar.altitudeRad;
@@ -1074,7 +1117,6 @@
       return heightM / tanAlt;
     }
 
-    // Bottom bar shows shadow length(s) and grid cell size
     function updateShadowLengthsBar(solar) {
       const humanH = getHumanHeightMeters();
       const objH   = getObjectHeightMeters();
@@ -1125,7 +1167,7 @@
     }
 
     /* ----------------------------------------------------------------------
-       Math details panel (for visitors who want the derivation)
+       Math details panel
        ---------------------------------------------------------------------- */
 
     function updateMathDetails(solar) {
@@ -1190,9 +1232,7 @@
         lengthLine = `L = ${lengthM.toFixed(3)} m  ≈  ${cm.toFixed(1)} cm`;
       }
 
-      // Projected ground direction: we define world axes as:
-      //   X = +east, Z = +south
-      // SunCalc azimuth: 0° = south, 90° = west, 180° = north, 270° = east.
+      // World axes: X = east, Z = south
       const alt = solar.altitudeRad;
       const az  = solar.azimuthRad;
       const sx = Math.sin(az) * Math.cos(alt);
@@ -1278,7 +1318,7 @@ Shadow direction (ground plane):
       threeCamera.position.set(6, 6, 6);
       threeCamera.lookAt(0, 0, 0);
 
-      updateGridForUnits(); // builds ground grid + directional compass
+      updateGridForUnits();
 
       const amb = new THREE.AmbientLight(0xffffff, 0.6);
       threeScene.add(amb);
@@ -1335,13 +1375,11 @@ Shadow direction (ground plane):
       threeRenderer.setSize(width, height);
       threeCamera.aspect = width / height;
       threeCamera.updateProjectionMatrix();
-
-      // Keep compass anchored to top-left in screen space
       positionCompassInView();
     }
 
     /* ----------------------------------------------------------------------
-       Compass overlay (shows world axes + N/S labels)
+       Compass overlay (world axes + N/S labels)
        ---------------------------------------------------------------------- */
 
     function createCompassLabelSprite(text, colorCss, sizeWorld) {
@@ -1352,7 +1390,6 @@ Shadow direction (ground plane):
 
       ctx.clearRect(0, 0, canvasSize, canvasSize);
 
-      // White circular background for legibility
       ctx.fillStyle = "rgba(255,255,255,0.9)";
       ctx.beginPath();
       ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize * 0.45, 0, Math.PI * 2);
@@ -1409,39 +1446,29 @@ Shadow direction (ground plane):
 
       compassGroup = new THREE.Group();
 
-      // Base axis arrows for the world frame:
-      //   X = east/west,   Z = south/north
       const arrowE = new THREE.ArrowHelper(
-        new THREE.Vector3( 1, 0,  0).normalize(), // +X = east
+        new THREE.Vector3( 1, 0,  0).normalize(),
         origin,
         length,
-        0x4444aa,
-        headLength,
-        headWidth
+        0x4444aa
       );
       const arrowW = new THREE.ArrowHelper(
-        new THREE.Vector3(-1, 0,  0).normalize(), // -X = west
+        new THREE.Vector3(-1, 0,  0).normalize(),
         origin,
         length,
-        0x8888aa,
-        headLength,
-        headWidth
+        0x8888aa
       );
       const arrowZNeg = new THREE.ArrowHelper(
-        new THREE.Vector3( 0, 0, -1).normalize(), // Z- = geographic north
+        new THREE.Vector3( 0, 0, -1).normalize(), // geographic north
         origin,
         length,
-        0x444444,
-        headLength,
-        headWidth
+        0x444444
       );
       const arrowZPos = new THREE.ArrowHelper(
-        new THREE.Vector3( 0, 0,  1).normalize(), // Z+ = geographic south
+        new THREE.Vector3( 0, 0,  1).normalize(), // geographic south
         origin,
         length,
-        0x888888,
-        headLength,
-        headWidth
+        0x888888
       );
 
       compassGroup.add(arrowE, arrowW, arrowZNeg, arrowZPos);
@@ -1449,23 +1476,17 @@ Shadow direction (ground plane):
       compassEastArrow  = arrowE;
       compassWestArrow  = arrowW;
 
-      // Hemisphere logic: in the southern hemisphere, "north" is visually opposite
       const isNorthernHemisphere = !appState.city || appState.city.lat >= 0;
 
       let northArrow, southArrow;
-      northArrow = arrowZPos;
-      southArrow = arrowZNeg;
-	  //if (isNorthernHemisphere) {
-        // In northern hemisphere: north is toward world Z-
+      //if (isNorthernHemisphere) {
         //northArrow = arrowZNeg;
         //southArrow = arrowZPos;
       //} else {
-        // In southern hemisphere: north is toward world Z+
-        //northArrow = arrowZPos;
-        //southArrow = arrowZNeg;
+        northArrow = arrowZPos;
+        southArrow = arrowZNeg;
       //}
 
-      // N arrow = red; S arrow = dark gray
       northArrow.setColor(new THREE.Color(0xff0000));
       southArrow.setColor(new THREE.Color(0x444444));
 
@@ -1503,8 +1524,7 @@ Shadow direction (ground plane):
     function positionCompassInView() {
       if (!compassGroup || !threeCamera) return;
 
-      // Place compass near top-left in Normalized Device Coordinates
-      const ndc = new THREE.Vector3(-0.75, 0.9, 0); // inside edges
+      const ndc = new THREE.Vector3(-0.75, 0.9, 0);
       ndc.unproject(threeCamera);
       const targetWorld = ndc.clone();
 
@@ -1516,8 +1536,6 @@ Shadow direction (ground plane):
       compassGroup.quaternion.identity();
 
       let scale = distNew / distRef;
-
-      // Keep compass roughly consistent size on screen, regardless of grid spacing
       const targetScreenSize = 0.4;
       scale *= targetScreenSize / currentGridSpacingM;
 
@@ -1528,7 +1546,6 @@ Shadow direction (ground plane):
        Shadow direction in 3D
        ---------------------------------------------------------------------- */
 
-    // Compute a normalized vector pointing from the sun to the ground
     function getSunLightDirection(solar) {
       if (!solar || solar.altitudeDeg <= 0) return null;
 
@@ -1549,7 +1566,7 @@ Shadow direction (ground plane):
       ly /= len;
       lz /= len;
 
-      if (ly >= 0) return null; // sun must be above ground, so light points downward (ly < 0)
+      if (ly >= 0) return null;
       return new THREE.Vector3(lx, ly, lz);
     }
 
@@ -1562,7 +1579,6 @@ Shadow direction (ground plane):
 
       const lightDir = getSunLightDirection(solar);
 
-      // Human geometry + shadow
       if (appState.humanVisible) {
         const heightM = getHumanHeightMeters();
         ensureHumanMesh(heightM || 0);
@@ -1579,7 +1595,6 @@ Shadow direction (ground plane):
         ensureHumanShadowFromHull(null);
       }
 
-      // Object geometry + shadow
       if (appState.objectVisible && appState.selectedObjectId) {
         const obj = appState.objects.find((o) => o.id === appState.selectedObjectId);
         if (obj) {
@@ -1599,7 +1614,6 @@ Shadow direction (ground plane):
       }
     }
 
-    // Simple humanoid: cylinder body + sphere head, scaled to desired height
     function ensureHumanMesh(heightM) {
       if (!humanGroup) {
         humanGroup = new THREE.Group();
@@ -1641,7 +1655,6 @@ Shadow direction (ground plane):
       headMesh.position.set(0, scaledBodyHeight + scaledHeadRadius, 0);
     }
 
-    // Objects: either a basic tree (trunk + canopy) or a simple box
     function ensureObjectMesh(obj) {
       const heightM = obj.height_m;
       const shapeId = obj.shape || "box_basic";
@@ -1743,7 +1756,6 @@ Shadow direction (ground plane):
           const ly = lightDir.y;
           if (Math.abs(ly) < 1e-6) continue;
 
-          // Ray from vertex along light direction; find intersection with y=0 plane
           const t = -tempV.y / ly;
           if (t < 0) continue;
 
@@ -1757,7 +1769,6 @@ Shadow direction (ground plane):
       return convexHull2D(points);
     }
 
-    // Standard monotone chain convex hull in 2D
     function convexHull2D(points) {
       if (points.length < 3) return null;
       const pts = points.slice().sort((a, b) => {
