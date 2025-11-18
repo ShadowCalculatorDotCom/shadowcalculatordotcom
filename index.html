@@ -10,10 +10,8 @@
 
   <meta name="description"
         content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. See how trees, fences, pergolas, and raised beds cast shade at any date, time, and location. Built with Three.js and SunCalc.">
-
   <meta name="keywords"
         content="shadow calculator, garden shade, tree shadow, fence shadow, pergola shade, raised bed sun, fruit tree placement, vegetable garden planning, landscape design sun, solar angle calculator">
-
   <meta name="author" content="shadowcalculator.com">
   <meta name="robots" content="index,follow">
 
@@ -69,13 +67,12 @@
       height: 100%;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text-main);
-      background-color: --bg;
       background-color: var(--bg);
     }
 
     body { display: block; }
 
-    /* Two-column layout: sidebar (controls) + main (3D view & readouts) */
+    /* Desktop: sidebar + main */
     #app {
       display: grid;
       grid-template-columns: 340px minmax(0, 1fr);
@@ -85,7 +82,7 @@
       overflow: hidden;
     }
 
-    /* Sidebar: controls + explanation */
+    /* Sidebar */
     #control-panel {
       grid-column: 1;
       background: var(--panel-bg);
@@ -99,7 +96,7 @@
     }
 
     .panel-header {
-      position: relative; /* so the close button can sit in the corner */
+      position: relative;
     }
 
     .panel-header h1 {
@@ -127,7 +124,7 @@
       text-decoration: underline;
     }
 
-    /* Mobile-only close button for settings overlay */
+    /* Mobile-only close button for full settings overlay */
     #mobile-settings-close {
       position: absolute;
       top: 8px;
@@ -138,7 +135,7 @@
       line-height: 1;
       cursor: pointer;
       padding: 2px 6px;
-      display: none; /* shown in media query on mobile */
+      display: none;
     }
 
     .panel-section {
@@ -210,7 +207,7 @@
       color: var(--text-muted);
     }
 
-    /* Main view (right pane) */
+    /* Main view */
     #view-panel {
       grid-column: 2;
       display: flex;
@@ -227,7 +224,7 @@
       overflow: hidden;
     }
 
-    /* Mobile settings toggle (shows/hides controls on small screens) */
+    /* Mobile settings toggle in scene (top-right) */
     #mobile-settings-toggle {
       position: absolute;
       top: 8px;
@@ -240,10 +237,10 @@
       background: rgba(255,255,255,0.9);
       cursor: pointer;
       z-index: 10000;
-      display: none; /* shown only on mobile via media query */
+      display: none;
     }
 
-    /* Shadow length + grid info bar at bottom */
+    /* Bottom bar readout */
     #shadow-readout {
       display: flex;
       justify-content: center;
@@ -263,7 +260,7 @@
       color: var(--accent);
     }
 
-    /* Math details panel: shows the actual trigonometry and directions */
+    /* Math details panel */
     #math-details {
       margin: 0;
       padding: 6px 12px 10px;
@@ -286,39 +283,57 @@
       max-height: 40vh;
     }
 
-    /* Mobile layout: full-screen settings overlay */
+    /* ------------------------------------------------------------------ */
+    /* Mobile layout                                                      */
+    /* ------------------------------------------------------------------ */
+
     @media (max-width: 768px) {
+      /* Stack: scene on top, mini controls at bottom */
       #app {
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
       }
 
       #view-panel {
         grid-column: 1;
         grid-row: 1;
-        min-height: 100vh;
+        min-height: 60vh;
       }
 
       #scene-container {
-        min-height: 100vh;
+        min-height: 60vh;
       }
 
-      /* Settings panel becomes an overlay on top of everything */
       #control-panel {
+        grid-column: 1;
+        grid-row: 2;
+        border-right: none;
+        border-top: 1px solid var(--border-subtle);
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+        max-height: 45vh;
+      }
+
+      /* Compact = bottom mini strip: header + time section only */
+      #control-panel.compact {
+        position: relative;
+        height: auto;
+        overflow-y: hidden;
+      }
+
+      #control-panel.compact .panel-section:not(#time-section) {
+        display: none;
+      }
+
+      /* Expanded = full-screen overlay for all settings */
+      #control-panel.expanded {
         position: fixed;
         inset: 0;
-        max-width: none;
-        max-height: none;
         height: 100vh;
-        z-index: 15000;
+        max-height: none;
         overflow-y: auto;
-        border-right: none;
+        border-top: none;
         box-shadow: 0 0 16px rgba(0,0,0,0.25);
-      }
-
-      /* Hidden state when in "scene" mode */
-      #control-panel.hidden-mobile {
-        display: none;
+        z-index: 15000;
       }
 
       #mobile-settings-toggle {
@@ -382,7 +397,7 @@
         </div>
       </section>
 
-      <!-- Time controls -->
+      <!-- Time controls (these are always visible in compact mode) -->
       <section class="panel-section" id="time-section">
         <h2>Time</h2>
 
@@ -450,14 +465,11 @@
     </main>
   </div>
 
-  <!-- External libraries (CDN) -->
+  <!-- External libraries -->
   <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
 
   <script>
-    /* ----------------------------------------------------------------------
-       Cities & objects
-       ---------------------------------------------------------------------- */
     const CITIES = [
       { name: "New York, USA",        lat: 40.7128,  lon: -74.006,   tz: "America/New_York" },
       { name: "Los Angeles, USA",     lat: 34.0522,  lon: -118.2437, tz: "America/Los_Angeles" },
@@ -472,16 +484,13 @@
       { id: "planter",    name: "Raised planter",   height_m: 0.8, shape: "box_basic" }
     ];
 
-    /* ----------------------------------------------------------------------
-       Global state (UI + scene)
-       ---------------------------------------------------------------------- */
     const appState = {
       units: "imperial",
       humanVisible: true,
-      humanHeight: 68,      // inches
+      humanHeight: 68,
       objectVisible: false,
       selectedObjectId: null,
-      timeMinutes: 12 * 60, // noon local time
+      timeMinutes: 12 * 60,
       date: null,
       city: null,
       cities: CITIES.slice(),
@@ -498,11 +507,10 @@
     let currentObjectShapeId = null;
     let humanShadowMesh = null;
     let objectShadowMesh = null;
-    let mobileMode = "scene"; // "scene" or "settings"
+    let mobileMode = "scene"; // "scene" -> compact strip; "settings" -> full overlay
     let currentGridSizeM = 0;
     let currentGridSpacingM = 0;
 
-    // Compass in the top-left overlay (world axes + N/S labels)
     let compassGroup = null;
     let compassNorthArrow = null;
     let compassSouthArrow = null;
@@ -527,16 +535,10 @@
       });
 
       if (window.ResizeObserver && dom.sceneContainer) {
-        const ro = new ResizeObserver(() => {
-          resizeSceneToContainer();
-        });
+        const ro = new ResizeObserver(() => resizeSceneToContainer());
         ro.observe(dom.sceneContainer);
       }
     });
-
-    /* ----------------------------------------------------------------------
-       DOM cache & event handlers
-       ---------------------------------------------------------------------- */
 
     function cacheDom() {
       dom.controlPanel          = document.getElementById("control-panel");
@@ -629,11 +631,7 @@
       dom.citySelect.addEventListener("change", () => {
         const idx = Number(dom.citySelect.value);
         appState.city = appState.cities[idx] || null;
-
-        if (threeScene) {
-          buildCompass3D();
-        }
-
+        if (threeScene) buildCompass3D();
         updateAll();
       });
 
@@ -657,7 +655,7 @@
       if (dom.mobileSettingsToggle) {
         dom.mobileSettingsToggle.addEventListener("click", () => {
           if (!isMobile()) return;
-          mobileMode = (mobileMode === "scene") ? "settings" : "scene";
+          mobileMode = "settings";
           updateMobileLayout();
         });
       }
@@ -678,36 +676,29 @@
     function updateMobileLayout() {
       const panel = dom.controlPanel;
 
-      // Desktop / tablet: no overlay, sidebar always visible
+      // Desktop: always full sidebar, no mobile toggle/close
       if (!isMobile()) {
-        if (panel) panel.classList.remove("hidden-mobile");
+        panel.classList.remove("compact", "expanded");
         if (dom.mobileSettingsToggle) dom.mobileSettingsToggle.style.display = "none";
-        if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "none";
-        if (dom.viewPanel) dom.viewPanel.style.display = "flex";
+        if (dom.mobileSettingsClose)  dom.mobileSettingsClose.style.display  = "none";
         return;
       }
 
-      // Mobile: scene always present underneath, settings overlay on demand
-      if (dom.mobileSettingsToggle) {
-        dom.mobileSettingsToggle.style.display = "inline-block";
-      }
-
-      if (!panel) return;
+      // Mobile: show settings button over scene
+      if (dom.mobileSettingsToggle) dom.mobileSettingsToggle.style.display = "inline-block";
 
       if (mobileMode === "scene") {
-        panel.classList.add("hidden-mobile");
+        panel.classList.add("compact");
+        panel.classList.remove("expanded");
         if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "none";
-        if (dom.viewPanel) dom.viewPanel.style.display = "flex";
       } else {
-        panel.classList.remove("hidden-mobile");
+        panel.classList.add("expanded");
+        panel.classList.remove("compact");
         if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "inline-block";
-        if (dom.viewPanel) dom.viewPanel.style.display = "flex"; // scene stays behind overlay
       }
     }
 
-    /* ----------------------------------------------------------------------
-       Initial data & defaults
-       ---------------------------------------------------------------------- */
+    /* -------------------------- init data & defaults ---------------------- */
 
     function initData() {
       populateCitySelect();
@@ -855,9 +846,7 @@
       return { feet, inches: remInches, totalInches: inchesRounded };
     }
 
-    /* ----------------------------------------------------------------------
-       Time zone helpers
-       ---------------------------------------------------------------------- */
+    /* time zone helpers --------------------------------------------------- */
 
     function getZonedDateParts(date, timeZone) {
       const dtf = new Intl.DateTimeFormat("en-US", {
@@ -907,9 +896,7 @@
       return guess;
     }
 
-    /* ----------------------------------------------------------------------
-       URL state (sharing)
-       ---------------------------------------------------------------------- */
+    /* URL state ----------------------------------------------------------- */
 
     function applyStateFromQuery(search) {
       if (!search || search.length <= 1) return;
@@ -1010,9 +997,7 @@
       history.replaceState(null, "", newUrl);
     }
 
-    /* ----------------------------------------------------------------------
-       Solar + shadow calculation
-       ---------------------------------------------------------------------- */
+    /* solar + shadow ------------------------------------------------------ */
 
     function updateAll() {
       const solar = computeSolarPositionSafe();
@@ -1131,15 +1116,9 @@
       if (!sunOK) {
         pieces.push("No shadow (sun below horizon)");
       } else {
-        if (humanL) {
-          pieces.push("Human " + formatLengthString(humanL));
-        }
-        if (objL) {
-          pieces.push("Object " + formatLengthString(objL));
-        }
-        if (!humanL && !objL) {
-          pieces.push("No caster selected");
-        }
+        if (humanL) pieces.push("Human " + formatLengthString(humanL));
+        if (objL)   pieces.push("Object " + formatLengthString(objL));
+        if (!humanL && !objL) pieces.push("No caster selected");
       }
 
       if (currentGridSpacingM > 0) {
@@ -1166,9 +1145,7 @@
       }
     }
 
-    /* ----------------------------------------------------------------------
-       Math details panel
-       ---------------------------------------------------------------------- */
+    /* math details -------------------------------------------------------- */
 
     function updateMathDetails(solar) {
       if (!dom.mathDetails) return;
@@ -1232,7 +1209,6 @@
         lengthLine = `L = ${lengthM.toFixed(3)} m  ≈  ${cm.toFixed(1)} cm`;
       }
 
-      // World axes: X = east, Z = south
       const alt = solar.altitudeRad;
       const az  = solar.azimuthRad;
       const sx = Math.sin(az) * Math.cos(alt);
@@ -1285,9 +1261,7 @@ Shadow direction (ground plane):
       resizeSceneToContainer();
     }
 
-    /* ----------------------------------------------------------------------
-       3D scene setup (Three.js)
-       ---------------------------------------------------------------------- */
+    /* Three.js scene ------------------------------------------------------ */
 
     function initSceneSafe() {
       const container = dom.sceneContainer;
@@ -1344,10 +1318,10 @@ Shadow direction (ground plane):
 
       let spacing, divisions;
       if (appState.units === "imperial") {
-        spacing = 0.3048; // 1 ft in meters
+        spacing = 0.3048;
         divisions = 40;
       } else {
-        spacing = 0.5; // 0.5 m
+        spacing = 0.5;
         divisions = 40;
       }
       const size = spacing * divisions;
@@ -1378,9 +1352,7 @@ Shadow direction (ground plane):
       positionCompassInView();
     }
 
-    /* ----------------------------------------------------------------------
-       Compass overlay (world axes + N/S labels)
-       ---------------------------------------------------------------------- */
+    /* Compass ------------------------------------------------------------- */
 
     function createCompassLabelSprite(text, colorCss, sizeWorld) {
       const canvasSize = 128;
@@ -1417,7 +1389,7 @@ Shadow direction (ground plane):
 
       if (compassGroup) {
         threeScene.remove(compassGroup);
-        compassGroup.traverse((child) => {
+        compassGroup.traverse(child => {
           if (child.isMesh || child.isLine || child.isLineSegments || child.isSprite) {
             if (child.geometry) child.geometry.dispose();
             if (child.material) {
@@ -1440,8 +1412,6 @@ Shadow direction (ground plane):
       const size    = currentGridSizeM     || spacing * 40;
 
       const length      = spacing;
-      const headLength  = length * 0.35;
-      const headWidth   = length * 0.25;
       const origin      = new THREE.Vector3(0, 0.01, 0);
 
       compassGroup = new THREE.Group();
@@ -1459,13 +1429,13 @@ Shadow direction (ground plane):
         0x8888aa
       );
       const arrowZNeg = new THREE.ArrowHelper(
-        new THREE.Vector3( 0, 0, -1).normalize(), // geographic north
+        new THREE.Vector3( 0, 0, -1).normalize(),
         origin,
         length,
         0x444444
       );
       const arrowZPos = new THREE.ArrowHelper(
-        new THREE.Vector3( 0, 0,  1).normalize(), // geographic south
+        new THREE.Vector3( 0, 0,  1).normalize(),
         origin,
         length,
         0x888888
@@ -1497,6 +1467,7 @@ Shadow direction (ground plane):
       const northLabel = createCompassLabelSprite("N", "#ff0000", labelSize);
       const southLabel = createCompassLabelSprite("S", "#333333", labelSize);
 
+      const headLength  = length * 0.35;
       const offsetFactor = length + headLength * 0.6;
 
       const northDir =
@@ -1542,9 +1513,7 @@ Shadow direction (ground plane):
       compassGroup.scale.set(scale, scale, scale);
     }
 
-    /* ----------------------------------------------------------------------
-       Shadow direction in 3D
-       ---------------------------------------------------------------------- */
+    /* sun direction & shadows -------------------------------------------- */
 
     function getSunLightDirection(solar) {
       if (!solar || solar.altitudeDeg <= 0) return null;
@@ -1569,10 +1538,6 @@ Shadow direction (ground plane):
       if (ly >= 0) return null;
       return new THREE.Vector3(lx, ly, lz);
     }
-
-    /* ----------------------------------------------------------------------
-       Scene objects & shadows (3D projection → ground polygon)
-       ---------------------------------------------------------------------- */
 
     function updateSceneFromState(solar) {
       if (!threeScene) return;
@@ -1725,10 +1690,6 @@ Shadow direction (ground plane):
         mesh.position.set(0, (baseHeight * s) / 2, 0);
       }
     }
-
-    /* ----------------------------------------------------------------------
-       Geometry projection: mesh → ground convex hull (shadow)
-       ---------------------------------------------------------------------- */
 
     function projectGroupToGroundHull(group, lightDir) {
       if (!group || !lightDir) return null;
