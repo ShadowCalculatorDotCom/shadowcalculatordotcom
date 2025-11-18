@@ -316,11 +316,11 @@
       /* Compact = bottom mini strip: header + time section only */
       #control-panel.compact {
         position: relative;
-        height: auto;
-        overflow-y: hidden;
+        max-height: 45vh;
+        overflow-y: auto;
       }
 
-      #control-panel.compact .panel-section:not(#time-section) {
+      #control-panel.compact .panel-section:not(#time-section):not(#location-section) {
         display: none;
       }
 
