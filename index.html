@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shadow Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    Shadow Calculator
+    ------------------
+    Educational tool to visualize how shadow length and direction depend on:
+    - Latitude / longitude (via selected city)
+    - Date (seasonal solar altitude)
+    - Time of day (solar elevation + azimuth)
+
+    Science highlights:
+    - Uses SunCalc for solar position (altitude & azimuth).
+    - Assumes a simple flat ground; shadow length L = H / tan(α),
+      where H is object height and α is the solar altitude angle.
+    - 3D scene (Three.js) projects a simple human / object mesh onto
+      the ground along the sun direction to form a shadow polygon.
+  -->
+
+  <style>
+    :root {
+      --bg: #f4f4f6;
+      --panel-bg: #ffffff;
+      --border-subtle: #d7d7dd;
+      --text-main: #222222;
+      --text-muted: #666666;
+      --accent: #2a7de1;
+      --shadow-length-bg: #ffffff;
+    }
+
+    *,:before,:after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-main);
+      background-color: var(--bg);
+    }
+
+    body { display: block; }
+
+    /* Two-column layout: sidebar (controls) + main (3D view & readouts) */
+    #app {
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+      height: 100vh;
+      min-height: 0;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* Sidebar: controls + explanation */
+    #control-panel {
+      grid-column: 1;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border-subtle);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+      overflow-y: auto;
+    }
+
+    .panel-header h1 {
+      font-size: 1.4rem;
+      margin: 0 0 4px;
+    }
+
+    .panel-header p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .panel-section {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+    }
+
+    .panel-section h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .field-row {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-row label { font-size: 0.85rem; }
+
+    .field-with-unit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-with-unit input { flex: 1 1 auto; }
+
+    .field-with-unit span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    input[type="number"],
+    select,
+    input[type="date"],
+    input[type="range"] {
+      font: inherit;
+    }
+
+    input[type="number"],
+    select,
+    input[type="date"] {
+      padding: 4px 6px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      background-color: #fff;
+    }
+
+    input[type="range"] { width: 100%; }
+
+    .field-help {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .toggle-row,
+    .radio-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .status-message {
+      margin: 6px 0 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Main view (right pane) */
+    #view-panel {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    #scene-container {
+      flex: 1 1 auto;
+      min-height: 0;
+      position: relative;
+      background: radial-gradient(circle at top, #ffffff, #dde3ec);
+      overflow: hidden;
+    }
+
+    /* Mobile settings toggle (shows/hides controls on small screens) */
+    #mobile-settings-toggle {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      z-index: 10000;
+      display: none; /* shown only on mobile */
+    }
+
+    /* Shadow length + grid info bar at bottom */
+    #shadow-readout {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--shadow-length-bg);
+      font-size: 0.9rem;
+      flex: 0 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #shadow-length-value {
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* Math details panel: shows the actual trigonometry and directions */
+    #math-details {
+      margin: 0;
+      padding: 6px 12px 10px;
+      border-top: 1px solid var(--border-subtle);
+      background: #f8f8fa;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      white-space: pre;
+      overflow-x: auto;
+      overflow-y: auto;
+      display: none;
+      flex: 0 0 auto;
+      max-height: 35vh;
+    }
+
+    #view-panel.math-visible #math-details {
+      display: block;
+      height: 30vh;
+      max-height: 40vh;
+    }
+
+	.panel-header .panel-about {
+	  margin-top: 4px;
+	  font-size: 0.8rem;
+	}
+
+	.panel-header .panel-about a {
+	  color: var(--accent);
+	  text-decoration: none;
+	}
+
+	.panel-header .panel-about a:hover {
+	  text-decoration: underline;
+	}
+
+    /* Mobile layout: stack sidebar above view */
+    @media (max-width: 768px) {
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+      #control-panel {
+        grid-column: 1;
+        grid-row: 1;
+        max-height: 55vh;
+      }
+      #view-panel {
+        grid-column: 1;
+        grid-row: 2;
+        min-height: 45vh;
+      }
+
+      #mobile-settings-toggle {
+        display: inline-block;
+      }
+
+      /* Compact mode: when showing scene, hide all sections except time */
+      #control-panel.compact .panel-section:not(#time-section) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar controls -->
+    <aside id="control-panel">
+      <header class="panel-header">
+        <h1>Shadow Calculator</h1>
+        <p>Visualize human and object shadows by time, date, and location.</p>
+        <p class="panel-about">
+		  <a href="about.html">About</a>
+	    </p>
+      </header>
+
+      <!-- Human controls -->
+      <section class="panel-section" id="human-section">
+        <h2>Human</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="human-visible" checked />
+          <span>Show human</span>
+        </label>
+
+        <div class="field-row" id="human-height-preset-row">
+          <label for="human-height-preset">Height preset</label>
+          <select id="human-height-preset"></select>
+        </div>
+
+        <div class="field-row" id="human-height-input-row">
+          <label for="human-height-input">Exact height</label>
+          <div class="field-with-unit">
+            <input type="number" id="human-height-input" step="0.5" />
+            <span id="human-height-unit-label">in</span>
+          </div>
+          <small class="field-help" id="human-height-help"></small>
+        </div>
+      </section>
+
+      <!-- Object controls -->
+      <section class="panel-section" id="object-section">
+        <h2>Object</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="object-visible" />
+          <span>Show object</span>
+        </label>
+
+        <div class="field-row" id="object-row" style="display:none;">
+          <label for="object-select">Object type</label>
+          <select id="object-select"></select>
+        </div>
+      </section>
+
+      <!-- Time controls -->
+      <section class="panel-section" id="time-section">
+        <h2>Time</h2>
+
+        <div class="field-row">
+          <label for="time-slider">Time of day</label>
+          <input type="range" id="time-slider" min="0" max="1439" value="720" />
+          <div class="field-inline">
+            <span id="time-label">12:00</span> (local)
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label for="date-input">Date</label>
+          <input type="date" id="date-input" />
+        </div>
+
+        <p class="status-message" id="sun-status"></p>
+      </section>
+
+      <!-- Location controls -->
+      <section class="panel-section" id="location-section">
+        <h2>Location</h2>
+
+        <div class="field-row">
+          <label for="city-select">Nearest city</label>
+          <select id="city-select"></select>
+        </div>
+      </section>
+
+      <!-- Units controls -->
+      <section class="panel-section" id="units-section">
+        <h2>Units</h2>
+        <div class="field-row">
+          <label class="radio-row">
+            <input type="radio" name="units" value="imperial" checked />
+            <span>Inches / feet</span>
+          </label>
+          <label class="radio-row">
+            <input type="radio" name="units" value="metric" />
+            <span>Centimeters</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Math toggle -->
+      <section class="panel-section" id="math-section">
+        <h2>Math details</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="show-math" />
+          <span>Show shadow angle &amp; length math</span>
+        </label>
+      </section>
+    </aside>
+
+    <!-- Main 3D view -->
+    <main id="view-panel">
+      <div id="scene-container">
+        <button id="mobile-settings-toggle">Settings</button>
+      </div>
+      <div id="shadow-readout">
+        <span>Shadow info:</span>
+        <strong id="shadow-length-value">–</strong>
+      </div>
+      <pre id="math-details"></pre>
+    </main>
+  </div>
+
+  <!-- External libraries (CDN) -->
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+
+  <script>
+    /* ----------------------------------------------------------------------
+       Cities & objects
+       ----------------------------------------------------------------------
+       CITIES: approximate lat/lon + IANA time zone.
+       OBJECTS: typical garden / yard objects with representative heights.
+       All heights here are in meters; human height is tracked in inches/cm.
+    */
+    const CITIES = [
+      { name: "New York, USA",        lat: 40.7128,  lon: -74.006,   tz: "America/New_York" },
+      { name: "Los Angeles, USA",     lat: 34.0522,  lon: -118.2437, tz: "America/Los_Angeles" },
+      { name: "London, UK",           lat: 51.5074,  lon: -0.1278,   tz: "Europe/London" },
+      { name: "Melbourne, Australia", lat: -37.8136, lon: 144.9631,  tz: "Australia/Melbourne" }
+    ];
+
+    const OBJECTS = [
+      { id: "fruit-tree", name: "Small fruit tree", height_m: 2.4, shape: "tree_basic" },
+      { id: "trellis",    name: "Trellis",          height_m: 1.8, shape: "box_basic" },
+      { id: "birdbath",   name: "Bird bath",        height_m: 0.9, shape: "box_basic" },
+      { id: "planter",    name: "Raised planter",   height_m: 0.8, shape: "box_basic" }
+    ];
+
+    /* ----------------------------------------------------------------------
+       Global state (UI + scene)
+       ---------------------------------------------------------------------- */
+    const appState = {
+      units: "imperial",
+      humanVisible: true,
+      humanHeight: 68,      // inches (default ~median adult)
+      objectVisible: false,
+      selectedObjectId: null,
+      timeMinutes: 12 * 60, // noon local time
+      date: null,
+      city: null,
+      cities: CITIES.slice(),
+      objects: OBJECTS.slice()
+    };
+
+    const dom = {};
+    let threeScene = null;
+    let threeRenderer = null;
+    let threeCamera = null;
+    let gridHelper = null;
+    let humanGroup = null;
+    let objectGroup = null;
+    let currentObjectShapeId = null;
+    let humanShadowMesh = null;
+    let objectShadowMesh = null;
+    let mobileMode = "scene"; // "scene" or "settings"
+    let currentGridSizeM = 0;
+    let currentGridSpacingM = 0;
+
+    // Compass in the top-left overlay (world axes + N/S labels)
+    let compassGroup = null;
+    let compassNorthArrow = null;
+    let compassSouthArrow = null;
+    let compassEastArrow  = null;
+    let compassWestArrow  = null;
+    let compassNorthLabel = null;
+    let compassSouthLabel = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      cacheDom();
+      initEventHandlers();
+      initData();
+      initDefaults();
+      applyStateFromQuery(window.location.search);
+      initSceneSafe();
+      updateAll();
+      updateMobileLayout();
+
+      window.addEventListener("resize", () => {
+        resizeSceneToContainer();
+        updateMobileLayout();
+      });
+
+      if (window.ResizeObserver && dom.sceneContainer) {
+        const ro = new ResizeObserver(() => {
+          resizeSceneToContainer();
+        });
+        ro.observe(dom.sceneContainer);
+      }
+    });
+
+    /* ----------------------------------------------------------------------
+       DOM cache & event handlers
+       ---------------------------------------------------------------------- */
+
+    function cacheDom() {
+      dom.controlPanel          = document.getElementById("control-panel");
+
+      dom.humanVisible          = document.getElementById("human-visible");
+      dom.humanHeightPresetRow  = document.getElementById("human-height-preset-row");
+      dom.humanHeightInputRow   = document.getElementById("human-height-input-row");
+      dom.humanHeightPreset     = document.getElementById("human-height-preset");
+      dom.humanHeightInput      = document.getElementById("human-height-input");
+      dom.humanHeightUnitLabel  = document.getElementById("human-height-unit-label");
+      dom.humanHeightHelp       = document.getElementById("human-height-help");
+
+      dom.objectVisible         = document.getElementById("object-visible");
+      dom.objectRow             = document.getElementById("object-row");
+      dom.objectSelect          = document.getElementById("object-select");
+
+      dom.timeSlider            = document.getElementById("time-slider");
+      dom.timeLabel             = document.getElementById("time-label");
+      dom.dateInput             = document.getElementById("date-input");
+      dom.sunStatus             = document.getElementById("sun-status");
+
+      dom.citySelect            = document.getElementById("city-select");
+      dom.unitsRadios           = document.querySelectorAll('input[name="units"]');
+
+      dom.shadowLengthValue     = document.getElementById("shadow-length-value");
+      dom.sceneContainer        = document.getElementById("scene-container");
+
+      dom.showMath              = document.getElementById("show-math");
+      dom.mathDetails           = document.getElementById("math-details");
+      dom.viewPanel             = document.getElementById("view-panel");
+
+      dom.mobileSettingsToggle  = document.getElementById("mobile-settings-toggle");
+    }
+
+    function initEventHandlers() {
+      dom.humanVisible.addEventListener("change", () => {
+        appState.humanVisible = dom.humanVisible.checked;
+        updateHumanControlsVisibility();
+        updateAll();
+      });
+
+      dom.humanHeightPreset.addEventListener("change", () => {
+        const val = Number(dom.humanHeightPreset.value);
+        if (!Number.isNaN(val)) {
+          appState.humanHeight = val;
+          syncHumanHeightInputFromState();
+          updateAll();
+        }
+      });
+
+      dom.humanHeightInput.addEventListener("change", () => {
+        const val = Number(dom.humanHeightInput.value);
+        if (!Number.isNaNaN(val)) return;
+      });
+
+      dom.humanHeightInput.addEventListener("change", () => {
+        const val = Number(dom.humanHeightInput.value);
+        if (!Number.isNaN(val)) {
+          appState.humanHeight = clampHumanHeight(val);
+          syncHumanHeightInputFromState();
+          updateAll();
+        }
+      });
+
+      dom.objectVisible.addEventListener("change", () => {
+        appState.objectVisible = dom.objectVisible.checked;
+        updateObjectControlsVisibility();
+        if (!appState.objectVisible) {
+          appState.selectedObjectId = null;
+        }
+        updateAll();
+      });
+
+      dom.objectSelect.addEventListener("change", () => {
+        const val = dom.objectSelect.value || null;
+        appState.selectedObjectId = val || null;
+        updateAll();
+      });
+
+      dom.timeSlider.addEventListener("input", () => {
+        appState.timeMinutes = Number(dom.timeSlider.value);
+        syncTimeLabel();
+        updateAll();
+      });
+
+      dom.dateInput.addEventListener("change", () => {
+        const val = dom.dateInput.value;
+        if (val) {
+          // Interpret selected date at local 12:00 (time slider chooses hour)
+          appState.date = new Date(val + "T12:00:00");
+          updateAll();
+        }
+      });
+
+      dom.citySelect.addEventListener("change", () => {
+        const idx = Number(dom.citySelect.value);
+        appState.city = appState.cities[idx] || null;
+
+        // Rebuild compass so N/S arrow labels swap for hemispheres
+        if (threeScene) {
+          buildCompass3D();
+        }
+
+        updateAll();
+      });
+
+      dom.unitsRadios.forEach((r) => {
+        r.addEventListener("change", () => {
+          if (r.checked) {
+            appState.units = r.value;
+            syncUnitsUi();
+            updateGridForUnits();
+            updateAll();
+          }
+        });
+      });
+
+      dom.showMath.addEventListener("change", () => {
+        const solar = computeSolarPositionSafe();
+        updateMathDetails(solar);
+        updateUrlFromState();
+      });
+
+      dom.mobileSettingsToggle.addEventListener("click", () => {
+        if (!isMobile()) return;
+        mobileMode = (mobileMode === "scene") ? "settings" : "scene";
+        updateMobileLayout();
+      });
+    }
+
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    function updateMobileLayout() {
+      if (!isMobile()) {
+        dom.controlPanel.classList.remove("compact");
+        dom.viewPanel.style.display = "flex";
+        dom.mobileSettingsToggle.textContent = "Settings";
+        return;
+      }
+
+      if (mobileMode === "scene") {
+        dom.controlPanel.classList.add("compact");
+        dom.viewPanel.style.display = "flex";
+        dom.mobileSettingsToggle.textContent = "Settings";
+      } else {
+        dom.controlPanel.classList.remove("compact");
+        dom.viewPanel.style.display = "none";
+        dom.mobileSettingsToggle.textContent = "Scene";
+      }
+    }
+
+    /* ----------------------------------------------------------------------
+       Initial data & defaults
+       ---------------------------------------------------------------------- */
+
+    function initData() {
+      populateCitySelect();
+      populateObjectSelect();
+      populateHumanHeightPresets();
+    }
+
+    function initDefaults() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm   = String(today.getMonth() + 1).padStart(2, "0");
+      const dd   = String(today.getDate()).padStart(2, "0");
+      dom.dateInput.value = `${yyyy}-${mm}-${dd}`;
+      appState.date = today;
+
+      if (appState.cities.length > 0) {
+        appState.city = appState.cities[0];
+        dom.citySelect.value = "0";
+      }
+
+      syncTimeLabel();
+      syncUnitsUi();
+      syncHumanHeightInputFromState();
+      updateHumanControlsVisibility();
+      updateObjectControlsVisibility();
+    }
+
+    function populateCitySelect() {
+      dom.citySelect.innerHTML = "";
+      appState.cities.forEach((city, idx) => {
+        const opt = document.createElement("option");
+        opt.value = String(idx);
+        opt.textContent = city.name;
+        dom.citySelect.appendChild(opt);
+      });
+    }
+
+    function populateObjectSelect() {
+      dom.objectSelect.innerHTML = "";
+      const blank = document.createElement("option");
+      blank.value = "";
+      blank.textContent = "-- choose object --";
+      dom.objectSelect.appendChild(blank);
+
+      appState.objects.forEach((obj) => {
+        const opt = document.createElement("option");
+        opt.value = obj.id;
+        opt.textContent = obj.name;
+        dom.objectSelect.appendChild(opt);
+      });
+      dom.objectSelect.value = "";
+    }
+
+    function populateHumanHeightPresets() {
+      dom.humanHeightPreset.innerHTML = "";
+      const presets = getHumanHeightPresetsInInches();
+      presets.forEach((p) => {
+        const opt = document.createElement("option");
+        opt.value = String(p.valueInInches);
+        opt.textContent = p.label;
+        dom.humanHeightPreset.appendChild(opt);
+      });
+      dom.humanHeightPreset.value = String(presets[0].valueInInches);
+    }
+
+    function updateHumanControlsVisibility() {
+      const v = appState.humanVisible;
+      dom.humanHeightPresetRow.style.display = v ? "flex" : "none";
+      dom.humanHeightInputRow.style.display  = v ? "flex" : "none";
+    }
+
+    function updateObjectControlsVisibility() {
+      const v = appState.objectVisible;
+      dom.objectRow.style.display = v ? "flex" : "none";
+      dom.objectSelect.disabled   = !v;
+      if (v && !dom.objectSelect.value) {
+        appState.selectedObjectId = null;
+      }
+    }
+
+    function syncHumanHeightInputFromState() {
+      if (appState.units === "imperial") {
+        dom.humanHeightInput.value = appState.humanHeight.toFixed(1);
+        dom.humanHeightUnitLabel.textContent = "in";
+        dom.humanHeightHelp.textContent = "Range: 20–96 inches";
+      } else {
+        const cm = inchesToCm(appState.humanHeight);
+        dom.humanHeightInput.value = cm.toFixed(1);
+        dom.humanHeightUnitLabel.textContent = "cm";
+        dom.humanHeightHelp.textContent = "Range: 50–250 cm";
+      }
+    }
+
+    function syncTimeLabel() {
+      const minutes = appState.timeMinutes;
+      const hh = Math.floor(minutes / 60);
+      const mm = minutes % 60;
+      const hhStr = String(hh).padStart(2, "0");
+      const mmStr = String(mm).padStart(2, "0");
+      dom.timeLabel.textContent = `${hhStr}:${mmStr}`;
+    }
+
+    function syncUnitsUi() {
+      dom.humanHeightInput.step = appState.units === "imperial" ? "0.5" : "1";
+      syncHumanHeightInputFromState();
+      dom.unitsRadios.forEach(r => {
+        r.checked = (r.value === appState.units);
+      });
+    }
+
+    function getHumanHeightPresetsInInches() {
+      const medianMale   = 69;
+      const medianFemale = 64;
+      const presets = [
+        { label: "Median US male (~5'9\")",   valueInInches: medianMale },
+        { label: "Median US female (~5'4\")", valueInInches: medianFemale }
+      ];
+      for (let h = 20; h <= 96; h++) {
+        presets.push({ label: `${h} in`, valueInInches: h });
+      }
+      return presets;
+    }
+
+    function clampHumanHeight(val) {
+      if (appState.units === "imperial") {
+        if (val < 20) return 20;
+        if (val > 96) return 96;
+        return val;
+      } else {
+        const inches = cmToInches(val);
+        if (inches < 20) return 20;
+        if (inches > 96) return 96;
+        return inches;
+      }
+    }
+
+    function inchesToCm(inches) { return inches * 2.54; }
+    function cmToInches(cm) { return cm / 2.54; }
+
+    // Round to nearest 0.1 in, then decompose into feet + remaining inches
+    function formatShadowImperialFromMeters(m) {
+      const inchesRaw = m / 0.0254;
+      const inchesRounded = Math.round(inchesRaw * 10) / 10;
+      const feet = Math.floor(inchesRounded / 12);
+      const remInches = inchesRounded - feet * 12;
+      return { feet, inches: remInches, totalInches: inchesRounded };
+    }
+
+    /* ----------------------------------------------------------------------
+       Time zone helpers (build local date in the selected city's zone)
+       ---------------------------------------------------------------------- */
+
+    function getZonedDateParts(date, timeZone) {
+      const dtf = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        hour12: false,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const parts = dtf.formatToParts(date);
+      const lookup = {};
+      for (const p of parts) {
+        if (p.type !== "literal") lookup[p.type] = p.value;
+      }
+
+      return {
+        year: Number(lookup.year),
+        monthIndex: Number(lookup.month) - 1,
+        day: Number(lookup.day),
+        hour: Number(lookup.hour),
+        minute: Number(lookup.minute)
+      };
+    }
+
+    function makeDateInTimeZone(year, monthIndex, day, hour, minute, timeZone) {
+      if (!timeZone || typeof Intl === "undefined" || !Intl.DateTimeFormat) {
+        return new Date(year, monthIndex, day, hour, minute, 0);
+      }
+
+      // Iteratively adjust a UTC guess so that when formatted in the target
+      // time zone, its clock time matches (year,month,day,hour,minute).
+      let guess = new Date(Date.UTC(year, monthIndex, day, hour, minute, 0));
+
+      for (let i = 0; i < 5; i++) {
+        const z = getZonedDateParts(guess, timeZone);
+
+        const desiredUTC = Date.UTC(year, monthIndex, day, hour, minute, 0);
+        const actualUTC  = Date.UTC(z.year, z.monthIndex, z.day, z.hour, z.minute, 0);
+
+        const diffMinutes = (actualUTC - desiredUTC) / 60000;
+        if (Math.abs(diffMinutes) < 0.1) break;
+
+        guess = new Date(guess.getTime() - diffMinutes * 60000);
+      }
+
+      return guess;
+    }
+
+    /* ----------------------------------------------------------------------
+       URL state (sharing link encodes city, date, time, etc.)
+       ---------------------------------------------------------------------- */
+
+    function applyStateFromQuery(search) {
+      if (!search || search.length <= 1) return;
+      const params = new URLSearchParams(search);
+
+      if (params.has("city")) {
+        const idx = Number(params.get("city"));
+        if (!Number.isNaN(idx) && idx >= 0 && idx < appState.cities.length) {
+          appState.city = appState.cities[idx];
+          dom.citySelect.value = String(idx);
+        }
+      }
+
+      if (params.has("units")) {
+        const u = params.get("units");
+        if (u === "imp" || u === "metric" || u === "imperial") {
+          appState.units = (u === "imp") ? "imperial" : u;
+          syncUnitsUi();
+        }
+      }
+
+      if (params.has("date")) {
+        const d = params.get("date");
+        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+          dom.dateInput.value = d;
+          appState.date = new Date(d + "T12:00:00");
+        }
+      }
+
+      if (params.has("time")) {
+        const t = Number(params.get("time"));
+        if (!Number.isNaN(t) && t >= 0 && t <= 1439) {
+          appState.timeMinutes = t;
+          dom.timeSlider.value = String(t);
+          syncTimeLabel();
+        }
+      }
+
+      if (params.has("hv")) {
+        const hv = params.get("hv") === "1";
+        appState.humanVisible = hv;
+        dom.humanVisible.checked = hv;
+        updateHumanControlsVisibility();
+      }
+
+      if (params.has("hh")) {
+        const hh = Number(params.get("hh"));
+        if (!Number.isNaN(hh) && hh > 0) {
+          appState.humanHeight = hh;
+          syncHumanHeightInputFromState();
+          dom.humanHeightPreset.value = String(hh);
+        }
+      }
+
+      if (params.has("ov")) {
+        const ov = params.get("ov") === "1";
+        appState.objectVisible = ov;
+        dom.objectVisible.checked = ov;
+        updateObjectControlsVisibility();
+      }
+
+      if (params.has("oid")) {
+        const oid = params.get("oid");
+        const obj = appState.objects.find(o => o.id === oid);
+        if (obj) {
+          appState.selectedObjectId = oid;
+          dom.objectSelect.value = oid;
+        }
+      }
+
+      if (params.has("sm")) {
+        const sm = params.get("sm") === "1";
+        dom.showMath.checked = sm;
+      }
+    }
+
+    function updateUrlFromState() {
+      if (typeof history === "undefined" || !history.replaceState) return;
+
+      const params = new URLSearchParams();
+      const cityIdx = appState.cities.indexOf(appState.city);
+      if (cityIdx >= 0) params.set("city", String(cityIdx));
+
+      params.set("units", appState.units === "imperial" ? "imp" : "metric");
+
+      if (dom.dateInput.value) params.set("date", dom.dateInput.value);
+      params.set("time", String(appState.timeMinutes));
+
+      params.set("hv", appState.humanVisible ? "1" : "0");
+      params.set("hh", String(appState.humanHeight));
+
+      params.set("ov", appState.objectVisible ? "1" : "0");
+      if (appState.selectedObjectId) params.set("oid", appState.selectedObjectId);
+
+      params.set("sm", dom.showMath.checked ? "1" : "0");
+
+      const newUrl = window.location.pathname + "?" + params.toString();
+      history.replaceState(null, "", newUrl);
+    }
+
+    /* ----------------------------------------------------------------------
+       Solar + shadow calculation
+       ---------------------------------------------------------------------- */
+
+    function updateAll() {
+      const solar = computeSolarPositionSafe();
+      updateSunStatus(solar);
+      updateShadowLengthsBar(solar);
+      updateSceneFromState(solar);
+      updateMathDetails(solar);
+      updateUrlFromState();
+    }
+
+    // Build a Date in the selected city's local time zone for current UI date/time
+    function buildCurrentDateTime() {
+      const dateStr = dom.dateInput.value;
+      if (!dateStr) return null;
+
+      const [yStr, mStr, dStr] = dateStr.split("-");
+      const year        = Number(yStr);
+      const monthIndex  = Number(mStr) - 1;
+      const day         = Number(dStr);
+
+      const minutes = appState.timeMinutes;
+      const hh      = Math.floor(minutes / 60);
+      const mm      = minutes % 60;
+
+      const tz = appState.city && appState.city.tz;
+      return makeDateInTimeZone(year, monthIndex, day, hh, mm, tz);
+    }
+
+    function computeSolarPositionSafe() {
+      if (!appState.city) return null;
+      const dt = buildCurrentDateTime();
+      if (!dt) return null;
+
+      if (typeof SunCalc === "undefined" || typeof SunCalc.getPosition !== "function") {
+        console.warn("SunCalc not available; solar position cannot be computed.");
+        return null;
+      }
+
+      const lat = appState.city.lat;
+      const lon = appState.city.lon;
+
+      const pos = SunCalc.getPosition(dt, lat, lon);
+      const altitudeRad = pos.altitude;
+      const azimuthRad  = pos.azimuth;
+
+      return {
+        date: dt,
+        lat,
+        lon,
+        altitudeRad,
+        azimuthRad,
+        altitudeDeg: (altitudeRad * 180) / Math.PI,
+        azimuthDeg:  (azimuthRad  * 180) / Math.PI
+      };
+    }
+
+    function updateSunStatus(solar) {
+      if (!solar) {
+        dom.sunStatus.textContent = "Sun position unavailable (missing data or SunCalc).";
+        dom.sunStatus.style.color = "#666";
+        return;
+      }
+      const altDeg = solar.altitudeDeg;
+      const minutes = appState.timeMinutes;
+      const hh = Math.floor(minutes / 60);
+      const mm = minutes % 60;
+      const hhStr = String(hh).padStart(2, "0");
+      const mmStr = String(mm).padStart(2, "0");
+
+      if (altDeg <= 0) {
+        dom.sunStatus.textContent =
+          `Sun is below the horizon at ${hhStr}:${mmStr} for this date and location. No shadow is cast.`;
+        dom.sunStatus.style.color = "#b00020";
+      } else {
+        dom.sunStatus.textContent =
+          `Sun is above the horizon at ${hhStr}:${mmStr}. Elevation ≈ ${altDeg.toFixed(1)}°.`;
+        dom.sunStatus.style.color = "#2a7d3b";
+      }
+    }
+
+    function getHumanHeightMeters() {
+      if (!appState.humanVisible) return null;
+      return appState.humanHeight * 0.0254;
+    }
+
+    function getObjectHeightMeters() {
+      if (!appState.objectVisible || !appState.selectedObjectId) return null;
+      const obj = appState.objects.find(o => o.id === appState.selectedObjectId);
+      return obj ? obj.height_m : null;
+    }
+
+    function getEffectiveHeightMeters() {
+      const h = getHumanHeightMeters();
+      if (h != null) return h;
+      return getObjectHeightMeters();
+    }
+
+    // Core formula: L = H / tan(α)
+    function computeShadowLengthM(heightM, solar) {
+      if (!solar || solar.altitudeDeg <= 0 || !heightM) return 0;
+      const altRad = solar.altitudeRad;
+      const tanAlt = Math.tan(altRad);
+      if (tanAlt <= 0) return 0;
+      return heightM / tanAlt;
+    }
+
+    // Bottom bar shows shadow length(s) and grid cell size
+    function updateShadowLengthsBar(solar) {
+      const humanH = getHumanHeightMeters();
+      const objH   = getObjectHeightMeters();
+
+      const sunOK = solar && solar.altitudeDeg > 0;
+
+      const humanL = (sunOK && humanH) ? computeShadowLengthM(humanH, solar) : null;
+      const objL   = (sunOK && objH)   ? computeShadowLengthM(objH, solar)   : null;
+
+      const pieces = [];
+
+      if (!sunOK) {
+        pieces.push("No shadow (sun below horizon)");
+      } else {
+        if (humanL) {
+          pieces.push("Human " + formatLengthString(humanL));
+        }
+        if (objL) {
+          pieces.push("Object " + formatLengthString(objL));
+        }
+        if (!humanL && !objL) {
+          pieces.push("No caster selected");
+        }
+      }
+
+      if (currentGridSpacingM > 0) {
+        if (appState.units === "imperial") {
+          const cellFt = currentGridSpacingM / 0.3048;
+          pieces.push(`Grid cell ${cellFt.toFixed(1)} ft`);
+        } else {
+          const cellM = currentGridSpacingM;
+          pieces.push(`Grid cell ${cellM.toFixed(2)} m`);
+        }
+      }
+
+      dom.shadowLengthValue.textContent = pieces.join("  •  ");
+    }
+
+    function formatLengthString(lengthM) {
+      if (appState.units === "imperial") {
+        const { feet, inches } = formatShadowImperialFromMeters(lengthM);
+        return `${feet} ft ${inches.toFixed(1)} in`;
+      } else {
+        const cm = lengthM * 100;
+        const roundedCm = Math.round(cm);
+        return `${roundedCm} cm`;
+      }
+    }
+
+    /* ----------------------------------------------------------------------
+       Math details panel (for visitors who want the derivation)
+       ---------------------------------------------------------------------- */
+
+    function updateMathDetails(solar) {
+      if (!dom.mathDetails) return;
+
+      if (!dom.showMath.checked) {
+        dom.mathDetails.style.display = "none";
+        dom.viewPanel.classList.remove("math-visible");
+        resizeSceneToContainer();
+        return;
+      }
+
+      dom.viewPanel.classList.add("math-visible");
+      dom.mathDetails.style.display = "block";
+
+      const heightM = getEffectiveHeightMeters();
+
+      if (!solar || !heightM || solar.altitudeDeg <= 0) {
+        dom.mathDetails.textContent =
+          "No shadow math to show:\n" +
+          "- Sun below horizon, or\n" +
+          "- No human/object selected.";
+        resizeSceneToContainer();
+        return;
+      }
+
+      const lengthM = computeShadowLengthM(heightM, solar);
+      if (!lengthM || lengthM <= 0) {
+        dom.mathDetails.textContent =
+          "Shadow length computed as zero (sun too low or numerical issue).";
+        resizeSceneToContainer();
+        return;
+      }
+
+      const altDeg = solar.altitudeDeg;
+      const altRad = solar.altitudeRad;
+      const azRad  = solar.azimuthRad;
+      const azDeg  = solar.azimuthDeg;
+      const tanAlt = Math.tan(altRad);
+
+      const dateStr = dom.dateInput.value || "–";
+      const timeStr = dom.timeLabel.textContent || "–";
+      const cityName = appState.city ? appState.city.name : "–";
+
+      let heightLine;
+      if (appState.units === "imperial") {
+        const inches = heightM / 0.0254;
+        const feet = Math.floor(inches / 12);
+        const remInches = inches - feet * 12;
+        heightLine = `H = ${heightM.toFixed(3)} m  ≈  ${feet} ft ${remInches.toFixed(1)} in`;
+      } else {
+        const cm = heightM * 100;
+        heightLine = `H = ${heightM.toFixed(3)} m  ≈  ${cm.toFixed(1)} cm`;
+      }
+
+      let lengthLine;
+      if (appState.units === "imperial") {
+        const { feet, inches } = formatShadowImperialFromMeters(lengthM);
+        lengthLine = `L = ${lengthM.toFixed(3)} m  ≈  ${feet} ft ${inches.toFixed(1)} in`;
+      } else {
+        const cm = lengthM * 100;
+        lengthLine = `L = ${lengthM.toFixed(3)} m  ≈  ${cm.toFixed(1)} cm`;
+      }
+
+      // Projected ground direction: we define world axes as:
+      //   X = +east, Z = +south
+      // SunCalc azimuth: 0° = south, 90° = west, 180° = north, 270° = east.
+      const alt = solar.altitudeRad;
+      const az  = solar.azimuthRad;
+      const sx = Math.sin(az) * Math.cos(alt);
+      const sz = Math.cos(az) * Math.cos(alt);
+      let dx = -sx;
+      let dz = -sz;
+      const dLen = Math.hypot(dx, dz) || 1;
+      dx /= dLen;
+      dz /= dLen;
+      const groundAngleRad = Math.atan2(dz, dx);
+      const groundAngleDeg = groundAngleRad * 180 / Math.PI;
+
+      const mathText =
+`City:         ${cityName}
+Date:         ${dateStr}
+Time (local): ${timeStr}
+
+Sun altitude (angle above horizon):
+  α = ${altDeg.toFixed(3)}°
+
+From SunCalc (radians):
+  altitude_rad = ${altRad.toFixed(6)}
+  azimuth_rad  = ${azRad.toFixed(6)}
+  azimuth_deg  = ${azDeg.toFixed(3)}°   (SunCalc: 0° = south, +90° = west)
+
+Effective height used:
+  ${heightLine}
+
+Shadow length formula:
+  tan(α) = H / L  →  L = H / tan(α)
+
+Numeric substitution:
+  tan(α) = tan(${altDeg.toFixed(3)}°) ≈ ${tanAlt.toFixed(5)}
+  L = ${heightM.toFixed(3)} m / ${tanAlt.toFixed(5)} ≈ ${lengthM.toFixed(3)} m
+
+Shadow length result:
+  ${lengthLine}
+
+Shadow direction (ground plane):
+
+  World axes convention:
+    X = +east,  Z = +south
+
+  Shadow unit direction (ground):
+    shadow_dir ≈ (dx, dz) = (${dx.toFixed(4)}, ${dz.toFixed(4)})
+    angle from +X (east), CCW ≈ ${groundAngleDeg.toFixed(1)}°
+`;
+
+      dom.mathDetails.textContent = mathText;
+      resizeSceneToContainer();
+    }
+
+    /* ----------------------------------------------------------------------
+       3D scene setup (Three.js)
+       ---------------------------------------------------------------------- */
+
+    function initSceneSafe() {
+      const container = dom.sceneContainer;
+      if (!container) return;
+
+      if (typeof THREE === "undefined") {
+        container.innerHTML =
+          "<div style='padding:16px;font-family:system-ui;color:#b00020;font-size:14px;'>" +
+          "<strong>THREE.js is not loaded.</strong><br><br>" +
+          "Check your internet or the three.js CDN URL." +
+          "</div>";
+        return;
+      }
+
+      const oldCanvas = container.querySelector("canvas");
+      if (oldCanvas) container.removeChild(oldCanvas);
+
+      const { width, height } = getSceneSize();
+      threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+      threeRenderer.setSize(width, height);
+      threeRenderer.setClearColor(0xf2f4fb, 1);
+
+      container.insertBefore(threeRenderer.domElement, container.firstChild);
+
+      threeScene = new THREE.Scene();
+
+      threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      threeCamera.position.set(6, 6, 6);
+      threeCamera.lookAt(0, 0, 0);
+
+      updateGridForUnits(); // builds ground grid + directional compass
+
+      const amb = new THREE.AmbientLight(0xffffff, 0.6);
+      threeScene.add(amb);
+
+      const dir = new THREE.DirectionalLight(0xffffff, 0.6);
+      dir.position.set(5, 10, 5);
+      threeScene.add(dir);
+
+      threeRenderer.setAnimationLoop(() => {
+        threeRenderer.render(threeScene, threeCamera);
+      });
+
+      resizeSceneToContainer();
+    }
+
+    function updateGridForUnits() {
+      if (!threeScene || typeof THREE === "undefined") return;
+      if (gridHelper) {
+        threeScene.remove(gridHelper);
+        gridHelper.geometry.dispose();
+        gridHelper.material.dispose();
+      }
+
+      let spacing, divisions;
+      if (appState.units === "imperial") {
+        spacing = 0.3048; // 1 ft in meters
+        divisions = 40;
+      } else {
+        spacing = 0.5; // 0.5 m
+        divisions = 40;
+      }
+      const size = spacing * divisions;
+      currentGridSizeM = size;
+      currentGridSpacingM = spacing;
+
+      gridHelper = new THREE.GridHelper(size, divisions);
+      gridHelper.material.opacity = 0.35;
+      gridHelper.material.transparent = true;
+      threeScene.add(gridHelper);
+
+      buildCompass3D();
+    }
+
+    function getSceneSize() {
+      const c = dom.sceneContainer;
+      const width  = (c && (c.clientWidth || c.offsetWidth))  || 600;
+      const height = (c && (c.clientHeight || c.offsetHeight)) || 400;
+      return { width, height };
+    }
+
+    function resizeSceneToContainer() {
+      if (!threeRenderer || !threeCamera || !dom.sceneContainer) return;
+      const { width, height } = getSceneSize();
+      threeRenderer.setSize(width, height);
+      threeCamera.aspect = width / height;
+      threeCamera.updateProjectionMatrix();
+
+      // Keep compass anchored to top-left in screen space
+      positionCompassInView();
+    }
+
+    /* ----------------------------------------------------------------------
+       Compass overlay (shows world axes + N/S labels)
+       ---------------------------------------------------------------------- */
+
+    function createCompassLabelSprite(text, colorCss, sizeWorld) {
+      const canvasSize = 128;
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = canvasSize;
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvasSize, canvasSize);
+
+      // White circular background for legibility
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.beginPath();
+      ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = colorCss;
+      ctx.font = "bold 64px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, canvasSize / 2, canvasSize / 2);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true
+      });
+
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(sizeWorld, sizeWorld, 1);
+      return sprite;
+    }
+
+    function buildCompass3D() {
+      if (!threeScene || typeof THREE === "undefined") return;
+
+      if (compassGroup) {
+        threeScene.remove(compassGroup);
+        compassGroup.traverse((child) => {
+          if (child.isMesh || child.isLine || child.isLineSegments || child.isSprite) {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+              if (Array.isArray(child.material)) {
+                child.material.forEach(m => m && m.dispose());
+              } else {
+                child.material.dispose();
+              }
+            }
+          }
+        });
+        compassGroup = null;
+      }
+
+      compassNorthArrow = compassSouthArrow = null;
+      compassEastArrow  = compassWestArrow  = null;
+      compassNorthLabel = compassSouthLabel = null;
+
+      const spacing = currentGridSpacingM || 0.5;
+      const size    = currentGridSizeM     || spacing * 40;
+
+      const length      = spacing;
+      const headLength  = length * 0.35;
+      const headWidth   = length * 0.25;
+      const origin      = new THREE.Vector3(0, 0.01, 0);
+
+      compassGroup = new THREE.Group();
+
+      // Base axis arrows for the world frame:
+      //   X = east/west,   Z = south/north
+      const arrowE = new THREE.ArrowHelper(
+        new THREE.Vector3( 1, 0,  0).normalize(), // +X = east
+        origin,
+        length,
+        0x4444aa,
+        headLength,
+        headWidth
+      );
+      const arrowW = new THREE.ArrowHelper(
+        new THREE.Vector3(-1, 0,  0).normalize(), // -X = west
+        origin,
+        length,
+        0x8888aa,
+        headLength,
+        headWidth
+      );
+      const arrowZNeg = new THREE.ArrowHelper(
+        new THREE.Vector3( 0, 0, -1).normalize(), // Z- = geographic north
+        origin,
+        length,
+        0x444444,
+        headLength,
+        headWidth
+      );
+      const arrowZPos = new THREE.ArrowHelper(
+        new THREE.Vector3( 0, 0,  1).normalize(), // Z+ = geographic south
+        origin,
+        length,
+        0x888888,
+        headLength,
+        headWidth
+      );
+
+      compassGroup.add(arrowE, arrowW, arrowZNeg, arrowZPos);
+
+      compassEastArrow  = arrowE;
+      compassWestArrow  = arrowW;
+
+      // Hemisphere logic: in the southern hemisphere, "north" is visually opposite
+      const isNorthernHemisphere = !appState.city || appState.city.lat >= 0;
+
+      let northArrow, southArrow;
+      northArrow = arrowZPos;
+      southArrow = arrowZNeg;
+	  //if (isNorthernHemisphere) {
+        // In northern hemisphere: north is toward world Z-
+        //northArrow = arrowZNeg;
+        //southArrow = arrowZPos;
+      //} else {
+        // In southern hemisphere: north is toward world Z+
+        //northArrow = arrowZPos;
+        //southArrow = arrowZNeg;
+      //}
+
+      // N arrow = red; S arrow = dark gray
+      northArrow.setColor(new THREE.Color(0xff0000));
+      southArrow.setColor(new THREE.Color(0x444444));
+
+      compassNorthArrow = northArrow;
+      compassSouthArrow = southArrow;
+
+      const labelSize = spacing * 0.9;
+      const northLabel = createCompassLabelSprite("N", "#ff0000", labelSize);
+      const southLabel = createCompassLabelSprite("S", "#333333", labelSize);
+
+      const offsetFactor = length + headLength * 0.6;
+
+      const northDir =
+        (northArrow === arrowZNeg) ? new THREE.Vector3(0, 0, -1)
+                                   : new THREE.Vector3(0, 0,  1);
+      const southDir =
+        (southArrow === arrowZNeg) ? new THREE.Vector3(0, 0, -1)
+                                   : new THREE.Vector3(0, 0,  1);
+
+      northLabel.position.copy(northDir.clone().multiplyScalar(offsetFactor));
+      southLabel.position.copy(southDir.clone().multiplyScalar(offsetFactor));
+
+      compassGroup.add(northLabel);
+      compassGroup.add(southLabel);
+
+      compassNorthLabel = northLabel;
+      compassSouthLabel = southLabel;
+
+      compassGroup.position.set(0, 0, 0);
+      threeScene.add(compassGroup);
+
+      positionCompassInView();
+    }
+
+    function positionCompassInView() {
+      if (!compassGroup || !threeCamera) return;
+
+      // Place compass near top-left in Normalized Device Coordinates
+      const ndc = new THREE.Vector3(-0.75, 0.9, 0); // inside edges
+      ndc.unproject(threeCamera);
+      const targetWorld = ndc.clone();
+
+      const originWorld = new THREE.Vector3(0, 0, 0);
+      const distRef = threeCamera.position.distanceTo(originWorld);
+      const distNew = threeCamera.position.distanceTo(targetWorld);
+
+      compassGroup.position.copy(targetWorld);
+      compassGroup.quaternion.identity();
+
+      let scale = distNew / distRef;
+
+      // Keep compass roughly consistent size on screen, regardless of grid spacing
+      const targetScreenSize = 0.4;
+      scale *= targetScreenSize / currentGridSpacingM;
+
+      compassGroup.scale.set(scale, scale, scale);
+    }
+
+    /* ----------------------------------------------------------------------
+       Shadow direction in 3D
+       ---------------------------------------------------------------------- */
+
+    // Compute a normalized vector pointing from the sun to the ground
+    function getSunLightDirection(solar) {
+      if (!solar || solar.altitudeDeg <= 0) return null;
+
+      const alt = solar.altitudeRad;
+      const az  = solar.azimuthRad;
+
+      const sx = Math.sin(az) * Math.cos(alt);
+      const sy = Math.sin(alt);
+      const sz = Math.cos(az) * Math.cos(alt);
+
+      let lx = -sx;
+      let ly = -sy;
+      let lz = -sz;
+
+      const len = Math.hypot(lx, ly, lz);
+      if (len === 0) return null;
+      lx /= len;
+      ly /= len;
+      lz /= len;
+
+      if (ly >= 0) return null; // sun must be above ground, so light points downward (ly < 0)
+      return new THREE.Vector3(lx, ly, lz);
+    }
+
+    /* ----------------------------------------------------------------------
+       Scene objects & shadows (3D projection → ground polygon)
+       ---------------------------------------------------------------------- */
+
+    function updateSceneFromState(solar) {
+      if (!threeScene) return;
+
+      const lightDir = getSunLightDirection(solar);
+
+      // Human geometry + shadow
+      if (appState.humanVisible) {
+        const heightM = getHumanHeightMeters();
+        ensureHumanMesh(heightM || 0);
+        humanGroup.visible = true;
+
+        if (lightDir && heightM) {
+          const hull = projectGroupToGroundHull(humanGroup, lightDir);
+          ensureHumanShadowFromHull(hull);
+        } else {
+          ensureHumanShadowFromHull(null);
+        }
+      } else {
+        if (humanGroup) humanGroup.visible = false;
+        ensureHumanShadowFromHull(null);
+      }
+
+      // Object geometry + shadow
+      if (appState.objectVisible && appState.selectedObjectId) {
+        const obj = appState.objects.find((o) => o.id === appState.selectedObjectId);
+        if (obj) {
+          ensureObjectMesh(obj);
+          objectGroup.visible = true;
+
+          if (lightDir) {
+            const hullObj = projectGroupToGroundHull(objectGroup, lightDir);
+            ensureObjectShadowFromHull(hullObj);
+          } else {
+            ensureObjectShadowFromHull(null);
+          }
+        }
+      } else {
+        if (objectGroup) objectGroup.visible = false;
+        ensureObjectShadowFromHull(null);
+      }
+    }
+
+    // Simple humanoid: cylinder body + sphere head, scaled to desired height
+    function ensureHumanMesh(heightM) {
+      if (!humanGroup) {
+        humanGroup = new THREE.Group();
+
+        const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, 1, 16);
+        const bodyMat  = new THREE.MeshStandardMaterial({ color: 0x3333aa });
+        const bodyMesh = new THREE.Mesh(bodyGeom, bodyMat);
+        bodyMesh.name = "human-body";
+
+        const headGeom = new THREE.SphereGeometry(0.2, 16, 16);
+        const headMat  = new THREE.MeshStandardMaterial({ color: 0x3333aa });
+        const headMesh = new THREE.Mesh(headGeom, headMat);
+        headMesh.name = "human-head";
+
+        humanGroup.add(bodyMesh);
+        humanGroup.add(headMesh);
+        humanGroup.position.set(-1, 0, 0);
+
+        threeScene.add(humanGroup);
+      }
+
+      const bodyMesh = humanGroup.getObjectByName("human-body");
+      const headMesh = humanGroup.getObjectByName("human-head");
+      if (!bodyMesh || !headMesh) return;
+
+      const baseBodyHeight = 1.0;
+      const baseHeadRadius = 0.2;
+      const baseTotal = baseBodyHeight + 2 * baseHeadRadius;
+
+      const scaleFactor = heightM / baseTotal;
+
+      bodyMesh.scale.set(1, scaleFactor, 1);
+      headMesh.scale.set(1, scaleFactor, 1);
+
+      const scaledBodyHeight = baseBodyHeight * scaleFactor;
+      bodyMesh.position.set(0, scaledBodyHeight / 2, 0);
+
+      const scaledHeadRadius = baseHeadRadius * scaleFactor;
+      headMesh.position.set(0, scaledBodyHeight + scaledHeadRadius, 0);
+    }
+
+    // Objects: either a basic tree (trunk + canopy) or a simple box
+    function ensureObjectMesh(obj) {
+      const heightM = obj.height_m;
+      const shapeId = obj.shape || "box_basic";
+
+      if (!objectGroup || currentObjectShapeId !== shapeId) {
+        if (objectGroup) {
+          threeScene.remove(objectGroup);
+          objectGroup.traverse(child => {
+            if (child.isMesh) {
+              child.geometry.dispose();
+              child.material.dispose();
+            }
+          });
+        }
+
+        objectGroup = new THREE.Group();
+
+        if (shapeId === "tree_basic") {
+          const trunkGeom = new THREE.CylinderGeometry(0.12, 0.16, 1, 10);
+          const trunkMat  = new THREE.MeshStandardMaterial({ color: 0x7a4b2b });
+          const trunkMesh = new THREE.Mesh(trunkGeom, trunkMat);
+          trunkMesh.name = "tree-trunk";
+
+          const canopyGeom = new THREE.SphereGeometry(0.7, 20, 16);
+          const canopyMat  = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
+          const canopyMesh = new THREE.Mesh(canopyGeom, canopyMat);
+          canopyMesh.name = "tree-canopy";
+
+          objectGroup.add(trunkMesh);
+          objectGroup.add(canopyMesh);
+        } else {
+          const geom = new THREE.BoxGeometry(0.5, 1, 0.5);
+          const mat  = new THREE.MeshStandardMaterial({ color: 0x884422 });
+          const mesh = new THREE.Mesh(geom, mat);
+          mesh.name = "object-core";
+          objectGroup.add(mesh);
+        }
+
+        objectGroup.position.set(1, 0, 0);
+        threeScene.add(objectGroup);
+        currentObjectShapeId = shapeId;
+      }
+
+      if (shapeId === "tree_basic") {
+        const trunkMesh  = objectGroup.getObjectByName("tree-trunk");
+        const canopyMesh = objectGroup.getObjectByName("tree-canopy");
+        if (!trunkMesh || !canopyMesh) return;
+
+        const baseTrunkHeight = 1.0;
+        const baseCanopyRadius = 0.7;
+        const baseTotal = baseTrunkHeight + baseCanopyRadius * 2;
+
+        const s = heightM / baseTotal;
+
+        trunkMesh.scale.set(1, s, 1);
+        const scaledTrunkHeight = baseTrunkHeight * s;
+        trunkMesh.position.set(0, scaledTrunkHeight / 2, 0);
+
+        canopyMesh.scale.set(s, s, s);
+        const scaledCanopyRadius = baseCanopyRadius * s;
+        canopyMesh.position.set(0, scaledTrunkHeight + scaledCanopyRadius, 0);
+      } else {
+        const mesh = objectGroup.getObjectByName("object-core");
+        if (!mesh) return;
+        const baseHeight = 1.0;
+        const s = heightM / baseHeight;
+        mesh.scale.set(1, s, 1);
+        mesh.position.set(0, (baseHeight * s) / 2, 0);
+      }
+    }
+
+    /* ----------------------------------------------------------------------
+       Geometry projection: mesh → ground convex hull (shadow)
+       ---------------------------------------------------------------------- */
+
+    function projectGroupToGroundHull(group, lightDir) {
+      if (!group || !lightDir) return null;
+
+      const points = [];
+      const tempV = new THREE.Vector3();
+
+      group.updateWorldMatrix(true, true);
+
+      group.traverse((child) => {
+        if (!child.isMesh) return;
+        if (!child.geometry || !child.geometry.attributes || !child.geometry.attributes.position) return;
+
+        const posAttr = child.geometry.attributes.position;
+        const count = posAttr.count;
+
+        for (let i = 0; i < count; i++) {
+          tempV.set(
+            posAttr.getX(i),
+            posAttr.getY(i),
+            posAttr.getZ(i)
+          );
+          tempV.applyMatrix4(child.matrixWorld);
+
+          const ly = lightDir.y;
+          if (Math.abs(ly) < 1e-6) continue;
+
+          // Ray from vertex along light direction; find intersection with y=0 plane
+          const t = -tempV.y / ly;
+          if (t < 0) continue;
+
+          const p = tempV.clone().addScaledVector(lightDir, t);
+          points.push({ x: p.x, z: p.z });
+        }
+      });
+
+      if (points.length < 3) return null;
+
+      return convexHull2D(points);
+    }
+
+    // Standard monotone chain convex hull in 2D
+    function convexHull2D(points) {
+      if (points.length < 3) return null;
+      const pts = points.slice().sort((a, b) => {
+        if (a.x === b.x) return a.z - b.z;
+        return a.x - b.x;
+      });
+
+      const cross = (o, a, b) =>
+        (a.x - o.x) * (b.z - o.z) - (a.z - o.z) * (b.x - o.x);
+
+      const lower = [];
+      for (const p of pts) {
+        while (lower.length >= 2 &&
+               cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+          lower.pop();
+        }
+        lower.push(p);
+      }
+
+      const upper = [];
+      for (let i = pts.length - 1; i >= 0; i--) {
+        const p = pts[i];
+        while (upper.length >= 2 &&
+               cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+          upper.pop();
+        }
+        upper.push(p);
+      }
+
+      upper.pop();
+      lower.pop();
+      const hull = lower.concat(upper);
+      return hull.length >= 3 ? hull : null;
+    }
+
+    function ensureHumanShadowFromHull(hull) {
+      if (!hull) {
+        if (humanShadowMesh) humanShadowMesh.visible = false;
+        return;
+      }
+
+      if (!humanShadowMesh) {
+        const shape = new THREE.Shape();
+        const geom  = new THREE.ShapeGeometry(shape);
+        const mat   = new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          opacity: 0.45,
+          transparent: true
+        });
+        humanShadowMesh = new THREE.Mesh(geom, mat);
+        humanShadowMesh.name = "human-shadow";
+        humanShadowMesh.rotation.x = -Math.PI / 2;
+        humanShadowMesh.position.y = 0.001;
+        threeScene.add(humanShadowMesh);
+      }
+
+      const shape = new THREE.Shape();
+      shape.moveTo(hull[0].x, hull[0].z);
+      for (let i = 1; i < hull.length; i++) {
+        shape.lineTo(hull[i].x, hull[i].z);
+      }
+      shape.closePath();
+
+      if (humanShadowMesh.geometry) {
+        humanShadowMesh.geometry.dispose();
+      }
+      humanShadowMesh.geometry = new THREE.ShapeGeometry(shape);
+      humanShadowMesh.visible = true;
+    }
+
+    function ensureObjectShadowFromHull(hull) {
+      if (!hull) {
+        if (objectShadowMesh) objectShadowMesh.visible = false;
+        return;
+      }
+
+      if (!objectShadowMesh) {
+        const shape = new THREE.Shape();
+        const geom  = new THREE.ShapeGeometry(shape);
+        const mat   = new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          opacity: 0.35,
+          transparent: true
+        });
+        objectShadowMesh = new THREE.Mesh(geom, mat);
+        objectShadowMesh.name = "object-shadow";
+        objectShadowMesh.rotation.x = -Math.PI / 2;
+        objectShadowMesh.position.y = 0.001;
+        threeScene.add(objectShadowMesh);
+      }
+
+      const shape = new THREE.Shape();
+      shape.moveTo(hull[0].x, hull[0].z);
+      for (let i = 1; i < hull.length; i++) {
+        shape.lineTo(hull[i].x, hull[i].z);
+      }
+      shape.closePath();
+
+      if (objectShadowMesh.geometry) {
+        objectShadowMesh.geometry.dispose();
+      }
+      objectShadowMesh.geometry = new THREE.ShapeGeometry(shape);
+      objectShadowMesh.visible = true;
+    }
+  </script>
+</body>
+</html>

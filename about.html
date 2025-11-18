@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>About – Shadow Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f4f6;
+      color: #222;
+    }
+    header, main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+    header {
+      border-bottom: 1px solid #d7d7dd;
+      background: #ffffff;
+    }
+    a {
+      color: #2a7de1;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Shadow Calculator</h1>
+    <p><a href="index.html">Back to the calculator</a></p>
+  </header>
+  <main>
+    <h2>What this tool does</h2>
+    <p>
+      Shadow Calculator is an educational, browser-based tool that shows how
+      shadow length and direction change with date, time, latitude, and object height.
+    </p>
+
+    <p>
+      The app uses the open-source library <strong>SunCalc</strong> for solar position
+      calculations and <strong>Three.js</strong> for 3D visualization in your browser.
+      All computations happen locally on your device.
+    </p>
+
+    <h2>Scientific assumptions</h2>
+    <ul>
+      <li>Flat ground (no terrain or slope).</li>
+      <li>Standard geometry: <code>L = H / tan(α)</code>, where <em>H</em> is object height and <em>α</em> is solar altitude.</li>
+      <li>Approximate city coordinates and time zones, suitable for visualization but not survey-grade work.</li>
+    </ul>
+
+    <h2>Disclaimer</h2>
+    <p>
+      This site is provided for informational and educational purposes only.
+      It is <strong>not</strong> intended for navigation, engineering certification,
+      safety-critical design, or any use where precise solar position or shadow
+      length is required.
+    </p>
+	
+	<p>
+      This was created as a fun and quick reference tool for family and friends.
+    </p>
+	
+    <p>
+      No guarantees are made about the accuracy or completeness of the results.
+      Use at your own risk.
+    </p>
+
+    <h2>Privacy</h2>
+    <p>
+      This site does not require login and does not intentionally collect personal data.
+      Any parameters you set are processed within your browser. Being deployed with GitHub Pages,
+      GitHub may collect basic technical logs as part of their hosting.
+    </p>
+
+    <h2>Open-source license</h2>
+    <p>
+      The source code for this site is intended to be open-sourced on GitHub
+      under the MIT License. See the <code>LICENSE</code> file in the repository
+      for details.
+    </p>
+
+    <p>
+      Questions or comments? See the project repository on GitHub.
+    </p>
+  </main>
+</body>
+</html>
