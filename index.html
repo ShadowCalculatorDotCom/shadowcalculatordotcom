@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shadow Calculator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. Visualize how objects cast shadows at any date, time, and location.">
   
   <!-- Basic SEO -->
   <link rel="canonical" href="https://shadowcalculator.com/">
 
   <meta name="description"
-        content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. See how trees, fences, pergolas, and raised beds cast shade at any date, time, and location. Built with Three.js and SunCalc.">
+        content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. See how people and objects cast shade at any date, time, and location. Built with Three.js and SunCalc.">
   <meta name="keywords"
         content="shadow calculator, garden shade, tree shadow, fence shadow, pergola shade, raised bed sun, fruit tree placement, vegetable garden planning, landscape design sun, solar angle calculator">
   <meta name="author" content="shadowcalculator.com">
@@ -31,1819 +32,1265 @@
   <meta name="twitter:description"
         content="See how shadows move across your garden or yard throughout the day and year.">
   <meta name="twitter:image" content="https://shadowcalculator.com/social-preview.png">
-
-  <!--
-    Shadow Calculator
-    ------------------
-    Educational tool to visualize how shadow length and direction depend on:
-    - Latitude / longitude (via selected city)
-    - Date (seasonal solar altitude)
-    - Time of day (solar elevation + azimuth)
-
-    Science highlights:
-    - Uses SunCalc for solar position (altitude & azimuth).
-    - Assumes a simple flat ground; shadow length L = H / tan(α),
-      where H is object height and α is the solar altitude angle.
-    - 3D scene (Three.js) projects a simple human / object mesh onto
-      the ground along the sun direction to form a shadow polygon.
-  -->
-
+  
   <style>
     :root {
-      --bg: #f4f4f6;
+      --bg: #f0f2f5;
       --panel-bg: #ffffff;
-      --border-subtle: #d7d7dd;
-      --text-main: #222222;
-      --text-muted: #666666;
-      --accent: #2a7de1;
-      --shadow-length-bg: #ffffff;
+      --border: #e0e3e8;
+      --text: #1a1a1a;
+      --text-muted: #6b7280;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      --radius: 8px;
     }
 
-    *,:before,:after { box-sizing: border-box; }
-
-    html, body {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text-main);
-      background-color: var(--bg);
     }
 
-    body { display: block; }
-
-    /* Desktop: sidebar + main */
-    #app {
-      display: grid;
-      grid-template-columns: 340px minmax(0, 1fr);
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
       height: 100vh;
-      min-height: 0;
-      width: 100vw;
       overflow: hidden;
     }
 
+    #app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      height: 100vh;
+      width: 100vw;
+    }
+
     /* Sidebar */
-    #control-panel {
-      grid-column: 1;
+    #sidebar {
       background: var(--panel-bg);
-      border-right: 1px solid var(--border-subtle);
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: 0;
+      padding: 24px;
       overflow-y: auto;
-    }
-
-    .panel-header {
-      position: relative;
-    }
-
-    .panel-header h1 {
-      font-size: 1.4rem;
-      margin: 0 0 4px;
-    }
-
-    .panel-header p {
-      margin: 0;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .panel-header .panel-about {
-      margin-top: 4px;
-      font-size: 0.8rem;
-    }
-
-    .panel-header .panel-about a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .panel-header .panel-about a:hover {
-      text-decoration: underline;
-    }
-
-    /* Mobile-only close button for full settings overlay */
-    #mobile-settings-close {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      border: none;
-      background: transparent;
-      font-size: 1.4rem;
-      line-height: 1;
-      cursor: pointer;
-      padding: 2px 6px;
-      display: none;
-    }
-
-    .panel-section {
-      border-top: 1px solid var(--border-subtle);
-      padding-top: 12px;
-    }
-
-    .panel-section h2 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-    }
-
-    .field-row {
-      margin-bottom: 10px;
+      box-shadow: var(--shadow-lg);
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 20px;
     }
 
-    .field-row label { font-size: 0.85rem; }
+    .header {
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
 
-    .field-with-unit {
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .section {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    input[type="number"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 16px;
+    }
+
+    .radio-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .field-with-unit input { flex: 1 1 auto; }
+    input[type="radio"],
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
 
-    .field-with-unit span {
+    .input-with-unit {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-with-unit input {
+      flex: 1;
+    }
+
+    .input-with-unit .unit {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+
+    .value-display {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .status {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #f9fafb;
+      border-radius: 6px;
+      border-left: 3px solid var(--accent);
       font-size: 0.85rem;
       color: var(--text-muted);
     }
 
-    input[type="number"],
-    select,
-    input[type="date"],
-    input[type="range"] {
-      font: inherit;
+    .status.error {
+      border-left-color: #ef4444;
+      color: #dc2626;
     }
 
-    input[type="number"],
-    select,
-    input[type="date"] {
-      padding: 4px 6px;
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-      background-color: #fff;
+    .status.success {
+      border-left-color: #10b981;
+      color: #059669;
     }
 
-    input[type="range"] { width: 100%; }
-
-    .field-help {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .toggle-row,
-    .radio-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-    }
-
-    .status-message {
-      margin: 6px 0 0;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    /* Main view */
-    #view-panel {
-      grid-column: 2;
+    /* Main area */
+    #main {
       display: flex;
       flex-direction: column;
-      min-width: 0;
-      min-height: 0;
-    }
-
-    #scene-container {
-      flex: 1 1 auto;
-      min-height: 0;
-      position: relative;
-      background: radial-gradient(circle at top, #ffffff, #dde3ec);
+      padding: 16px;
+      gap: 16px;
       overflow: hidden;
     }
 
-    /* Mobile settings toggle in scene (top-right) */
-    #mobile-settings-toggle {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      left: auto;
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      border-radius: 4px;
-      border: 1px solid rgba(0,0,0,0.2);
-      background: rgba(255,255,255,0.9);
-      cursor: pointer;
-      z-index: 10000;
-      display: none;
+    #scene-container {
+      flex: 1;
+      position: relative;
+      background: #e5e9f0;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
     }
 
-    /* Bottom bar readout */
-    #shadow-readout {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-top: 1px solid var(--border-subtle);
-      background: var(--shadow-length-bg);
-      font-size: 0.9rem;
-      flex: 0 0 auto;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    #shadow-length-value {
-      font-weight: 500;
-      color: var(--accent);
-    }
-
-    /* Math details panel */
-    #math-details {
-      margin: 0;
-      padding: 6px 12px 10px;
-      border-top: 1px solid var(--border-subtle);
-      background: #f8f8fa;
-      font-family: "SF Mono", Menlo, Consolas, monospace;
-      font-size: 0.78rem;
-      line-height: 1.35;
-      white-space: pre;
-      overflow-x: auto;
-      overflow-y: auto;
-      display: none;
-      flex: 0 0 auto;
-      max-height: 35vh;
-    }
-
-    #view-panel.math-visible #math-details {
+    #scene-container canvas {
       display: block;
-      height: 30vh;
-      max-height: 40vh;
+      width: 100%;
+      height: 100%;
     }
 
-    /* ------------------------------------------------------------------ */
-    /* Mobile layout                                                      */
-    /* ------------------------------------------------------------------ */
+    #info-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-	/* Mobile layout: scene on top, mini settings + shadow bar visible */
-	@media (max-width: 768px) {
-	  #app {
-		grid-template-columns: 1fr;
-		grid-template-rows: minmax(0, 1fr) auto; /* row 1 = scene+shadow bar, row 2 = settings strip */
-	  }
+    #shadow-info {
+      text-align: center;
+      font-size: 0.95rem;
+    }
 
-	  /* Top row: view panel (scene + shadow bar + optional math) */
-	  #view-panel {
-		grid-column: 1;
-		grid-row: 1;
-		display: flex;
-		flex-direction: column;
-		min-height: 0;         /* allow bar to fit */
-	  }
+    #shadow-info .value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 4px;
+    }
 
-	  #scene-container {
-		flex: 1 1 auto;
-		min-height: 50vh;      /* big enough, but still leaves room for the bar */
-	  }
+    /* Triangle diagram */
+    #triangle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
 
-	  #shadow-readout {
-		flex: 0 0 auto;        /* always kept at the bottom of the scene area */
-	  }
+    #triangle-container h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
 
-	  /* Bottom row: settings panel */
-	  #control-panel {
-		grid-column: 1;
-		grid-row: 2;
-		border-right: none;
-		border-top: 1px solid var(--border-subtle);
-		box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
-	  }
+    #triangle-svg {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+    }
 
-	  /* Compact = mini strip: header + time + location (scrollable if tall) */
-	  #control-panel.compact {
-		position: relative;
-		max-height: 45vh;
-		overflow-y: auto;
-	  }
+    .triangle-path {
+      stroke: var(--text);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linejoin: round;
+    }
 
-	  /* Keep Time and Location visible in compact mode */
-	  #control-panel.compact .panel-section:not(#time-section):not(#location-section) {
-		display: none;
-	  }
+    .triangle-fill {
+      fill: rgba(59, 130, 246, 0.08);
+    }
 
-	  /* Expanded = full-screen overlay with all controls */
-	  #control-panel.expanded {
-		position: fixed;
-		inset: 0;
-		height: 100vh;
-		max-height: none;
-		overflow-y: auto;
-		border-top: none;
-		box-shadow: 0 0 16px rgba(0,0,0,0.25);
-		z-index: 15000;
-	  }
+    .triangle-angle-arc {
+      stroke: var(--accent);
+      stroke-width: 2;
+      fill: none;
+    }
 
-	  /* Mobile settings button & close button */
-	  #mobile-settings-toggle {
-		display: inline-block;
-	  }
+    .triangle-label {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      fill: var(--text);
+      font-weight: 500;
+    }
 
-	  #mobile-settings-close {
-		display: inline-block;
-	  }
-	}
+    .triangle-value {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      fill: var(--accent);
+      font-weight: 600;
+    }
 
+    #math-details {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 6px;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--text-muted);
+      display: none;
+    }
+
+    #math-details.visible {
+      display: block;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      #app {
+        grid-template-columns: 1fr;
+      }
+
+      #sidebar {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+      }
+
+      #sidebar.open {
+        display: flex;
+      }
+
+      .mobile-toggle {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 8px 16px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 10;
+        font-weight: 500;
+        box-shadow: var(--shadow-md);
+      }
+      
+      #triangle-container {
+        padding: 12px;
+      }
+      
+      #triangle-container h3 {
+        font-size: 0.9rem;
+      }
+    }
   </style>
-
 </head>
 <body>
   <div id="app">
-    <!-- Sidebar controls -->
-    <aside id="control-panel">
-      <header class="panel-header">
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="header">
         <h1>Shadow Calculator</h1>
-        <p>Visualize human and object shadows by time, date, and location.</p>
-        <p class="panel-about">
-          <a href="about.html">About</a>
-        </p>
-        <button id="mobile-settings-close" type="button" aria-label="Close settings">×</button>
-      </header>
+		<p class="subtitle">(alpha)</p>
+        <p class="subtitle">Visualize how objects cast shadows at any time and location using solar position calculations. <a href="about.html">About</a></p>
+      </div>
 
-      <!-- Human controls -->
-      <section class="panel-section" id="human-section">
-        <h2>Human</h2>
-        <label class="toggle-row">
-          <input type="checkbox" id="human-visible" checked />
-          <span>Show human</span>
-        </label>
-
-        <div class="field-row" id="human-height-preset-row">
-          <label for="human-height-preset">Height preset</label>
-          <select id="human-height-preset"></select>
-        </div>
-
-        <div class="field-row" id="human-height-input-row">
-          <label for="human-height-input">Exact height</label>
-          <div class="field-with-unit">
-            <input type="number" id="human-height-input" step="0.5" />
-            <span id="human-height-unit-label">in</span>
-          </div>
-          <small class="field-help" id="human-height-help"></small>
-        </div>
-      </section>
-
-      <!-- Object controls -->
-      <section class="panel-section" id="object-section">
-        <h2>Object</h2>
-        <label class="toggle-row">
-          <input type="checkbox" id="object-visible" />
-          <span>Show object</span>
-        </label>
-
-        <div class="field-row" id="object-row" style="display:none;">
-          <label for="object-select">Object type</label>
-          <select id="object-select"></select>
-        </div>
-      </section>
-
-      <!-- Time controls (these are always visible in compact mode) -->
-      <section class="panel-section" id="time-section">
-        <h2>Time</h2>
-
-        <div class="field-row">
-          <label for="time-slider">Time of day</label>
-          <input type="range" id="time-slider" min="0" max="1439" value="720" />
-          <div class="field-inline">
-            <span id="time-label">12:00</span> (local)
-          </div>
-        </div>
-
-        <div class="field-row">
-          <label for="date-input">Date</label>
-          <input type="date" id="date-input" />
-        </div>
-
-        <p class="status-message" id="sun-status"></p>
-      </section>
-
-      <!-- Location controls -->
-      <section class="panel-section" id="location-section">
+      <div class="section">
         <h2>Location</h2>
-
-        <div class="field-row">
-          <label for="city-select">Nearest city</label>
-          <select id="city-select"></select>
+        <div class="field">
+          <label for="city">City</label>
+          <select id="city">
+            <option value="0">New York, USA</option>
+            <option value="1">Los Angeles, USA</option>
+            <option value="2">London, UK</option>
+            <option value="3">Paris, France</option>
+            <option value="4">Tokyo, Japan</option>
+            <option value="5">Sydney, Australia</option>
+            <option value="6">Berlin, Germany</option>
+            <option value="7">Singapore</option>
+          </select>
         </div>
-      </section>
+        <div class="field">
+          <label>Latitude: <span id="lat-display" class="value-display">40.7°N</span></label>
+          <input type="range" id="lat" min="-90" max="90" step="0.5" value="40.7">
+        </div>
+        <div class="field">
+          <label>Longitude: <span id="lon-display" class="value-display">74.0°W</span></label>
+          <input type="range" id="lon" min="-180" max="180" step="0.5" value="-74.0">
+        </div>
+      </div>
 
-      <!-- Units controls -->
-      <section class="panel-section" id="units-section">
-        <h2>Units</h2>
-        <div class="field-row">
-          <label class="radio-row">
-            <input type="radio" name="units" value="imperial" checked />
-            <span>Inches / feet</span>
-          </label>
-          <label class="radio-row">
-            <input type="radio" name="units" value="metric" />
-            <span>Centimeters</span>
+      <div class="section">
+        <h2>Date & Time</h2>
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date">
+        </div>
+        <div class="field">
+          <label>Time: <span id="time-display" class="value-display">12:00</span></label>
+          <input type="range" id="time" min="0" max="1439" step="1" value="720">
+        </div>
+        <div class="status" id="sun-status">Calculating sun position...</div>
+      </div>
+
+      <div class="section">
+        <h2>Object</h2>
+        <div class="field">
+          <label>Type</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="object-type" value="human" checked>
+              <span>Human</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="object-type" value="tree">
+              <span>Tree</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="object-type" value="box">
+              <span>Post/Box</span>
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="height">Height</label>
+          <div class="input-with-unit">
+            <input type="number" id="height" min="0.1" max="30" step="0.1" value="1.75">
+            <span class="unit" id="height-unit">m</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Settings</h2>
+        <div class="field">
+          <label>Units</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="units" value="metric" checked>
+              <span>Metric</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="units" value="imperial">
+              <span>Imperial</span>
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="radio-item">
+            <input type="checkbox" id="show-grid" checked>
+            <span>Show grid</span>
           </label>
         </div>
-      </section>
-
-      <!-- Math toggle -->
-      <section class="panel-section" id="math-section">
-        <h2>Math details</h2>
-        <label class="toggle-row">
-          <input type="checkbox" id="show-math" />
-          <span>Show shadow angle &amp; length math</span>
-        </label>
-      </section>
-    </aside>
-
-    <!-- Main 3D view -->
-    <main id="view-panel">
-      <div id="scene-container">
-        <button id="mobile-settings-toggle">Settings</button>
+        <div class="field">
+          <label class="radio-item">
+            <input type="checkbox" id="show-math">
+            <span>Show math details</span>
+          </label>
+        </div>
       </div>
-      <div id="shadow-readout">
-        <span>Shadow info:</span>
-        <strong id="shadow-length-value">–</strong>
+    </div>
+
+    <!-- Main area -->
+    <div id="main">
+      <div id="scene-container"></div>
+      <div id="info-panel">
+        <div id="shadow-info">
+          <div>Shadow Length</div>
+          <div class="value" id="shadow-length">—</div>
+        </div>
+        
+        <div id="triangle-container">
+          <h3>Right Triangle – Side View</h3>
+          <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
+            <!-- Triangle fill -->
+            <path id="triangle-fill-path" class="triangle-fill" d="M 80 190 L 80 190 L 80 190 Z" />
+            <!-- Triangle outline -->
+            <path id="triangle-path" class="triangle-path" d="M 80 190 L 80 70 L 350 190 Z" />
+            <!-- Angle arc -->
+            <path id="angle-arc" class="triangle-angle-arc" d="" />
+            <!-- Labels -->
+            <text id="height-label" class="triangle-label" x="55" y="120" text-anchor="end">Height</text>
+            <text id="height-value" class="triangle-value" x="55" y="140" text-anchor="end">1.75 m</text>
+            <text id="shadow-label" class="triangle-label" x="215" y="210" text-anchor="middle">Shadow</text>
+            <text id="shadow-value" class="triangle-value" x="215" y="230" text-anchor="middle">2.54 m</text>
+            <text id="angle-label" class="triangle-label" x="310" y="160" text-anchor="end">Angle</text>
+            <text id="angle-value" class="triangle-value" x="310" y="178" text-anchor="end">34.6°</text>
+          </svg>
+        </div>
+        
+        <div id="math-details"></div>
       </div>
-      <pre id="math-details"></pre>
-    </main>
+    </div>
   </div>
 
-  <!-- External libraries -->
+  <!-- External Libraries -->
   <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
 
   <script>
+    // ============================================================================
+    // CONFIGURATION & STATE
+    // ============================================================================
+    
     const CITIES = [
-      { name: "New York, USA",        lat: 40.7128,  lon: -74.006,   tz: "America/New_York" },
-      { name: "Los Angeles, USA",     lat: 34.0522,  lon: -118.2437, tz: "America/Los_Angeles" },
-      { name: "London, UK",           lat: 51.5074,  lon: -0.1278,   tz: "Europe/London" },
-      { name: "Melbourne, Australia", lat: -37.8136, lon: 144.9631,  tz: "Australia/Melbourne" }
+      { name: "New York, USA", lat: 40.7128, lon: -74.0060, tz: "America/New_York" },
+      { name: "Los Angeles, USA", lat: 34.0522, lon: -118.2437, tz: "America/Los_Angeles" },
+      { name: "London, UK", lat: 51.5074, lon: -0.1278, tz: "Europe/London" },
+      { name: "Paris, France", lat: 48.8566, lon: 2.3522, tz: "Europe/Paris" },
+      { name: "Tokyo, Japan", lat: 35.6762, lon: 139.6503, tz: "Asia/Tokyo" },
+      { name: "Sydney, Australia", lat: -33.8688, lon: 151.2093, tz: "Australia/Sydney" },
+      { name: "Berlin, Germany", lat: 52.5200, lon: 13.4050, tz: "Europe/Berlin" },
+      { name: "Singapore", lat: 1.3521, lon: 103.8198, tz: "Asia/Singapore" }
     ];
 
-    const OBJECTS = [
-      { id: "fruit-tree", name: "Small fruit tree", height_m: 2.4, shape: "tree_basic" },
-      { id: "trellis",    name: "Trellis",          height_m: 1.8, shape: "box_basic" },
-      { id: "birdbath",   name: "Bird bath",        height_m: 0.9, shape: "box_basic" },
-      { id: "planter",    name: "Raised planter",   height_m: 0.8, shape: "box_basic" }
-    ];
-
-    const appState = {
-      units: "imperial",
-      humanVisible: true,
-      humanHeight: 68,
-      objectVisible: false,
-      selectedObjectId: null,
-      timeMinutes: 12 * 60,
-      date: null,
-      city: null,
-      cities: CITIES.slice(),
-      objects: OBJECTS.slice()
+    const state = {
+      cityIndex: 0,
+      lat: 40.7128,
+      lon: -74.0060,
+      date: new Date(),
+      timeMinutes: 720, // 12:00
+      objectType: 'human',
+      height: 1.75, // meters
+      units: 'metric',
+      showGrid: true,
+      showMath: false
     };
 
-    const dom = {};
-    let threeScene = null;
-    let threeRenderer = null;
-    let threeCamera = null;
-    let gridHelper = null;
-    let humanGroup = null;
-    let objectGroup = null;
-    let currentObjectShapeId = null;
-    let humanShadowMesh = null;
-    let objectShadowMesh = null;
-    let mobileMode = "scene"; // "scene" -> compact strip; "settings" -> full overlay
-    let currentGridSizeM = 0;
-    let currentGridSpacingM = 0;
-
-    let compassGroup = null;
-    let compassNorthArrow = null;
-    let compassSouthArrow = null;
-    let compassEastArrow  = null;
-    let compassWestArrow  = null;
-    let compassNorthLabel = null;
-    let compassSouthLabel = null;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      cacheDom();
-      initEventHandlers();
-      initData();
-      initDefaults();
-      applyStateFromQuery(window.location.search);
-      initSceneSafe();
-      updateAll();
-      updateMobileLayout();
-
-      window.addEventListener("resize", () => {
-        resizeSceneToContainer();
-        updateMobileLayout();
-      });
-
-      if (window.ResizeObserver && dom.sceneContainer) {
-        const ro = new ResizeObserver(() => resizeSceneToContainer());
-        ro.observe(dom.sceneContainer);
-      }
-    });
-
-    function cacheDom() {
-      dom.controlPanel          = document.getElementById("control-panel");
-
-      dom.humanVisible          = document.getElementById("human-visible");
-      dom.humanHeightPresetRow  = document.getElementById("human-height-preset-row");
-      dom.humanHeightInputRow   = document.getElementById("human-height-input-row");
-      dom.humanHeightPreset     = document.getElementById("human-height-preset");
-      dom.humanHeightInput      = document.getElementById("human-height-input");
-      dom.humanHeightUnitLabel  = document.getElementById("human-height-unit-label");
-      dom.humanHeightHelp       = document.getElementById("human-height-help");
-
-      dom.objectVisible         = document.getElementById("object-visible");
-      dom.objectRow             = document.getElementById("object-row");
-      dom.objectSelect          = document.getElementById("object-select");
-
-      dom.timeSlider            = document.getElementById("time-slider");
-      dom.timeLabel             = document.getElementById("time-label");
-      dom.dateInput             = document.getElementById("date-input");
-      dom.sunStatus             = document.getElementById("sun-status");
-
-      dom.citySelect            = document.getElementById("city-select");
-      dom.unitsRadios           = document.querySelectorAll('input[name="units"]');
-
-      dom.shadowLengthValue     = document.getElementById("shadow-length-value");
-      dom.sceneContainer        = document.getElementById("scene-container");
-
-      dom.showMath              = document.getElementById("show-math");
-      dom.mathDetails           = document.getElementById("math-details");
-      dom.viewPanel             = document.getElementById("view-panel");
-
-      dom.mobileSettingsToggle  = document.getElementById("mobile-settings-toggle");
-      dom.mobileSettingsClose   = document.getElementById("mobile-settings-close");
-    }
-
-    function initEventHandlers() {
-      dom.humanVisible.addEventListener("change", () => {
-        appState.humanVisible = dom.humanVisible.checked;
-        updateHumanControlsVisibility();
-        updateAll();
-      });
-
-      dom.humanHeightPreset.addEventListener("change", () => {
-        const val = Number(dom.humanHeightPreset.value);
-        if (!Number.isNaN(val)) {
-          appState.humanHeight = val;
-          syncHumanHeightInputFromState();
-          updateAll();
-        }
-      });
-
-      dom.humanHeightInput.addEventListener("change", () => {
-        const val = Number(dom.humanHeightInput.value);
-        if (!Number.isNaN(val)) {
-          appState.humanHeight = clampHumanHeight(val);
-          syncHumanHeightInputFromState();
-          updateAll();
-        }
-      });
-
-      dom.objectVisible.addEventListener("change", () => {
-        appState.objectVisible = dom.objectVisible.checked;
-        updateObjectControlsVisibility();
-        if (!appState.objectVisible) {
-          appState.selectedObjectId = null;
-        }
-        updateAll();
-      });
-
-      dom.objectSelect.addEventListener("change", () => {
-        const val = dom.objectSelect.value || null;
-        appState.selectedObjectId = val || null;
-        updateAll();
-      });
-
-      dom.timeSlider.addEventListener("input", () => {
-        appState.timeMinutes = Number(dom.timeSlider.value);
-        syncTimeLabel();
-        updateAll();
-      });
-
-      dom.dateInput.addEventListener("change", () => {
-        const val = dom.dateInput.value;
-        if (val) {
-          appState.date = new Date(val + "T12:00:00");
-          updateAll();
-        }
-      });
-
-      dom.citySelect.addEventListener("change", () => {
-        const idx = Number(dom.citySelect.value);
-        appState.city = appState.cities[idx] || null;
-        if (threeScene) buildCompass3D();
-        updateAll();
-      });
-
-      dom.unitsRadios.forEach((r) => {
-        r.addEventListener("change", () => {
-          if (r.checked) {
-            appState.units = r.value;
-            syncUnitsUi();
-            updateGridForUnits();
-            updateAll();
-          }
-        });
-      });
-
-      dom.showMath.addEventListener("change", () => {
-        const solar = computeSolarPositionSafe();
-        updateMathDetails(solar);
-        updateUrlFromState();
-      });
-
-      if (dom.mobileSettingsToggle) {
-        dom.mobileSettingsToggle.addEventListener("click", () => {
-          if (!isMobile()) return;
-          mobileMode = "settings";
-          updateMobileLayout();
-        });
-      }
-
-      if (dom.mobileSettingsClose) {
-        dom.mobileSettingsClose.addEventListener("click", () => {
-          if (!isMobile()) return;
-          mobileMode = "scene";
-          updateMobileLayout();
-        });
-      }
-    }
-
-    function isMobile() {
-      return window.innerWidth <= 768;
-    }
-
-    function updateMobileLayout() {
-      const panel = dom.controlPanel;
-
-      // Desktop: always full sidebar, no mobile toggle/close
-      if (!isMobile()) {
-        panel.classList.remove("compact", "expanded");
-        if (dom.mobileSettingsToggle) dom.mobileSettingsToggle.style.display = "none";
-        if (dom.mobileSettingsClose)  dom.mobileSettingsClose.style.display  = "none";
-        return;
-      }
-
-      // Mobile: show settings button over scene
-      if (dom.mobileSettingsToggle) dom.mobileSettingsToggle.style.display = "inline-block";
-
-      if (mobileMode === "scene") {
-        panel.classList.add("compact");
-        panel.classList.remove("expanded");
-        if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "none";
-      } else {
-        panel.classList.add("expanded");
-        panel.classList.remove("compact");
-        if (dom.mobileSettingsClose) dom.mobileSettingsClose.style.display = "inline-block";
-      }
-    }
-
-    /* -------------------------- init data & defaults ---------------------- */
-
-    function initData() {
-      populateCitySelect();
-      populateObjectSelect();
-      populateHumanHeightPresets();
-    }
-
-    function initDefaults() {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm   = String(today.getMonth() + 1).padStart(2, "0");
-      const dd   = String(today.getDate()).padStart(2, "0");
-      dom.dateInput.value = `${yyyy}-${mm}-${dd}`;
-      appState.date = today;
-
-      if (appState.cities.length > 0) {
-        appState.city = appState.cities[0];
-        dom.citySelect.value = "0";
-      }
-
-      syncTimeLabel();
-      syncUnitsUi();
-      syncHumanHeightInputFromState();
-      updateHumanControlsVisibility();
-      updateObjectControlsVisibility();
-    }
-
-    function populateCitySelect() {
-      dom.citySelect.innerHTML = "";
-      appState.cities.forEach((city, idx) => {
-        const opt = document.createElement("option");
-        opt.value = String(idx);
-        opt.textContent = city.name;
-        dom.citySelect.appendChild(opt);
-      });
-    }
-
-    function populateObjectSelect() {
-      dom.objectSelect.innerHTML = "";
-      const blank = document.createElement("option");
-      blank.value = "";
-      blank.textContent = "-- choose object --";
-      dom.objectSelect.appendChild(blank);
-
-      appState.objects.forEach((obj) => {
-        const opt = document.createElement("option");
-        opt.value = obj.id;
-        opt.textContent = obj.name;
-        dom.objectSelect.appendChild(opt);
-      });
-      dom.objectSelect.value = "";
-    }
-
-    function populateHumanHeightPresets() {
-      dom.humanHeightPreset.innerHTML = "";
-      const presets = getHumanHeightPresetsInInches();
-      presets.forEach((p) => {
-        const opt = document.createElement("option");
-        opt.value = String(p.valueInInches);
-        opt.textContent = p.label;
-        dom.humanHeightPreset.appendChild(opt);
-      });
-      dom.humanHeightPreset.value = String(presets[0].valueInInches);
-    }
-
-    function updateHumanControlsVisibility() {
-      const v = appState.humanVisible;
-      dom.humanHeightPresetRow.style.display = v ? "flex" : "none";
-      dom.humanHeightInputRow.style.display  = v ? "flex" : "none";
-    }
-
-    function updateObjectControlsVisibility() {
-      const v = appState.objectVisible;
-      dom.objectRow.style.display = v ? "flex" : "none";
-      dom.objectSelect.disabled   = !v;
-      if (v && !dom.objectSelect.value) {
-        appState.selectedObjectId = null;
-      }
-    }
-
-    function syncHumanHeightInputFromState() {
-      if (appState.units === "imperial") {
-        dom.humanHeightInput.value = appState.humanHeight.toFixed(1);
-        dom.humanHeightUnitLabel.textContent = "in";
-        dom.humanHeightHelp.textContent = "Range: 20–96 inches";
-      } else {
-        const cm = inchesToCm(appState.humanHeight);
-        dom.humanHeightInput.value = cm.toFixed(1);
-        dom.humanHeightUnitLabel.textContent = "cm";
-        dom.humanHeightHelp.textContent = "Range: 50–250 cm";
-      }
-    }
-
-    function syncTimeLabel() {
-      const minutes = appState.timeMinutes;
-      const hh = Math.floor(minutes / 60);
-      const mm = minutes % 60;
-      const hhStr = String(hh).padStart(2, "0");
-      const mmStr = String(mm).padStart(2, "0");
-      dom.timeLabel.textContent = `${hhStr}:${mmStr}`;
-    }
-
-    function syncUnitsUi() {
-      dom.humanHeightInput.step = appState.units === "imperial" ? "0.5" : "1";
-      syncHumanHeightInputFromState();
-      dom.unitsRadios.forEach(r => {
-        r.checked = (r.value === appState.units);
-      });
-    }
-
-    function getHumanHeightPresetsInInches() {
-      const medianMale   = 69;
-      const medianFemale = 64;
-      const presets = [
-        { label: "Median US male (~5'9\")",   valueInInches: medianMale },
-        { label: "Median US female (~5'4\")", valueInInches: medianFemale }
-      ];
-      for (let h = 20; h <= 96; h++) {
-        presets.push({ label: `${h} in`, valueInInches: h });
-      }
-      return presets;
-    }
-
-    function clampHumanHeight(val) {
-      if (appState.units === "imperial") {
-        if (val < 20) return 20;
-        if (val > 96) return 96;
-        return val;
-      } else {
-        const inches = cmToInches(val);
-        if (inches < 20) return 20;
-        if (inches > 96) return 96;
-        return inches;
-      }
-    }
-
-    function inchesToCm(inches) { return inches * 2.54; }
-    function cmToInches(cm) { return cm / 2.54; }
-
-    function formatShadowImperialFromMeters(m) {
-      const inchesRaw = m / 0.0254;
-      const inchesRounded = Math.round(inchesRaw * 10) / 10;
-      const feet = Math.floor(inchesRounded / 12);
-      const remInches = inchesRounded - feet * 12;
-      return { feet, inches: remInches, totalInches: inchesRounded };
-    }
-
-    /* time zone helpers --------------------------------------------------- */
-
-    function getZonedDateParts(date, timeZone) {
-      const dtf = new Intl.DateTimeFormat("en-US", {
-        timeZone,
-        hour12: false,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-
-      const parts = dtf.formatToParts(date);
-      const lookup = {};
-      for (const p of parts) {
-        if (p.type !== "literal") lookup[p.type] = p.value;
-      }
-
-      return {
-        year: Number(lookup.year),
-        monthIndex: Number(lookup.month) - 1,
-        day: Number(lookup.day),
-        hour: Number(lookup.hour),
-        minute: Number(lookup.minute)
-      };
-    }
-
-    function makeDateInTimeZone(year, monthIndex, day, hour, minute, timeZone) {
-      if (!timeZone || typeof Intl === "undefined" || !Intl.DateTimeFormat) {
-        return new Date(year, monthIndex, day, hour, minute, 0);
-      }
-
-      let guess = new Date(Date.UTC(year, monthIndex, day, hour, minute, 0));
-
-      for (let i = 0; i < 5; i++) {
-        const z = getZonedDateParts(guess, timeZone);
-
-        const desiredUTC = Date.UTC(year, monthIndex, day, hour, minute, 0);
-        const actualUTC  = Date.UTC(z.year, z.monthIndex, z.day, z.hour, z.minute, 0);
-
-        const diffMinutes = (actualUTC - desiredUTC) / 60000;
-        if (Math.abs(diffMinutes) < 0.1) break;
-
-        guess = new Date(guess.getTime() - diffMinutes * 60000);
-      }
-
-      return guess;
-    }
-
-    /* URL state ----------------------------------------------------------- */
-
-    function applyStateFromQuery(search) {
-      if (!search || search.length <= 1) return;
-      const params = new URLSearchParams(search);
-
-      if (params.has("city")) {
-        const idx = Number(params.get("city"));
-        if (!Number.isNaN(idx) && idx >= 0 && idx < appState.cities.length) {
-          appState.city = appState.cities[idx];
-          dom.citySelect.value = String(idx);
-        }
-      }
-
-      if (params.has("units")) {
-        const u = params.get("units");
-        if (u === "imp" || u === "metric" || u === "imperial") {
-          appState.units = (u === "imp") ? "imperial" : u;
-          syncUnitsUi();
-        }
-      }
-
-      if (params.has("date")) {
-        const d = params.get("date");
-        if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
-          dom.dateInput.value = d;
-          appState.date = new Date(d + "T12:00:00");
-        }
-      }
-
-      if (params.has("time")) {
-        const t = Number(params.get("time"));
-        if (!Number.isNaN(t) && t >= 0 && t <= 1439) {
-          appState.timeMinutes = t;
-          dom.timeSlider.value = String(t);
-          syncTimeLabel();
-        }
-      }
-
-      if (params.has("hv")) {
-        const hv = params.get("hv") === "1";
-        appState.humanVisible = hv;
-        dom.humanVisible.checked = hv;
-        updateHumanControlsVisibility();
-      }
-
-      if (params.has("hh")) {
-        const hh = Number(params.get("hh"));
-        if (!Number.isNaN(hh) && hh > 0) {
-          appState.humanHeight = hh;
-          syncHumanHeightInputFromState();
-          dom.humanHeightPreset.value = String(hh);
-        }
-      }
-
-      if (params.has("ov")) {
-        const ov = params.get("ov") === "1";
-        appState.objectVisible = ov;
-        dom.objectVisible.checked = ov;
-        updateObjectControlsVisibility();
-      }
-
-      if (params.has("oid")) {
-        const oid = params.get("oid");
-        const obj = appState.objects.find(o => o.id === oid);
-        if (obj) {
-          appState.selectedObjectId = oid;
-          dom.objectSelect.value = oid;
-        }
-      }
-
-      if (params.has("sm")) {
-        const sm = params.get("sm") === "1";
-        dom.showMath.checked = sm;
-      }
-    }
-
-    function updateUrlFromState() {
-      if (typeof history === "undefined" || !history.replaceState) return;
-
-      const params = new URLSearchParams();
-      const cityIdx = appState.cities.indexOf(appState.city);
-      if (cityIdx >= 0) params.set("city", String(cityIdx));
-
-      params.set("units", appState.units === "imperial" ? "imp" : "metric");
-
-      if (dom.dateInput.value) params.set("date", dom.dateInput.value);
-      params.set("time", String(appState.timeMinutes));
-
-      params.set("hv", appState.humanVisible ? "1" : "0");
-      params.set("hh", String(appState.humanHeight));
-
-      params.set("ov", appState.objectVisible ? "1" : "0");
-      if (appState.selectedObjectId) params.set("oid", appState.selectedObjectId);
-
-      params.set("sm", dom.showMath.checked ? "1" : "0");
-
-      const newUrl = window.location.pathname + "?" + params.toString();
-      history.replaceState(null, "", newUrl);
-    }
-
-    /* solar + shadow ------------------------------------------------------ */
-
-    function updateAll() {
-      const solar = computeSolarPositionSafe();
-      updateSunStatus(solar);
-      updateShadowLengthsBar(solar);
-      updateSceneFromState(solar);
-      updateMathDetails(solar);
-      updateUrlFromState();
-    }
-
-    function buildCurrentDateTime() {
-      const dateStr = dom.dateInput.value;
-      if (!dateStr) return null;
-
-      const [yStr, mStr, dStr] = dateStr.split("-");
-      const year        = Number(yStr);
-      const monthIndex  = Number(mStr) - 1;
-      const day         = Number(dStr);
-
-      const minutes = appState.timeMinutes;
-      const hh      = Math.floor(minutes / 60);
-      const mm      = minutes % 60;
-
-      const tz = appState.city && appState.city.tz;
-      return makeDateInTimeZone(year, monthIndex, day, hh, mm, tz);
-    }
-
-    function computeSolarPositionSafe() {
-      if (!appState.city) return null;
-      const dt = buildCurrentDateTime();
-      if (!dt) return null;
-
-      if (typeof SunCalc === "undefined" || typeof SunCalc.getPosition !== "function") {
-        console.warn("SunCalc not available; solar position cannot be computed.");
-        return null;
-      }
-
-      const lat = appState.city.lat;
-      const lon = appState.city.lon;
-
-      const pos = SunCalc.getPosition(dt, lat, lon);
-      const altitudeRad = pos.altitude;
-      const azimuthRad  = pos.azimuth;
-
-      return {
-        date: dt,
-        lat,
-        lon,
-        altitudeRad,
-        azimuthRad,
-        altitudeDeg: (altitudeRad * 180) / Math.PI,
-        azimuthDeg:  (azimuthRad  * 180) / Math.PI
-      };
-    }
-
-    function updateSunStatus(solar) {
-      if (!solar) {
-        dom.sunStatus.textContent = "Sun position unavailable (missing data or SunCalc).";
-        dom.sunStatus.style.color = "#666";
-        return;
-      }
-      const altDeg = solar.altitudeDeg;
-      const minutes = appState.timeMinutes;
-      const hh = Math.floor(minutes / 60);
-      const mm = minutes % 60;
-      const hhStr = String(hh).padStart(2, "0");
-      const mmStr = String(mm).padStart(2, "0");
-
-      if (altDeg <= 0) {
-        dom.sunStatus.textContent =
-          `Sun is below the horizon at ${hhStr}:${mmStr} for this date and location. No shadow is cast.`;
-        dom.sunStatus.style.color = "#b00020";
-      } else {
-        dom.sunStatus.textContent =
-          `Sun is above the horizon at ${hhStr}:${mmStr}. Elevation ≈ ${altDeg.toFixed(1)}°.`;
-        dom.sunStatus.style.color = "#2a7d3b";
-      }
-    }
-
-    function getHumanHeightMeters() {
-      if (!appState.humanVisible) return null;
-      return appState.humanHeight * 0.0254;
-    }
-
-    function getObjectHeightMeters() {
-      if (!appState.objectVisible || !appState.selectedObjectId) return null;
-      const obj = appState.objects.find(o => o.id === appState.selectedObjectId);
-      return obj ? obj.height_m : null;
-    }
-
-    function getEffectiveHeightMeters() {
-      const h = getHumanHeightMeters();
-      if (h != null) return h;
-      return getObjectHeightMeters();
-    }
-
-    function computeShadowLengthM(heightM, solar) {
-      if (!solar || solar.altitudeDeg <= 0 || !heightM) return 0;
-      const altRad = solar.altitudeRad;
-      const tanAlt = Math.tan(altRad);
-      if (tanAlt <= 0) return 0;
-      return heightM / tanAlt;
-    }
-
-    function updateShadowLengthsBar(solar) {
-      const humanH = getHumanHeightMeters();
-      const objH   = getObjectHeightMeters();
-
-      const sunOK = solar && solar.altitudeDeg > 0;
-
-      const humanL = (sunOK && humanH) ? computeShadowLengthM(humanH, solar) : null;
-      const objL   = (sunOK && objH)   ? computeShadowLengthM(objH, solar)   : null;
-
-      const pieces = [];
-
-      if (!sunOK) {
-        pieces.push("No shadow (sun below horizon)");
-      } else {
-        if (humanL) pieces.push("Human " + formatLengthString(humanL));
-        if (objL)   pieces.push("Object " + formatLengthString(objL));
-        if (!humanL && !objL) pieces.push("No caster selected");
-      }
-
-      if (currentGridSpacingM > 0) {
-        if (appState.units === "imperial") {
-          const cellFt = currentGridSpacingM / 0.3048;
-          pieces.push(`Grid cell ${cellFt.toFixed(1)} ft`);
-        } else {
-          const cellM = currentGridSpacingM;
-          pieces.push(`Grid cell ${cellM.toFixed(2)} m`);
-        }
-      }
-
-      dom.shadowLengthValue.textContent = pieces.join("  •  ");
-    }
-
-    function formatLengthString(lengthM) {
-      if (appState.units === "imperial") {
-        const { feet, inches } = formatShadowImperialFromMeters(lengthM);
-        return `${feet} ft ${inches.toFixed(1)} in`;
-      } else {
-        const cm = lengthM * 100;
-        const roundedCm = Math.round(cm);
-        return `${roundedCm} cm`;
-      }
-    }
-
-    /* math details -------------------------------------------------------- */
-
-    function updateMathDetails(solar) {
-      if (!dom.mathDetails) return;
-
-      if (!dom.showMath.checked) {
-        dom.mathDetails.style.display = "none";
-        dom.viewPanel.classList.remove("math-visible");
-        resizeSceneToContainer();
-        return;
-      }
-
-      dom.viewPanel.classList.add("math-visible");
-      dom.mathDetails.style.display = "block";
-
-      const heightM = getEffectiveHeightMeters();
-
-      if (!solar || !heightM || solar.altitudeDeg <= 0) {
-        dom.mathDetails.textContent =
-          "No shadow math to show:\n" +
-          "- Sun below horizon, or\n" +
-          "- No human/object selected.";
-        resizeSceneToContainer();
-        return;
-      }
-
-      const lengthM = computeShadowLengthM(heightM, solar);
-      if (!lengthM || lengthM <= 0) {
-        dom.mathDetails.textContent =
-          "Shadow length computed as zero (sun too low or numerical issue).";
-        resizeSceneToContainer();
-        return;
-      }
-
-      const altDeg = solar.altitudeDeg;
-      const altRad = solar.altitudeRad;
-      const azRad  = solar.azimuthRad;
-      const azDeg  = solar.azimuthDeg;
-      const tanAlt = Math.tan(altRad);
-
-      const dateStr = dom.dateInput.value || "–";
-      const timeStr = dom.timeLabel.textContent || "–";
-      const cityName = appState.city ? appState.city.name : "–";
-
-      let heightLine;
-      if (appState.units === "imperial") {
-        const inches = heightM / 0.0254;
-        const feet = Math.floor(inches / 12);
-        const remInches = inches - feet * 12;
-        heightLine = `H = ${heightM.toFixed(3)} m  ≈  ${feet} ft ${remInches.toFixed(1)} in`;
-      } else {
-        const cm = heightM * 100;
-        heightLine = `H = ${heightM.toFixed(3)} m  ≈  ${cm.toFixed(1)} cm`;
-      }
-
-      let lengthLine;
-      if (appState.units === "imperial") {
-        const { feet, inches } = formatShadowImperialFromMeters(lengthM);
-        lengthLine = `L = ${lengthM.toFixed(3)} m  ≈  ${feet} ft ${inches.toFixed(1)} in`;
-      } else {
-        const cm = lengthM * 100;
-        lengthLine = `L = ${lengthM.toFixed(3)} m  ≈  ${cm.toFixed(1)} cm`;
-      }
-
-      const alt = solar.altitudeRad;
-      const az  = solar.azimuthRad;
-      const sx = Math.sin(az) * Math.cos(alt);
-      const sz = Math.cos(az) * Math.cos(alt);
-      let dx = -sx;
-      let dz = -sz;
-      const dLen = Math.hypot(dx, dz) || 1;
-      dx /= dLen;
-      dz /= dLen;
-      const groundAngleRad = Math.atan2(dz, dx);
-      const groundAngleDeg = groundAngleRad * 180 / Math.PI;
-
-      const mathText =
-`City:         ${cityName}
-Date:         ${dateStr}
-Time (local): ${timeStr}
-
-Sun altitude (angle above horizon):
-  α = ${altDeg.toFixed(3)}°
-
-From SunCalc (radians):
-  altitude_rad = ${altRad.toFixed(6)}
-  azimuth_rad  = ${azRad.toFixed(6)}
-  azimuth_deg  = ${azDeg.toFixed(3)}°   (SunCalc: 0° = south, +90° = west)
-
-Effective height used:
-  ${heightLine}
-
-Shadow length formula:
-  tan(α) = H / L  →  L = H / tan(α)
-
-Numeric substitution:
-  tan(α) = tan(${altDeg.toFixed(3)}°) ≈ ${tanAlt.toFixed(5)}
-  L = ${heightM.toFixed(3)} m / ${tanAlt.toFixed(5)} ≈ ${lengthM.toFixed(3)} m
-
-Shadow length result:
-  ${lengthLine}
-
-Shadow direction (ground plane):
-
-  World axes convention:
-    X = +east,  Z = +south
-
-  Shadow unit direction (ground):
-    shadow_dir ≈ (dx, dz) = (${dx.toFixed(4)}, ${dz.toFixed(4)})
-    angle from +X (east), CCW ≈ ${groundAngleDeg.toFixed(1)}°
-`;
-
-      dom.mathDetails.textContent = mathText;
-      resizeSceneToContainer();
-    }
-
-    /* Three.js scene ------------------------------------------------------ */
-
-    function initSceneSafe() {
-      const container = dom.sceneContainer;
-      if (!container) return;
-
-      if (typeof THREE === "undefined") {
-        container.innerHTML =
-          "<div style='padding:16px;font-family:system-ui;color:#b00020;font-size:14px;'>" +
-          "<strong>THREE.js is not loaded.</strong><br><br>" +
-          "Check your internet or the three.js CDN URL." +
-          "</div>";
-        return;
-      }
-
-      const oldCanvas = container.querySelector("canvas");
-      if (oldCanvas) container.removeChild(oldCanvas);
-
-      const { width, height } = getSceneSize();
-      threeRenderer = new THREE.WebGLRenderer({ antialias: true });
-      threeRenderer.setSize(width, height);
-      threeRenderer.setClearColor(0xf2f4fb, 1);
-
-      container.insertBefore(threeRenderer.domElement, container.firstChild);
-
-      threeScene = new THREE.Scene();
-
-      threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      threeCamera.position.set(6, 6, 6);
-      threeCamera.lookAt(0, 0, 0);
-
-      updateGridForUnits();
-
-      const amb = new THREE.AmbientLight(0xffffff, 0.6);
-      threeScene.add(amb);
-
-      const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-      dir.position.set(5, 10, 5);
-      threeScene.add(dir);
-
-      threeRenderer.setAnimationLoop(() => {
-        threeRenderer.render(threeScene, threeCamera);
-      });
-
-      resizeSceneToContainer();
-    }
-
-    function updateGridForUnits() {
-      if (!threeScene || typeof THREE === "undefined") return;
-      if (gridHelper) {
-        threeScene.remove(gridHelper);
-        gridHelper.geometry.dispose();
-        gridHelper.material.dispose();
-      }
-
-      let spacing, divisions;
-      if (appState.units === "imperial") {
-        spacing = 0.3048;
-        divisions = 40;
-      } else {
-        spacing = 0.5;
-        divisions = 40;
-      }
-      const size = spacing * divisions;
-      currentGridSizeM = size;
-      currentGridSpacingM = spacing;
-
-      gridHelper = new THREE.GridHelper(size, divisions);
-      gridHelper.material.opacity = 0.35;
+    // ============================================================================
+    // THREE.JS SCENE
+    // ============================================================================
+    
+    let scene, camera, renderer;
+    let objectMesh, shadowMesh, gridHelper;
+    
+    function initScene() {
+      const container = document.getElementById('scene-container');
+      
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xe5e9f0);
+      
+      // Camera (orthographic for consistent shadow visualization)
+      const aspect = container.clientWidth / container.clientHeight;
+      const viewSize = 6;
+      camera = new THREE.OrthographicCamera(
+        -viewSize * aspect, viewSize * aspect,
+        viewSize, -viewSize,
+        0.1, 1000
+      );
+      camera.position.set(6, 6, 6);
+      camera.lookAt(0, 0, 0);
+      
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+      
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(5, 10, 5);
+      scene.add(directionalLight);
+      
+      // Grid
+      gridHelper = new THREE.GridHelper(10, 20, 0xaaaaaa, 0xdddddd);
+      gridHelper.material.opacity = 0.38;
       gridHelper.material.transparent = true;
-      threeScene.add(gridHelper);
-
-      buildCompass3D();
+      scene.add(gridHelper);
+      
+      // Start animation loop
+      animate();
+      
+      // Handle resize
+      window.addEventListener('resize', onWindowResize);
     }
-
-    function getSceneSize() {
-      const c = dom.sceneContainer;
-      const width  = (c && (c.clientWidth || c.offsetWidth))  || 600;
-      const height = (c && (c.clientHeight || c.offsetHeight)) || 400;
-      return { width, height };
+    
+    function onWindowResize() {
+      const container = document.getElementById('scene-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const aspect = width / height;
+      const viewSize = 6;
+      
+      camera.left = -viewSize * aspect;
+      camera.right = viewSize * aspect;
+      camera.top = viewSize;
+      camera.bottom = -viewSize;
+      camera.updateProjectionMatrix();
+      
+      renderer.setSize(width, height);
     }
-
-    function resizeSceneToContainer() {
-      if (!threeRenderer || !threeCamera || !dom.sceneContainer) return;
-      const { width, height } = getSceneSize();
-      threeRenderer.setSize(width, height);
-      threeCamera.aspect = width / height;
-      threeCamera.updateProjectionMatrix();
-      positionCompassInView();
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
     }
-
-    /* Compass ------------------------------------------------------------- */
-
-    function createCompassLabelSprite(text, colorCss, sizeWorld) {
-      const canvasSize = 128;
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = canvasSize;
-      const ctx = canvas.getContext("2d");
-
-      ctx.clearRect(0, 0, canvasSize, canvasSize);
-
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.beginPath();
-      ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize * 0.45, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = colorCss;
-      ctx.font = "bold 64px system-ui";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, canvasSize / 2, canvasSize / 2);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      const material = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: true
-      });
-
-      const sprite = new THREE.Sprite(material);
-      sprite.scale.set(sizeWorld, sizeWorld, 1);
-      return sprite;
+    
+    // ============================================================================
+    // OBJECT CREATION
+    // ============================================================================
+    
+    function createObject(type, height) {
+      // Remove existing object
+      if (objectMesh) {
+        scene.remove(objectMesh);
+        objectMesh.traverse(child => {
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) child.material.dispose();
+        });
+      }
+      
+      objectMesh = new THREE.Group();
+      
+      if (type === 'human') {
+        // Body
+        const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, height * 0.6, 16);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+        const body = new THREE.Mesh(bodyGeom, bodyMat);
+        body.position.y = height * 0.3;
+        
+        // Head
+        const headGeom = new THREE.SphereGeometry(height * 0.12, 16, 16);
+        const headMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+        const head = new THREE.Mesh(headGeom, headMat);
+        head.position.y = height * 0.65;
+        
+        objectMesh.add(body);
+        objectMesh.add(head);
+        
+      } else if (type === 'tree') {
+        // Trunk
+        const trunkGeom = new THREE.CylinderGeometry(height * 0.05, height * 0.08, height * 0.4, 12);
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7a4b2b });
+        const trunk = new THREE.Mesh(trunkGeom, trunkMat);
+        trunk.position.y = height * 0.2;
+        
+        // Canopy
+        const canopyGeom = new THREE.SphereGeometry(height * 0.35, 20, 16);
+        const canopyMat = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
+        const canopy = new THREE.Mesh(canopyGeom, canopyMat);
+        canopy.position.y = height * 0.55;
+        
+        objectMesh.add(trunk);
+        objectMesh.add(canopy);
+        
+      } else { // box
+        const boxGeom = new THREE.BoxGeometry(height * 0.3, height, height * 0.3);
+        const boxMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+        const box = new THREE.Mesh(boxGeom, boxMat);
+        box.position.y = height / 2;
+        
+        objectMesh.add(box);
+      }
+      
+	  normalizeObjectHeight(objectMesh, height);
+	  
+      scene.add(objectMesh);
     }
+	
+	function normalizeObjectHeight(group, targetHeight) {
+	  // Ensure world matrices are up to date
+	  group.updateMatrixWorld(true);
 
-    function buildCompass3D() {
-      if (!threeScene || typeof THREE === "undefined") return;
+	  const box = new THREE.Box3().setFromObject(group);
+	  const currentHeight = box.max.y - box.min.y;
 
-      if (compassGroup) {
-        threeScene.remove(compassGroup);
-        compassGroup.traverse(child => {
-          if (child.isMesh || child.isLine || child.isLineSegments || child.isSprite) {
-            if (child.geometry) child.geometry.dispose();
-            if (child.material) {
-              if (Array.isArray(child.material)) {
-                child.material.forEach(m => m && m.dispose());
-              } else {
-                child.material.dispose();
+	  if (!isFinite(currentHeight) || currentHeight <= 0) return;
+
+	  // Scale in Y so the total height equals targetHeight
+	  const scaleY = targetHeight / currentHeight;
+	  group.scale.set(1, scaleY, 1);
+
+	  // Recompute bounding box after scaling
+	  group.updateMatrixWorld(true);
+	  box.setFromObject(group);
+
+	  // Shift so the bottom sits exactly on the ground plane (y = 0)
+	  const yOffset = -box.min.y;
+	  group.position.y += yOffset;
+	}
+
+    
+    // ============================================================================
+    // SHADOW CALCULATION
+    // ============================================================================
+    
+    function getSolarPosition() {
+      const city = CITIES[state.cityIndex];
+      const dt = createDateTime(state.date, state.timeMinutes, city.tz);
+      const pos = SunCalc.getPosition(dt, state.lat, state.lon);
+      
+      return {
+        altitude: pos.altitude,
+        azimuth: pos.azimuth,
+        altitudeDeg: pos.altitude * 180 / Math.PI,
+        azimuthDeg: pos.azimuth * 180 / Math.PI
+      };
+    }
+    
+    function createDateTime(date, minutes, timezone) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const day = date.getDate();
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      
+      // Create a date in the specified timezone
+      if (timezone && typeof Intl !== 'undefined') {
+        let guess = new Date(Date.UTC(year, month, day, hours, mins, 0));
+        
+        // Iterate to find correct UTC time for desired local time
+        for (let i = 0; i < 3; i++) {
+          const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          });
+          
+          const parts = formatter.formatToParts(guess);
+          const getValue = (type) => parts.find(p => p.type === type)?.value;
+          
+          const localYear = parseInt(getValue('year'));
+          const localMonth = parseInt(getValue('month')) - 1;
+          const localDay = parseInt(getValue('day'));
+          const localHour = parseInt(getValue('hour'));
+          const localMinute = parseInt(getValue('minute'));
+          
+          const desiredUTC = Date.UTC(year, month, day, hours, mins, 0);
+          const actualUTC = Date.UTC(localYear, localMonth, localDay, localHour, localMinute, 0);
+          
+          const diff = actualUTC - desiredUTC;
+          if (Math.abs(diff) < 60000) break; // within 1 minute
+          
+          guess = new Date(guess.getTime() - diff);
+        }
+        
+        return guess;
+      }
+      
+      return new Date(year, month, day, hours, mins, 0);
+    }
+    
+    function calculateShadowLength(height, altitude) {
+      if (altitude <= 0) return 0;
+      return height / Math.tan(altitude);
+    }
+    
+    function createShadow(solar) {
+      // Remove existing shadow
+      if (shadowMesh) {
+        scene.remove(shadowMesh);
+        if (shadowMesh.geometry) shadowMesh.geometry.dispose();
+        if (shadowMesh.material) shadowMesh.material.dispose();
+      }
+      
+      if (solar.altitudeDeg <= 0 || !objectMesh) {
+        return; // No shadow when sun is below horizon
+      }
+      
+      // Calculate shadow direction (opposite of sun direction)
+      const sunX = Math.sin(solar.azimuth) * Math.cos(solar.altitude);
+      const sunY = Math.sin(solar.altitude);
+      const sunZ = Math.cos(solar.azimuth) * Math.cos(solar.altitude);
+      
+      const lightDir = new THREE.Vector3(-sunX, -sunY, -sunZ);
+      
+      // Project all vertices to ground
+      const points = [];
+      objectMesh.updateMatrixWorld(true);
+      
+      objectMesh.traverse(child => {
+        if (child.isMesh && child.geometry) {
+          const positions = child.geometry.attributes.position;
+          const vertex = new THREE.Vector3();
+          
+          for (let i = 0; i < positions.count; i++) {
+            vertex.fromBufferAttribute(positions, i);
+            vertex.applyMatrix4(child.matrixWorld);
+            
+            // Project to ground (y=0)
+            if (Math.abs(lightDir.y) > 0.001) {
+              const t = -vertex.y / lightDir.y;
+              if (t > 0) {
+                const projected = vertex.clone().addScaledVector(lightDir, t);
+                points.push({ x: projected.x, z: projected.z });
               }
             }
           }
-        });
-        compassGroup = null;
-      }
-
-      compassNorthArrow = compassSouthArrow = null;
-      compassEastArrow  = compassWestArrow  = null;
-      compassNorthLabel = compassSouthLabel = null;
-
-      const spacing = currentGridSpacingM || 0.5;
-      const size    = currentGridSizeM     || spacing * 40;
-
-      const length      = spacing;
-      const origin      = new THREE.Vector3(0, 0.01, 0);
-
-      compassGroup = new THREE.Group();
-
-      const arrowE = new THREE.ArrowHelper(
-        new THREE.Vector3( 1, 0,  0).normalize(),
-        origin,
-        length,
-        0x4444aa
-      );
-      const arrowW = new THREE.ArrowHelper(
-        new THREE.Vector3(-1, 0,  0).normalize(),
-        origin,
-        length,
-        0x8888aa
-      );
-      const arrowZNeg = new THREE.ArrowHelper(
-        new THREE.Vector3( 0, 0, -1).normalize(),
-        origin,
-        length,
-        0x444444
-      );
-      const arrowZPos = new THREE.ArrowHelper(
-        new THREE.Vector3( 0, 0,  1).normalize(),
-        origin,
-        length,
-        0x888888
-      );
-
-      compassGroup.add(arrowE, arrowW, arrowZNeg, arrowZPos);
-
-      compassEastArrow  = arrowE;
-      compassWestArrow  = arrowW;
-
-      const isNorthernHemisphere = !appState.city || appState.city.lat >= 0;
-
-      let northArrow, southArrow;
-      //if (isNorthernHemisphere) {
-        //northArrow = arrowZNeg;
-        //southArrow = arrowZPos;
-      //} else {
-        northArrow = arrowZPos;
-        southArrow = arrowZNeg;
-      //}
-
-      northArrow.setColor(new THREE.Color(0xff0000));
-      southArrow.setColor(new THREE.Color(0x444444));
-
-      compassNorthArrow = northArrow;
-      compassSouthArrow = southArrow;
-
-      const labelSize = spacing * 0.9;
-      const northLabel = createCompassLabelSprite("N", "#ff0000", labelSize);
-      const southLabel = createCompassLabelSprite("S", "#333333", labelSize);
-
-      const headLength  = length * 0.35;
-      const offsetFactor = length + headLength * 0.6;
-
-      const northDir =
-        (northArrow === arrowZNeg) ? new THREE.Vector3(0, 0, -1)
-                                   : new THREE.Vector3(0, 0,  1);
-      const southDir =
-        (southArrow === arrowZNeg) ? new THREE.Vector3(0, 0, -1)
-                                   : new THREE.Vector3(0, 0,  1);
-
-      northLabel.position.copy(northDir.clone().multiplyScalar(offsetFactor));
-      southLabel.position.copy(southDir.clone().multiplyScalar(offsetFactor));
-
-      compassGroup.add(northLabel);
-      compassGroup.add(southLabel);
-
-      compassNorthLabel = northLabel;
-      compassSouthLabel = southLabel;
-
-      compassGroup.position.set(0, 0, 0);
-      threeScene.add(compassGroup);
-
-      positionCompassInView();
-    }
-
-    function positionCompassInView() {
-      if (!compassGroup || !threeCamera) return;
-
-      const ndc = new THREE.Vector3(-0.75, 0.9, 0);
-      ndc.unproject(threeCamera);
-      const targetWorld = ndc.clone();
-
-      const originWorld = new THREE.Vector3(0, 0, 0);
-      const distRef = threeCamera.position.distanceTo(originWorld);
-      const distNew = threeCamera.position.distanceTo(targetWorld);
-
-      compassGroup.position.copy(targetWorld);
-      compassGroup.quaternion.identity();
-
-      let scale = distNew / distRef;
-      const targetScreenSize = 0.4;
-      scale *= targetScreenSize / currentGridSpacingM;
-
-      compassGroup.scale.set(scale, scale, scale);
-    }
-
-    /* sun direction & shadows -------------------------------------------- */
-
-    function getSunLightDirection(solar) {
-      if (!solar || solar.altitudeDeg <= 0) return null;
-
-      const alt = solar.altitudeRad;
-      const az  = solar.azimuthRad;
-
-      const sx = Math.sin(az) * Math.cos(alt);
-      const sy = Math.sin(alt);
-      const sz = Math.cos(az) * Math.cos(alt);
-
-      let lx = -sx;
-      let ly = -sy;
-      let lz = -sz;
-
-      const len = Math.hypot(lx, ly, lz);
-      if (len === 0) return null;
-      lx /= len;
-      ly /= len;
-      lz /= len;
-
-      if (ly >= 0) return null;
-      return new THREE.Vector3(lx, ly, lz);
-    }
-
-    function updateSceneFromState(solar) {
-      if (!threeScene) return;
-
-      const lightDir = getSunLightDirection(solar);
-
-      if (appState.humanVisible) {
-        const heightM = getHumanHeightMeters();
-        ensureHumanMesh(heightM || 0);
-        humanGroup.visible = true;
-
-        if (lightDir && heightM) {
-          const hull = projectGroupToGroundHull(humanGroup, lightDir);
-          ensureHumanShadowFromHull(hull);
-        } else {
-          ensureHumanShadowFromHull(null);
-        }
-      } else {
-        if (humanGroup) humanGroup.visible = false;
-        ensureHumanShadowFromHull(null);
-      }
-
-      if (appState.objectVisible && appState.selectedObjectId) {
-        const obj = appState.objects.find((o) => o.id === appState.selectedObjectId);
-        if (obj) {
-          ensureObjectMesh(obj);
-          objectGroup.visible = true;
-
-          if (lightDir) {
-            const hullObj = projectGroupToGroundHull(objectGroup, lightDir);
-            ensureObjectShadowFromHull(hullObj);
-          } else {
-            ensureObjectShadowFromHull(null);
-          }
-        }
-      } else {
-        if (objectGroup) objectGroup.visible = false;
-        ensureObjectShadowFromHull(null);
-      }
-    }
-
-    function ensureHumanMesh(heightM) {
-      if (!humanGroup) {
-        humanGroup = new THREE.Group();
-
-        const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, 1, 16);
-        const bodyMat  = new THREE.MeshStandardMaterial({ color: 0x3333aa });
-        const bodyMesh = new THREE.Mesh(bodyGeom, bodyMat);
-        bodyMesh.name = "human-body";
-
-        const headGeom = new THREE.SphereGeometry(0.2, 16, 16);
-        const headMat  = new THREE.MeshStandardMaterial({ color: 0x3333aa });
-        const headMesh = new THREE.Mesh(headGeom, headMat);
-        headMesh.name = "human-head";
-
-        humanGroup.add(bodyMesh);
-        humanGroup.add(headMesh);
-        humanGroup.position.set(-1, 0, 0);
-
-        threeScene.add(humanGroup);
-      }
-
-      const bodyMesh = humanGroup.getObjectByName("human-body");
-      const headMesh = humanGroup.getObjectByName("human-head");
-      if (!bodyMesh || !headMesh) return;
-
-      const baseBodyHeight = 1.0;
-      const baseHeadRadius = 0.2;
-      const baseTotal = baseBodyHeight + 2 * baseHeadRadius;
-
-      const scaleFactor = heightM / baseTotal;
-
-      bodyMesh.scale.set(1, scaleFactor, 1);
-      headMesh.scale.set(1, scaleFactor, 1);
-
-      const scaledBodyHeight = baseBodyHeight * scaleFactor;
-      bodyMesh.position.set(0, scaledBodyHeight / 2, 0);
-
-      const scaledHeadRadius = baseHeadRadius * scaleFactor;
-      headMesh.position.set(0, scaledBodyHeight + scaledHeadRadius, 0);
-    }
-
-    function ensureObjectMesh(obj) {
-      const heightM = obj.height_m;
-      const shapeId = obj.shape || "box_basic";
-
-      if (!objectGroup || currentObjectShapeId !== shapeId) {
-        if (objectGroup) {
-          threeScene.remove(objectGroup);
-          objectGroup.traverse(child => {
-            if (child.isMesh) {
-              child.geometry.dispose();
-              child.material.dispose();
-            }
-          });
-        }
-
-        objectGroup = new THREE.Group();
-
-        if (shapeId === "tree_basic") {
-          const trunkGeom = new THREE.CylinderGeometry(0.12, 0.16, 1, 10);
-          const trunkMat  = new THREE.MeshStandardMaterial({ color: 0x7a4b2b });
-          const trunkMesh = new THREE.Mesh(trunkGeom, trunkMat);
-          trunkMesh.name = "tree-trunk";
-
-          const canopyGeom = new THREE.SphereGeometry(0.7, 20, 16);
-          const canopyMat  = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
-          const canopyMesh = new THREE.Mesh(canopyGeom, canopyMat);
-          canopyMesh.name = "tree-canopy";
-
-          objectGroup.add(trunkMesh);
-          objectGroup.add(canopyMesh);
-        } else {
-          const geom = new THREE.BoxGeometry(0.5, 1, 0.5);
-          const mat  = new THREE.MeshStandardMaterial({ color: 0x884422 });
-          const mesh = new THREE.Mesh(geom, mat);
-          mesh.name = "object-core";
-          objectGroup.add(mesh);
-        }
-
-        objectGroup.position.set(1, 0, 0);
-        threeScene.add(objectGroup);
-        currentObjectShapeId = shapeId;
-      }
-
-      if (shapeId === "tree_basic") {
-        const trunkMesh  = objectGroup.getObjectByName("tree-trunk");
-        const canopyMesh = objectGroup.getObjectByName("tree-canopy");
-        if (!trunkMesh || !canopyMesh) return;
-
-        const baseTrunkHeight = 1.0;
-        const baseCanopyRadius = 0.7;
-        const baseTotal = baseTrunkHeight + baseCanopyRadius * 2;
-
-        const s = heightM / baseTotal;
-
-        trunkMesh.scale.set(1, s, 1);
-        const scaledTrunkHeight = baseTrunkHeight * s;
-        trunkMesh.position.set(0, scaledTrunkHeight / 2, 0);
-
-        canopyMesh.scale.set(s, s, s);
-        const scaledCanopyRadius = baseCanopyRadius * s;
-        canopyMesh.position.set(0, scaledTrunkHeight + scaledCanopyRadius, 0);
-      } else {
-        const mesh = objectGroup.getObjectByName("object-core");
-        if (!mesh) return;
-        const baseHeight = 1.0;
-        const s = heightM / baseHeight;
-        mesh.scale.set(1, s, 1);
-        mesh.position.set(0, (baseHeight * s) / 2, 0);
-      }
-    }
-
-    function projectGroupToGroundHull(group, lightDir) {
-      if (!group || !lightDir) return null;
-
-      const points = [];
-      const tempV = new THREE.Vector3();
-
-      group.updateWorldMatrix(true, true);
-
-      group.traverse((child) => {
-        if (!child.isMesh) return;
-        if (!child.geometry || !child.geometry.attributes || !child.geometry.attributes.position) return;
-
-        const posAttr = child.geometry.attributes.position;
-        const count = posAttr.count;
-
-        for (let i = 0; i < count; i++) {
-          tempV.set(
-            posAttr.getX(i),
-            posAttr.getY(i),
-            posAttr.getZ(i)
-          );
-          tempV.applyMatrix4(child.matrixWorld);
-
-          const ly = lightDir.y;
-          if (Math.abs(ly) < 1e-6) continue;
-
-          const t = -tempV.y / ly;
-          if (t < 0) continue;
-
-          const p = tempV.clone().addScaledVector(lightDir, t);
-          points.push({ x: p.x, z: p.z });
         }
       });
-
-      if (points.length < 3) return null;
-
-      return convexHull2D(points);
+      
+      if (points.length === 0) return;
+      
+      // Calculate convex hull
+      const hull = convexHull2D(points);
+      if (!hull || hull.length < 3) return;
+      
+      // Create shadow mesh
+      const shape = new THREE.Shape();
+      shape.moveTo(hull[0].x, hull[0].z);
+      for (let i = 1; i < hull.length; i++) {
+        shape.lineTo(hull[i].x, hull[i].z);
+      }
+      shape.closePath();
+      
+      const geometry = new THREE.ShapeGeometry(shape);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        opacity: 0.4,
+        transparent: true
+      });
+      
+      shadowMesh = new THREE.Mesh(geometry, material);
+      shadowMesh.rotation.x = -Math.PI / 2;
+      shadowMesh.position.y = 0.001; // Slightly above ground to prevent z-fighting
+      
+      scene.add(shadowMesh);
     }
-
+    
     function convexHull2D(points) {
       if (points.length < 3) return null;
-      const pts = points.slice().sort((a, b) => {
+      
+      // Sort points
+      const sorted = points.slice().sort((a, b) => {
         if (a.x === b.x) return a.z - b.z;
         return a.x - b.x;
       });
-
-      const cross = (o, a, b) =>
+      
+      const cross = (o, a, b) => 
         (a.x - o.x) * (b.z - o.z) - (a.z - o.z) * (b.x - o.x);
-
+      
+      // Build lower hull
       const lower = [];
-      for (const p of pts) {
-        while (lower.length >= 2 &&
+      for (const p of sorted) {
+        while (lower.length >= 2 && 
                cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
           lower.pop();
         }
         lower.push(p);
       }
-
+      
+      // Build upper hull
       const upper = [];
-      for (let i = pts.length - 1; i >= 0; i--) {
-        const p = pts[i];
-        while (upper.length >= 2 &&
+      for (let i = sorted.length - 1; i >= 0; i--) {
+        const p = sorted[i];
+        while (upper.length >= 2 && 
                cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
           upper.pop();
         }
         upper.push(p);
       }
-
-      upper.pop();
+      
+      // Remove last point of each half because it's repeated
       lower.pop();
+      upper.pop();
+      
       const hull = lower.concat(upper);
       return hull.length >= 3 ? hull : null;
     }
-
-    function ensureHumanShadowFromHull(hull) {
-      if (!hull) {
-        if (humanShadowMesh) humanShadowMesh.visible = false;
-        return;
+    
+    // ============================================================================
+    // UI UPDATE
+    // ============================================================================
+    
+    function updateScene() {
+      // Update grid visibility
+      if (gridHelper) {
+        gridHelper.visible = state.showGrid;
       }
-
-      if (!humanShadowMesh) {
-        const shape = new THREE.Shape();
-        const geom  = new THREE.ShapeGeometry(shape);
-        const mat   = new THREE.MeshBasicMaterial({
-          color: 0x000000,
-          opacity: 0.45,
-          transparent: true
-        });
-        humanShadowMesh = new THREE.Mesh(geom, mat);
-        humanShadowMesh.name = "human-shadow";
-        humanShadowMesh.rotation.x = -Math.PI / 2;
-        humanShadowMesh.position.y = 0.001;
-        threeScene.add(humanShadowMesh);
-      }
-
-      const shape = new THREE.Shape();
-      shape.moveTo(hull[0].x, hull[0].z);
-      for (let i = 1; i < hull.length; i++) {
-        shape.lineTo(hull[i].x, hull[i].z);
-      }
-      shape.closePath();
-
-      if (humanShadowMesh.geometry) {
-        humanShadowMesh.geometry.dispose();
-      }
-      humanShadowMesh.geometry = new THREE.ShapeGeometry(shape);
-      humanShadowMesh.visible = true;
+      
+      // Create/update object
+      createObject(state.objectType, state.height);
+      
+      // Calculate solar position
+      const solar = getSolarPosition();
+      
+      // Update shadow
+      createShadow(solar);
+      
+      // Update UI
+      updateSunStatus(solar);
+      updateShadowInfo(solar);
+      updateTriangle(solar);
+      updateMathDetails(solar);
     }
-
-    function ensureObjectShadowFromHull(hull) {
-      if (!hull) {
-        if (objectShadowMesh) objectShadowMesh.visible = false;
+    
+    function updateSunStatus(solar) {
+      const statusEl = document.getElementById('sun-status');
+      const hours = Math.floor(state.timeMinutes / 60);
+      const minutes = state.timeMinutes % 60;
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      
+      if (solar.altitudeDeg <= 0) {
+        statusEl.textContent = `Sun is below horizon at ${timeStr}. No shadow cast.`;
+        statusEl.className = 'status error';
+      } else {
+        statusEl.textContent = `Sun altitude: ${solar.altitudeDeg.toFixed(1)}° at ${timeStr}`;
+        statusEl.className = 'status success';
+      }
+    }
+    
+    function updateShadowInfo(solar) {
+      const lengthEl = document.getElementById('shadow-length');
+      
+      if (solar.altitudeDeg <= 0) {
+        lengthEl.textContent = 'No shadow';
         return;
       }
+      
+      const length = calculateShadowLength(state.height, solar.altitude);
+      
+      if (state.units === 'metric') {
+        if (length < 1) {
+          lengthEl.textContent = `${(length * 100).toFixed(0)} cm`;
+        } else {
+          lengthEl.textContent = `${length.toFixed(2)} m`;
+        }
+      } else {
+        const feet = length * 3.28084;
+        const ft = Math.floor(feet);
+        const inches = Math.round((feet - ft) * 12);
+        lengthEl.textContent = `${ft}' ${inches}"`;
+      }
+    }
+    
+    function updateMathDetails(solar) {
+      const mathEl = document.getElementById('math-details');
+      
+      if (!state.showMath) {
+        mathEl.classList.remove('visible');
+        return;
+      }
+      
+      mathEl.classList.add('visible');
+      
+      if (solar.altitudeDeg <= 0) {
+        mathEl.textContent = 'No shadow math: Sun is below horizon';
+        return;
+      }
+      
+      const city = CITIES[state.cityIndex];
+      const length = calculateShadowLength(state.height, solar.altitude);
+      const tanAlt = Math.tan(solar.altitude);
+      
+      const dateStr = state.date.toISOString().split('T')[0];
+      const hours = Math.floor(state.timeMinutes / 60);
+      const minutes = state.timeMinutes % 60;
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      
+      mathEl.textContent = `Location: ${city.name}
+Date: ${dateStr}
+Time: ${timeStr} (local)
 
-      if (!objectShadowMesh) {
-        const shape = new THREE.Shape();
-        const geom  = new THREE.ShapeGeometry(shape);
-        const mat   = new THREE.MeshBasicMaterial({
-          color: 0x000000,
-          opacity: 0.35,
-          transparent: true
+Sun Position:
+  Altitude (angle above horizon): ${solar.altitudeDeg.toFixed(2)}°
+  Azimuth: ${solar.azimuthDeg.toFixed(2)}°
+  (0° = south, +90° = west in SunCalc convention)
+
+Shadow Calculation:
+  Formula: L = H / tan(α)
+  Where:
+    L = shadow length
+    H = object height = ${state.height.toFixed(2)} m
+    α = sun altitude = ${solar.altitudeDeg.toFixed(2)}°
+  
+  tan(${solar.altitudeDeg.toFixed(2)}°) = ${tanAlt.toFixed(4)}
+  L = ${state.height.toFixed(2)} / ${tanAlt.toFixed(4)}
+  L = ${length.toFixed(2)} m`;
+    }
+    
+    function updateTriangle(solar) {
+      if (solar.altitudeDeg <= 0) {
+        // No triangle when sun is below horizon
+        document.getElementById('triangle-fill-path').setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
+        document.getElementById('triangle-path').setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
+        document.getElementById('angle-arc').setAttribute('d', '');
+        document.getElementById('height-value').textContent = '—';
+        document.getElementById('shadow-value').textContent = '—';
+        document.getElementById('angle-value').textContent = '—';
+        return;
+      }
+      
+      const height = state.height;
+      const shadowLength = calculateShadowLength(height, solar.altitude);
+      const angle = solar.altitudeDeg;
+      
+      // SVG coordinates
+      const baseX = 80;
+      const baseY = 190;
+      const maxHeight = 120;
+      const maxLength = 270;
+      
+      // Scale to fit
+      const scale = Math.min(
+        maxHeight / height,
+        maxLength / shadowLength
+      );
+      
+      const heightPx = height * scale;
+      const lengthPx = shadowLength * scale;
+      
+      const topX = baseX;
+      const topY = baseY - heightPx;
+      const endX = baseX + lengthPx;
+      const endY = baseY;
+      
+      // Update triangle paths
+      const trianglePath = `M ${baseX} ${baseY} L ${topX} ${topY} L ${endX} ${endY} Z`;
+      document.getElementById('triangle-fill-path').setAttribute('d', trianglePath);
+      document.getElementById('triangle-path').setAttribute('d', trianglePath);
+      
+      // Update angle arc (at bottom-right corner)
+      const arcRadius = 40;
+      const angleRad = solar.altitude;
+      
+      // Arc starts from horizontal (along shadow) and goes up to hypotenuse
+      // Center of arc is at the end of the shadow (endX, endY)
+      const arcStartX = endX - arcRadius; // Start left of the corner
+      const arcStartY = endY;
+      const arcEndX = endX - arcRadius * Math.cos(angleRad);
+      const arcEndY = endY - arcRadius * Math.sin(angleRad);
+      
+      // Arc goes from horizontal line up to the hypotenuse
+      const arcPath = `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 0 0 ${arcEndX} ${arcEndY}`;
+      document.getElementById('angle-arc').setAttribute('d', arcPath);
+      
+      // Update labels
+      // Height label (on left side)
+      const heightLabelX = baseX - 25;
+      const heightLabelY = baseY - heightPx / 2;
+      document.getElementById('height-label').setAttribute('x', heightLabelX);
+      document.getElementById('height-label').setAttribute('y', heightLabelY - 5);
+      document.getElementById('height-value').setAttribute('x', heightLabelX);
+      document.getElementById('height-value').setAttribute('y', heightLabelY + 15);
+      
+      // Format height value
+      let heightText;
+      if (state.units === 'metric') {
+        if (height < 1) {
+          heightText = `${(height * 100).toFixed(0)} cm`;
+        } else {
+          heightText = `${height.toFixed(2)} m`;
+        }
+      } else {
+        const feet = height * 3.28084;
+        const ft = Math.floor(feet);
+        const inches = Math.round((feet - ft) * 12);
+        if (ft === 0) {
+          heightText = `${inches}"`;
+        } else {
+          heightText = `${ft}' ${inches}"`;
+        }
+      }
+      document.getElementById('height-value').textContent = heightText;
+      
+      // Shadow label (on bottom)
+      const shadowLabelX = baseX + lengthPx / 2;
+      const shadowLabelY = baseY + 20;
+      document.getElementById('shadow-label').setAttribute('x', shadowLabelX);
+      document.getElementById('shadow-label').setAttribute('y', shadowLabelY);
+      document.getElementById('shadow-value').setAttribute('x', shadowLabelX);
+      document.getElementById('shadow-value').setAttribute('y', shadowLabelY + 20);
+      
+      // Format shadow value
+      let shadowText;
+      if (state.units === 'metric') {
+        if (shadowLength < 1) {
+          shadowText = `${(shadowLength * 100).toFixed(0)} cm`;
+        } else {
+          shadowText = `${shadowLength.toFixed(2)} m`;
+        }
+      } else {
+        const feet = shadowLength * 3.28084;
+        const ft = Math.floor(feet);
+        const inches = Math.round((feet - ft) * 12);
+        shadowText = `${ft}' ${inches}"`;
+      }
+      document.getElementById('shadow-value').textContent = shadowText;
+      
+      // Angle label (positioned near the arc at bottom-right corner)
+      const angleLabelX = endX - arcRadius - 15;
+      const angleLabelY = endY - arcRadius / 2;
+      
+      document.getElementById('angle-label').setAttribute('x', angleLabelX);
+      document.getElementById('angle-label').setAttribute('y', angleLabelY);
+      document.getElementById('angle-label').setAttribute('text-anchor', 'end');
+      document.getElementById('angle-value').setAttribute('x', angleLabelX);
+      document.getElementById('angle-value').setAttribute('y', angleLabelY + 18);
+      document.getElementById('angle-value').setAttribute('text-anchor', 'start');
+      document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
+    }
+    
+    // ============================================================================
+    // EVENT HANDLERS
+    // ============================================================================
+    
+    function setupEventListeners() {
+      // City selection
+      document.getElementById('city').addEventListener('change', (e) => {
+        state.cityIndex = parseInt(e.target.value);
+        const city = CITIES[state.cityIndex];
+        state.lat = city.lat;
+        state.lon = city.lon;
+        
+        // Update sliders
+        document.getElementById('lat').value = state.lat;
+        document.getElementById('lon').value = state.lon;
+        updateLatLonDisplay();
+        updateScene();
+      });
+      
+      // Latitude
+      document.getElementById('lat').addEventListener('input', (e) => {
+        state.lat = parseFloat(e.target.value);
+        updateLatLonDisplay();
+        updateScene();
+      });
+      
+      // Longitude
+      document.getElementById('lon').addEventListener('input', (e) => {
+        state.lon = parseFloat(e.target.value);
+        updateLatLonDisplay();
+        updateScene();
+      });
+      
+      // Date
+      document.getElementById('date').addEventListener('change', (e) => {
+        state.date = new Date(e.target.value + 'T12:00:00');
+        updateScene();
+      });
+      
+      // Time
+      document.getElementById('time').addEventListener('input', (e) => {
+        state.timeMinutes = parseInt(e.target.value);
+        updateTimeDisplay();
+        updateScene();
+      });
+      
+      // Object type
+      document.querySelectorAll('input[name="object-type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          state.objectType = e.target.value;
+          updateScene();
         });
-        objectShadowMesh = new THREE.Mesh(geom, mat);
-        objectShadowMesh.name = "object-shadow";
-        objectShadowMesh.rotation.x = -Math.PI / 2;
-        objectShadowMesh.position.y = 0.001;
-        threeScene.add(objectShadowMesh);
-      }
-
-      const shape = new THREE.Shape();
-      shape.moveTo(hull[0].x, hull[0].z);
-      for (let i = 1; i < hull.length; i++) {
-        shape.lineTo(hull[i].x, hull[i].z);
-      }
-      shape.closePath();
-
-      if (objectShadowMesh.geometry) {
-        objectShadowMesh.geometry.dispose();
-      }
-      objectShadowMesh.geometry = new THREE.ShapeGeometry(shape);
-      objectShadowMesh.visible = true;
+      });
+      
+      // Height
+      document.getElementById('height').addEventListener('input', (e) => {
+        let value = parseFloat(e.target.value);
+        if (state.units === 'imperial') {
+          value = value * 0.3048; // feet to meters
+        }
+        state.height = value;
+        updateScene();
+      });
+      
+      // Units
+      document.querySelectorAll('input[name="units"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const oldUnits = state.units;
+          state.units = e.target.value;
+          
+          // Convert height value in input
+          const heightInput = document.getElementById('height');
+          let currentValue = parseFloat(heightInput.value);
+          
+          if (oldUnits === 'metric' && state.units === 'imperial') {
+            // m to ft
+            heightInput.value = (state.height * 3.28084).toFixed(2);
+            heightInput.step = '0.1';
+            document.getElementById('height-unit').textContent = 'ft';
+          } else if (oldUnits === 'imperial' && state.units === 'metric') {
+            // ft to m
+            heightInput.value = state.height.toFixed(2);
+            heightInput.step = '0.1';
+            document.getElementById('height-unit').textContent = 'm';
+          }
+          
+          updateScene();
+        });
+      });
+      
+      // Grid toggle
+      document.getElementById('show-grid').addEventListener('change', (e) => {
+        state.showGrid = e.target.checked;
+        updateScene();
+      });
+      
+      // Math details toggle
+      document.getElementById('show-math').addEventListener('change', (e) => {
+        state.showMath = e.target.checked;
+        updateScene();
+      });
+    }
+    
+    function updateLatLonDisplay() {
+      const latDisplay = document.getElementById('lat-display');
+      const lonDisplay = document.getElementById('lon-display');
+      
+      const latDir = state.lat >= 0 ? 'N' : 'S';
+      const lonDir = state.lon >= 0 ? 'E' : 'W';
+      
+      latDisplay.textContent = `${Math.abs(state.lat).toFixed(1)}°${latDir}`;
+      lonDisplay.textContent = `${Math.abs(state.lon).toFixed(1)}°${lonDir}`;
+    }
+    
+    function updateTimeDisplay() {
+      const hours = Math.floor(state.timeMinutes / 60);
+      const minutes = state.timeMinutes % 60;
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      document.getElementById('time-display').textContent = timeStr;
+    }
+    
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
+    
+    function init() {
+      // Set default date to today
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0];
+      document.getElementById('date').value = dateStr;
+      state.date = today;
+      
+      // Initialize displays
+      updateLatLonDisplay();
+      updateTimeDisplay();
+      
+      // Initialize Three.js scene
+      initScene();
+      
+      // Setup event listeners
+      setupEventListeners();
+      
+      // Initial scene update
+      updateScene();
+    }
+    
+    // Start when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
     }
   </script>
 </body>
