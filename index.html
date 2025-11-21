@@ -69,6 +69,30 @@
       width: 100vw;
     }
 
+    /* Hamburger menu button */
+    #menu-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1000;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+    }
+
+    #menu-toggle span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: var(--text);
+      margin: 5px 0;
+      transition: 0.3s;
+    }
+
     /* Sidebar */
     #sidebar {
       background: var(--panel-bg);
@@ -358,32 +382,36 @@
         grid-template-columns: 1fr;
       }
 
+      #menu-toggle {
+        display: block;
+      }
+
       #sidebar {
-        display: none;
         position: fixed;
-        top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1000;
+        top: 0;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 999;
       }
 
       #sidebar.open {
-        display: flex;
+        transform: translateX(0);
       }
 
-      .mobile-toggle {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        padding: 8px 16px;
-        background: white;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        cursor: pointer;
-        z-index: 10;
-        font-weight: 500;
-        box-shadow: var(--shadow-md);
+      #main {
+        padding: 60px 12px 12px 12px;
+      }
+
+      h1 {
+        font-size: 1.4rem;
+      }
+
+      .section h2 {
+        font-size: 1rem;
       }
       
       #triangle-container {
@@ -394,9 +422,51 @@
         font-size: 0.9rem;
       }
     }
+
+    @media (max-width: 480px) {
+      #sidebar {
+        width: 90%;
+        max-width: none;
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+      }
+
+      .section {
+        padding: 12px;
+      }
+
+      #main {
+        padding: 60px 8px 8px 8px;
+        gap: 12px;
+      }
+
+      label {
+        font-size: 0.8rem;
+      }
+
+      input[type="number"],
+      input[type="date"],
+      select {
+        padding: 10px;
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+    }
   </style>
 </head>
 <body>
+  <button id="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  
   <div id="app">
     <!-- Sidebar -->
     <div id="sidebar">
@@ -1145,6 +1215,20 @@ Shadow Calculation:
     // ============================================================================
     
     function setupEventListeners() {
+      // Mobile menu toggle
+      document.getElementById('menu-toggle').addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('open');
+      });
+      
+      // Close sidebar when clicking outside on mobile
+      document.getElementById('main').addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('open') && window.innerWidth <= 768) {
+          sidebar.classList.remove('open');
+        }
+      });
+      
       // City selection
       document.getElementById('city').addEventListener('change', (e) => {
         state.cityIndex = parseInt(e.target.value);
