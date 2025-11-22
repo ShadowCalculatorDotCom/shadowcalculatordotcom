@@ -93,6 +93,10 @@
       transition: 0.3s;
     }
 
+	#mobile-header {
+      display: none;
+    }
+
     /* Sidebar */
     #sidebar {
       background: var(--panel-bg);
@@ -401,6 +405,31 @@
       #menu-toggle {
         display: block;
       }
+	  
+	  #mobile-header {
+	    display: block;
+	    position: fixed;
+	    top: 16px;
+	    right: 16px;
+	    text-align: right;
+	    z-index: 998;
+	  }
+
+	  #mobile-header h3 {
+	    font-size: 1rem;
+	    font-weight: 600;
+	    margin: 0 0 4px 0;
+	  }
+
+	  #mobile-header a {
+	    font-size: 0.85rem;
+	    color: var(--accent);
+	    text-decoration: none;
+	  }
+
+	  #sidebar .header {
+	    display: none;
+	  }
 
       #sidebar {
         position: fixed;
@@ -412,6 +441,7 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: 999;
+  	    padding-top: 90px;
       }
 
       #sidebar.open {
@@ -419,7 +449,7 @@
       }
 
 	  #main {
-	    padding: 60px 12px 12px 12px;
+	    padding: 90px 12px 12px 12px;
 	    overflow-y: auto;
 	    overflow-x: hidden;
 	    height: 100vh;
@@ -467,7 +497,7 @@
       }
 
 	  #main {
-	    padding: 60px 8px 8px 8px;
+	    padding: 90px 8px 8px 8px;
 	    gap: 12px;
 	    overflow-y: auto;
 	    overflow-x: hidden;
@@ -497,6 +527,11 @@
     <span></span>
     <span></span>
   </button>
+  
+  <div id="mobile-header">
+    <h2>Shadow Calculator</h2>
+    <a href="about.html">about</a>
+  </div>
   
   <div id="app">
     <!-- Sidebar -->
