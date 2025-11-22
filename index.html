@@ -1359,6 +1359,10 @@ Shadow Calculation:
       document.getElementById('show-math').addEventListener('change', (e) => {
         state.showMath = e.target.checked;
         updateScene();
+  	    // Resize scene on desktop only
+        if (window.innerWidth > 768) {
+          setTimeout(onWindowResize, 50);
+        }
       });
 	  
 	  // Triangle diagram toggle
@@ -1369,6 +1373,10 @@ Shadow Calculation:
 	    } else {
 		  triangleContainer.classList.add('hidden');
 	    }
+		// Resize scene on desktop only
+        if (window.innerWidth > 768) {
+          setTimeout(onWindowResize, 50);
+        }
 	  });
     }
     
