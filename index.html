@@ -402,9 +402,17 @@
         transform: translateX(0);
       }
 
-      #main {
-        padding: 60px 12px 12px 12px;
-      }
+	  #main {
+	    padding: 60px 12px 12px 12px;
+	    overflow-y: auto;
+	    overflow-x: hidden;
+	    height: 100vh;
+	  }
+	  
+	  #scene-container {
+		min-height: 300px;
+		flex: 0 0 auto;
+	  }
 
       h1 {
         font-size: 1.4rem;
@@ -442,11 +450,18 @@
         padding: 12px;
       }
 
-      #main {
-        padding: 60px 8px 8px 8px;
-        gap: 12px;
+	  #main {
+	    padding: 60px 8px 8px 8px;
+	    gap: 12px;
+	    overflow-y: auto;
+	    overflow-x: hidden;
+	    height: 100vh;
+	  }
+	  
+	  #scene-container {
+	    min-height: 250px;
       }
-
+	  
       label {
         font-size: 0.8rem;
       }
