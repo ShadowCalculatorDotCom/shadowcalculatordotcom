@@ -1201,7 +1201,7 @@ Shadow Calculation:
       document.getElementById('triangle-path').setAttribute('d', trianglePath);
       
       // Update angle arc (at bottom-right corner)
-      const arcRadius = 40;
+	  const arcRadius = angle > 50 ? Math.max(10, 40 - (angle - 50) * 0.6) : 40;
       const angleRad = solar.altitude;
       
       // Arc starts from horizontal (along shadow) and goes up to hypotenuse
