@@ -547,14 +547,15 @@
         <div class="field">
           <label for="city">City</label>
           <select id="city">
-            <option value="0">New York, USA</option>
-            <option value="1">Los Angeles, USA</option>
-            <option value="2">London, UK</option>
-            <option value="3">Paris, France</option>
-            <option value="4">Tokyo, Japan</option>
-            <option value="5">Sydney, Australia</option>
-            <option value="6">Berlin, Germany</option>
-            <option value="7">Singapore</option>
+            <option value="0">Custom Location</option>
+			<option value="1" selected>New York, USA</option>
+            <option value="2">Los Angeles, USA</option>
+            <option value="3">London, UK</option>
+            <option value="4">Paris, France</option>
+            <option value="5">Tokyo, Japan</option>
+            <option value="6">Sydney, Australia</option>
+            <option value="7">Berlin, Germany</option>
+            <option value="8">Singapore</option>
           </select>
         </div>
         <div class="field">
@@ -686,7 +687,15 @@
     // ============================================================================
     
     const CITIES = [
-      { name: "New York, USA", lat: 40.7128, lon: -74.0060, tz: "America/New_York" },
+      // index 0 → value "0" → Custom Location
+	  {
+		name: "Custom Location",
+		lat: 40.7128,    // initial defaults; will be overwritten by sliders
+		lon: -74.0060,
+		tz: "America/New_York",
+		isCustom: true
+	  },
+	  { name: "New York, USA", lat: 40.7128, lon: -74.0060, tz: "America/New_York" },
       { name: "Los Angeles, USA", lat: 34.0522, lon: -118.2437, tz: "America/Los_Angeles" },
       { name: "London, UK", lat: 51.5074, lon: -0.1278, tz: "Europe/London" },
       { name: "Paris, France", lat: 48.8566, lon: 2.3522, tz: "Europe/Paris" },
@@ -695,9 +704,11 @@
       { name: "Berlin, Germany", lat: 52.5200, lon: 13.4050, tz: "Europe/Berlin" },
       { name: "Singapore", lat: 1.3521, lon: 103.8198, tz: "Asia/Singapore" }
     ];
+	
+	const CUSTOM_CITY_INDEX = 0;
 
     const state = {
-      cityIndex: 0,
+      cityIndex: 1,
       lat: 40.7128,
       lon: -74.0060,
       date: new Date(),
@@ -1284,6 +1295,16 @@ Shadow Calculation:
     // EVENT HANDLERS
     // ============================================================================
     
+	function setCustomLocationFromSliders() {
+      const citySelect = document.getElementById('city');
+      // Keep the custom city entry in sync with the sliders
+      CITIES[CUSTOM_CITY_INDEX].lat = state.lat;
+      CITIES[CUSTOM_CITY_INDEX].lon = state.lon;
+      // Switch state and dropdown to Custom
+      state.cityIndex = CUSTOM_CITY_INDEX;
+      citySelect.value = String(CUSTOM_CITY_INDEX);
+    }
+	
     function setupEventListeners() {
       // Mobile menu toggle
       document.getElementById('menu-toggle').addEventListener('click', () => {
@@ -1300,6 +1321,7 @@ Shadow Calculation:
       });
       
       // City selection
+      // For Custom Location (value 0), this uses the last lat/lon set by sliders
       document.getElementById('city').addEventListener('change', (e) => {
         state.cityIndex = parseInt(e.target.value);
         const city = CITIES[state.cityIndex];
@@ -1316,6 +1338,7 @@ Shadow Calculation:
       // Latitude
       document.getElementById('lat').addEventListener('input', (e) => {
         state.lat = parseFloat(e.target.value);
+		setCustomLocationFromSliders();
         updateLatLonDisplay();
         updateScene();
       });
@@ -1323,7 +1346,8 @@ Shadow Calculation:
       // Longitude
       document.getElementById('lon').addEventListener('input', (e) => {
         state.lon = parseFloat(e.target.value);
-        updateLatLonDisplay();
+        setCustomLocationFromSliders();
+		updateLatLonDisplay();
         updateScene();
       });
       
