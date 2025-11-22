@@ -632,7 +632,6 @@
             <text id="height-value" class="triangle-value" x="55" y="140" text-anchor="end">1.75 m</text>
             <text id="shadow-label" class="triangle-label" x="215" y="210" text-anchor="middle">Shadow</text>
             <text id="shadow-value" class="triangle-value" x="215" y="230" text-anchor="middle">2.54 m</text>
-            <text id="angle-label" class="triangle-label" x="310" y="160" text-anchor="end">Angle</text>
             <text id="angle-value" class="triangle-value" x="310" y="178" text-anchor="end">34.6°</text>
           </svg>
         </div>
@@ -1234,17 +1233,16 @@ Shadow Calculation:
       }
       document.getElementById('shadow-value').textContent = shadowText;
       
-      // Angle label (positioned near the arc at bottom-right corner)
-      const angleLabelX = endX - arcRadius - 15;
-      const angleLabelY = endY - arcRadius / 2;
-      
-      document.getElementById('angle-label').setAttribute('x', angleLabelX);
-      document.getElementById('angle-label').setAttribute('y', angleLabelY);
-      document.getElementById('angle-label').setAttribute('text-anchor', 'end');
-      document.getElementById('angle-value').setAttribute('x', angleLabelX);
-      document.getElementById('angle-value').setAttribute('y', angleLabelY + 18);
-      document.getElementById('angle-value').setAttribute('text-anchor', 'start');
-      document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
+	  // Angle label (positioned near the arc at bottom-right corner)
+	  const angleLabelX = endX - arcRadius - 15;
+	  const angleLabelY = endY - arcRadius / 2;
+	  const angleX = angle < 23 ? angleLabelX + 35 : angleLabelX + 5; // Shift right when angle < 23
+	  const angleY = angle < 23 ? angleLabelY - 10 : angleLabelY + 10; // Shift up when angle < 23  
+
+	  document.getElementById('angle-value').setAttribute('x', angleX);
+	  document.getElementById('angle-value').setAttribute('y', angleY);
+	  document.getElementById('angle-value').setAttribute('text-anchor', 'end');
+	  document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
     }
     
     // ============================================================================
