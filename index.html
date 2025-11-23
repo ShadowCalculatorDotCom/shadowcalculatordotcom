@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shadow Calculator</title>
-  <meta name="description" content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. Visualize how objects cast shadows at any date, time, and location.">
-  
+  <meta name="description"
+    content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. Visualize how objects cast shadows at any date, time, and location.">
+
   <!-- Basic SEO -->
   <link rel="canonical" href="https://shadowcalculator.com/">
 
   <meta name="description"
-        content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. See how people and objects cast shade at any date, time, and location. Built with Three.js and SunCalc.">
+    content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. See how people and objects cast shade at any date, time, and location. Built with Three.js and SunCalc.">
   <meta name="keywords"
-        content="shadow calculator, garden shade, tree shadow, fence shadow, pergola shade, raised bed sun, fruit tree placement, vegetable garden planning, landscape design sun, solar angle calculator">
+    content="shadow calculator, garden shade, tree shadow, fence shadow, pergola shade, raised bed sun, fruit tree placement, vegetable garden planning, landscape design sun, solar angle calculator">
   <meta name="author" content="shadowcalculator.com">
   <meta name="robots" content="index,follow">
 
   <!-- Open Graph / social preview -->
   <meta property="og:title" content="Shadow Calculator – Garden Shade & Sun Planning">
   <meta property="og:description"
-        content="Visualize how trees, fences, pergolas and people cast shadows in your garden at any date, time, and location.">
+    content="Visualize how trees, fences, pergolas and people cast shadows in your garden at any date, time, and location.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://shadowcalculator.com/">
   <meta property="og:image" content="https://shadowcalculator.com/social-preview.png">
@@ -30,9 +32,9 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Shadow Calculator – Garden Shade & Sun Planning">
   <meta name="twitter:description"
-        content="See how shadows move across your garden or yard throughout the day and year.">
+    content="See how shadows move across your garden or yard throughout the day and year.">
   <meta name="twitter:image" content="https://shadowcalculator.com/social-preview.png">
-  
+
   <style>
     :root {
       --bg: #f0f2f5;
@@ -93,7 +95,7 @@
       transition: 0.3s;
     }
 
-	#mobile-header {
+    #mobile-header {
       display: none;
     }
 
@@ -268,7 +270,7 @@
       padding: 16px;
       gap: 16px;
       overflow-x: hidden;
-	  overflow-y: auto;
+      overflow-y: auto;
     }
 
     #scene-container {
@@ -381,20 +383,20 @@
     #math-details.visible {
       display: block;
     }
-	
-	#triangle-container {
-	  display: flex;
-	  flex-direction: column;
-	  align-items: center;
-	  padding: 16px;
-	  background: #f9fafb;
-	  border-radius: var(--radius);
-	  border: 1px solid var(--border);
-	}
 
-	#triangle-container.hidden {
-	  display: none;
-	}
+    #triangle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    #triangle-container.hidden {
+      display: none;
+    }
 
     /* Mobile */
     @media (max-width: 768px) {
@@ -405,31 +407,31 @@
       #menu-toggle {
         display: block;
       }
-	  
-	  #mobile-header {
-	    display: block;
-	    position: fixed;
-	    top: 16px;
-	    right: 16px;
-	    text-align: right;
-	    z-index: 998;
-	  }
 
-	  #mobile-header h3 {
-	    font-size: 1rem;
-	    font-weight: 600;
-	    margin: 0 0 4px 0;
-	  }
+      #mobile-header {
+        display: block;
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        text-align: right;
+        z-index: 998;
+      }
 
-	  #mobile-header a {
-	    font-size: 0.85rem;
-	    color: var(--accent);
-	    text-decoration: none;
-	  }
+      #mobile-header h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+      }
 
-	  #sidebar .header {
-	    display: none;
-	  }
+      #mobile-header a {
+        font-size: 0.85rem;
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      #sidebar .header {
+        display: none;
+      }
 
       #sidebar {
         position: fixed;
@@ -441,24 +443,24 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         z-index: 999;
-  	    padding-top: 90px;
+        padding-top: 90px;
       }
 
       #sidebar.open {
         transform: translateX(0);
       }
 
-	  #main {
-	    padding: 90px 12px 12px 12px;
-	    overflow-y: auto;
-	    overflow-x: hidden;
-	    height: 100vh;
-	  }
-	  
-	  #scene-container {
-		min-height: 300px;
-		flex: 0 0 auto;
-	  }
+      #main {
+        padding: 90px 12px 12px 12px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100vh;
+      }
+
+      #scene-container {
+        min-height: 300px;
+        flex: 0 0 auto;
+      }
 
       h1 {
         font-size: 1.4rem;
@@ -467,11 +469,11 @@
       .section h2 {
         font-size: 1rem;
       }
-      
+
       #triangle-container {
         padding: 12px;
       }
-      
+
       #triangle-container h3 {
         font-size: 0.9rem;
       }
@@ -496,18 +498,18 @@
         padding: 12px;
       }
 
-	  #main {
-	    padding: 90px 8px 8px 8px;
-	    gap: 12px;
-	    overflow-y: auto;
-	    overflow-x: hidden;
-	    height: 100vh;
-	  }
-	  
-	  #scene-container {
-	    min-height: 250px;
+      #main {
+        padding: 90px 8px 8px 8px;
+        gap: 12px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: 100vh;
       }
-	  
+
+      #scene-container {
+        min-height: 250px;
+      }
+
       label {
         font-size: 0.8rem;
       }
@@ -516,39 +518,42 @@
       input[type="date"],
       select {
         padding: 10px;
-        font-size: 16px; /* Prevents zoom on iOS */
+        font-size: 16px;
+        /* Prevents zoom on iOS */
       }
     }
   </style>
 </head>
+
 <body>
   <button id="menu-toggle">
     <span></span>
     <span></span>
     <span></span>
   </button>
-  
+
   <div id="mobile-header">
     <h2>Shadow Calculator</h2>
     <a href="about.html">about</a>
   </div>
-  
+
   <div id="app">
     <!-- Sidebar -->
     <div id="sidebar">
       <div class="header">
         <h1>Shadow Calculator</h1>
-		<p class="subtitle">(alpha)</p>
-        <p class="subtitle">Visualize how objects cast shadows at any time and location using solar position calculations. <a href="about.html">About</a></p>
+        <p class="subtitle">(alpha)</p>
+        <p class="subtitle">Visualize how objects cast shadows at any time and location using solar position
+          calculations. <a href="about.html">About</a></p>
       </div>
 
-      <div class="section">
+      <div class="section" id="location-section">
         <h2>Location</h2>
         <div class="field">
           <label for="city">City</label>
           <select id="city">
             <option value="0">Custom Location</option>
-			<option value="1" selected>New York, USA</option>
+            <option value="1" selected>New York, USA</option>
             <option value="2">Los Angeles, USA</option>
             <option value="3">London, UK</option>
             <option value="4">Paris, France</option>
@@ -568,7 +573,7 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="section" id="datetime-section">
         <h2>Date & Time</h2>
         <div class="field">
           <label for="date">Date</label>
@@ -636,24 +641,25 @@
             <span>Show math details</span>
           </label>
         </div>
-		<div class="field">
-		  <label>
-			<input type="checkbox" id="show-triangle" checked>
-			<span>Show Triangle Diagram</span>
-		  </label>
-		</div>
+        <div class="field">
+          <label>
+            <input type="checkbox" id="show-triangle" checked>
+            <span>Show Triangle Diagram</span>
+          </label>
+        </div>
       </div>
     </div>
 
     <!-- Main area -->
     <div id="main">
       <div id="scene-container"></div>
+      <div id="mobile-location-container"></div>
       <div id="info-panel">
         <div id="shadow-info">
           <div>Shadow Length</div>
           <div class="value" id="shadow-length">—</div>
         </div>
-        
+
         <div id="triangle-container">
           <h3>Right Triangle – Side View</h3>
           <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
@@ -671,7 +677,7 @@
             <text id="angle-value" class="triangle-value" x="310" y="178" text-anchor="end">34.6°</text>
           </svg>
         </div>
-        
+
         <div id="math-details"></div>
       </div>
     </div>
@@ -685,17 +691,17 @@
     // ============================================================================
     // CONFIGURATION & STATE
     // ============================================================================
-    
+
     const CITIES = [
       // index 0 → value "0" → Custom Location
-	  {
-		name: "Custom Location",
-		lat: 40.7128,    // initial defaults; will be overwritten by sliders
-		lon: -74.0060,
-		tz: "America/New_York",
-		isCustom: true
-	  },
-	  { name: "New York, USA", lat: 40.7128, lon: -74.0060, tz: "America/New_York" },
+      {
+        name: "Custom Location",
+        lat: 40.7128,    // initial defaults; will be overwritten by sliders
+        lon: -74.0060,
+        tz: "America/New_York",
+        isCustom: true
+      },
+      { name: "New York, USA", lat: 40.7128, lon: -74.0060, tz: "America/New_York" },
       { name: "Los Angeles, USA", lat: 34.0522, lon: -118.2437, tz: "America/Los_Angeles" },
       { name: "London, UK", lat: 51.5074, lon: -0.1278, tz: "Europe/London" },
       { name: "Paris, France", lat: 48.8566, lon: 2.3522, tz: "Europe/Paris" },
@@ -704,8 +710,8 @@
       { name: "Berlin, Germany", lat: 52.5200, lon: 13.4050, tz: "Europe/Berlin" },
       { name: "Singapore", lat: 1.3521, lon: 103.8198, tz: "Asia/Singapore" }
     ];
-	
-	const CUSTOM_CITY_INDEX = 0;
+
+    const CUSTOM_CITY_INDEX = 0;
 
     const state = {
       cityIndex: 1,
@@ -723,17 +729,17 @@
     // ============================================================================
     // THREE.JS SCENE
     // ============================================================================
-    
+
     let scene, camera, renderer;
     let objectMesh, gridHelper;
-    
+
     function initScene() {
       const container = document.getElementById('scene-container');
-      
+
       // Scene
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xe5e9f0);
-      
+
       // Camera (orthographic for consistent shadow visualization)
       const aspect = container.clientWidth / container.clientHeight;
       const viewSize = 6;
@@ -744,7 +750,7 @@
       );
       camera.position.set(6, 6, 6);
       camera.lookAt(0, 0, 0);
-      
+
       // Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
@@ -752,11 +758,11 @@
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
-      
+
       // Lights
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
       scene.add(ambientLight);
-      
+
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
       directionalLight.position.set(5, 10, 5);
       directionalLight.castShadow = true;
@@ -779,45 +785,45 @@
       plane.position.y = 0.001;
       plane.receiveShadow = true;
       scene.add(plane);
-      
+
       // Grid
       gridHelper = new THREE.GridHelper(10, 20, 0xaaaaaa, 0xdddddd);
       gridHelper.material.opacity = 0.38;
       gridHelper.material.transparent = true;
       scene.add(gridHelper);
-      
+
       // Start animation loop
       animate();
-      
+
       // Handle resize
       window.addEventListener('resize', onWindowResize);
     }
-    
+
     function onWindowResize() {
       const container = document.getElementById('scene-container');
       const width = container.clientWidth;
       const height = container.clientHeight;
       const aspect = width / height;
       const viewSize = 6;
-      
+
       camera.left = -viewSize * aspect;
       camera.right = viewSize * aspect;
       camera.top = viewSize;
       camera.bottom = -viewSize;
       camera.updateProjectionMatrix();
-      
+
       renderer.setSize(width, height);
     }
-    
+
     function animate() {
       requestAnimationFrame(animate);
       renderer.render(scene, camera);
     }
-    
+
     // ============================================================================
     // OBJECT CREATION
     // ============================================================================
-    
+
     function createObject(type, height) {
       // Remove existing object
       if (objectMesh) {
@@ -827,9 +833,9 @@
           if (child.material) child.material.dispose();
         });
       }
-      
+
       objectMesh = new THREE.Group();
-      
+
       if (type === 'human') {
         // Body
         const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, height * 0.6, 16);
@@ -837,17 +843,17 @@
         const body = new THREE.Mesh(bodyGeom, bodyMat);
         body.position.y = height * 0.3;
         body.castShadow = true;
-        
+
         // Head
         const headGeom = new THREE.SphereGeometry(height * 0.12, 16, 16);
         const headMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
         const head = new THREE.Mesh(headGeom, headMat);
         head.position.y = height * 0.65;
         head.castShadow = true;
-        
+
         objectMesh.add(body);
         objectMesh.add(head);
-        
+
       } else if (type === 'tree') {
         // Trunk
         const trunkGeom = new THREE.CylinderGeometry(height * 0.05, height * 0.08, height * 0.4, 12);
@@ -855,64 +861,64 @@
         const trunk = new THREE.Mesh(trunkGeom, trunkMat);
         trunk.position.y = height * 0.2;
         trunk.castShadow = true;
-        
+
         // Canopy
         const canopyGeom = new THREE.SphereGeometry(height * 0.35, 20, 16);
         const canopyMat = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
         const canopy = new THREE.Mesh(canopyGeom, canopyMat);
         canopy.position.y = height * 0.55;
         canopy.castShadow = true;
-        
+
         objectMesh.add(trunk);
         objectMesh.add(canopy);
-        
+
       } else { // box
         const boxGeom = new THREE.BoxGeometry(height * 0.3, height, height * 0.3);
         const boxMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
         const box = new THREE.Mesh(boxGeom, boxMat);
         box.position.y = height / 2;
         box.castShadow = true;
-        
+
         objectMesh.add(box);
       }
-      
-	  normalizeObjectHeight(objectMesh, height);
-	  
+
+      normalizeObjectHeight(objectMesh, height);
+
       scene.add(objectMesh);
     }
-	
-	function normalizeObjectHeight(group, targetHeight) {
-	  // Ensure world matrices are up to date
-	  group.updateMatrixWorld(true);
 
-	  const box = new THREE.Box3().setFromObject(group);
-	  const currentHeight = box.max.y - box.min.y;
+    function normalizeObjectHeight(group, targetHeight) {
+      // Ensure world matrices are up to date
+      group.updateMatrixWorld(true);
 
-	  if (!isFinite(currentHeight) || currentHeight <= 0) return;
+      const box = new THREE.Box3().setFromObject(group);
+      const currentHeight = box.max.y - box.min.y;
 
-	  // Scale in Y so the total height equals targetHeight
-	  const scaleY = targetHeight / currentHeight;
-	  group.scale.set(1, scaleY, 1);
+      if (!isFinite(currentHeight) || currentHeight <= 0) return;
 
-	  // Recompute bounding box after scaling
-	  group.updateMatrixWorld(true);
-	  box.setFromObject(group);
+      // Scale in Y so the total height equals targetHeight
+      const scaleY = targetHeight / currentHeight;
+      group.scale.set(1, scaleY, 1);
 
-	  // Shift so the bottom sits exactly on the ground plane (y = 0)
-	  const yOffset = -box.min.y;
-	  group.position.y += yOffset;
-	}
+      // Recompute bounding box after scaling
+      group.updateMatrixWorld(true);
+      box.setFromObject(group);
 
-    
+      // Shift so the bottom sits exactly on the ground plane (y = 0)
+      const yOffset = -box.min.y;
+      group.position.y += yOffset;
+    }
+
+
     // ============================================================================
     // SHADOW CALCULATION
     // ============================================================================
-    
+
     function getSolarPosition() {
       const city = CITIES[state.cityIndex];
       const dt = createDateTime(state.date, state.timeMinutes, city.tz);
       const pos = SunCalc.getPosition(dt, state.lat, state.lon);
-      
+
       return {
         altitude: pos.altitude,
         azimuth: pos.azimuth,
@@ -920,18 +926,18 @@
         azimuthDeg: pos.azimuth * 180 / Math.PI
       };
     }
-    
+
     function createDateTime(date, minutes, timezone) {
       const year = date.getFullYear();
       const month = date.getMonth();
       const day = date.getDate();
       const hours = Math.floor(minutes / 60);
       const mins = minutes % 60;
-      
+
       // Create a date in the specified timezone
       if (timezone && typeof Intl !== 'undefined') {
         let guess = new Date(Date.UTC(year, month, day, hours, mins, 0));
-        
+
         // Iterate to find correct UTC time for desired local time
         for (let i = 0; i < 3; i++) {
           const formatter = new Intl.DateTimeFormat('en-US', {
@@ -943,36 +949,36 @@
             minute: '2-digit',
             hour12: false
           });
-          
+
           const parts = formatter.formatToParts(guess);
           const getValue = (type) => parts.find(p => p.type === type)?.value;
-          
+
           const localYear = parseInt(getValue('year'));
           const localMonth = parseInt(getValue('month')) - 1;
           const localDay = parseInt(getValue('day'));
           const localHour = parseInt(getValue('hour'));
           const localMinute = parseInt(getValue('minute'));
-          
+
           const desiredUTC = Date.UTC(year, month, day, hours, mins, 0);
           const actualUTC = Date.UTC(localYear, localMonth, localDay, localHour, localMinute, 0);
-          
+
           const diff = actualUTC - desiredUTC;
           if (Math.abs(diff) < 60000) break; // within 1 minute
-          
+
           guess = new Date(guess.getTime() - diff);
         }
-        
+
         return guess;
       }
-      
+
       return new Date(year, month, day, hours, mins, 0);
     }
-    
+
     function calculateShadowLength(height, altitude) {
       if (altitude <= 0) return 0;
       return height / Math.tan(altitude);
     }
-    
+
     function updateLightPosition(solar) {
       const light = scene.children.find(c => c.isDirectionalLight);
       if (!light) return;
@@ -986,44 +992,44 @@
         const x = Math.sin(solar.azimuth) * Math.cos(solar.altitude) * dist;
         const y = Math.sin(solar.altitude) * dist;
         const z = Math.cos(solar.azimuth) * Math.cos(solar.altitude) * dist;
-        
+
         light.position.set(x, y, z);
         light.updateMatrixWorld();
       }
     }
-    
+
     // ============================================================================
     // UI UPDATE
     // ============================================================================
-    
+
     function updateScene() {
       // Update grid visibility
       if (gridHelper) {
         gridHelper.visible = state.showGrid;
       }
-      
+
       // Create/update object
       createObject(state.objectType, state.height);
-      
+
       // Calculate solar position
       const solar = getSolarPosition();
-      
+
       // Update light position
       updateLightPosition(solar);
-      
+
       // Update UI
       updateSunStatus(solar);
       updateShadowInfo(solar);
       updateTriangle(solar);
       updateMathDetails(solar);
     }
-    
+
     function updateSunStatus(solar) {
       const statusEl = document.getElementById('sun-status');
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      
+
       if (solar.altitudeDeg <= 0) {
         statusEl.textContent = `Sun is below horizon at ${timeStr}. No shadow cast.`;
         statusEl.className = 'status error';
@@ -1032,17 +1038,17 @@
         statusEl.className = 'status success';
       }
     }
-    
+
     function updateShadowInfo(solar) {
       const lengthEl = document.getElementById('shadow-length');
-      
+
       if (solar.altitudeDeg <= 0) {
         lengthEl.textContent = 'No shadow';
         return;
       }
-      
+
       const length = calculateShadowLength(state.height, solar.altitude);
-      
+
       if (state.units === 'metric') {
         if (length < 1) {
           lengthEl.textContent = `${(length * 100).toFixed(0)} cm`;
@@ -1056,31 +1062,31 @@
         lengthEl.textContent = `${ft}' ${inches}"`;
       }
     }
-    
+
     function updateMathDetails(solar) {
       const mathEl = document.getElementById('math-details');
-      
+
       if (!state.showMath) {
         mathEl.classList.remove('visible');
         return;
       }
-      
+
       mathEl.classList.add('visible');
-      
+
       if (solar.altitudeDeg <= 0) {
         mathEl.textContent = 'No shadow math: Sun is below horizon';
         return;
       }
-      
+
       const city = CITIES[state.cityIndex];
       const length = calculateShadowLength(state.height, solar.altitude);
       const tanAlt = Math.tan(solar.altitude);
-      
+
       const dateStr = state.date.toISOString().split('T')[0];
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      
+
       mathEl.textContent = `Location: ${city.name}
 Date: ${dateStr}
 Time: ${timeStr} (local)
@@ -1101,7 +1107,7 @@ Shadow Calculation:
   L = ${state.height.toFixed(2)} / ${tanAlt.toFixed(4)}
   L = ${length.toFixed(2)} m`;
     }
-    
+
     function updateTriangle(solar) {
       if (solar.altitudeDeg <= 0) {
         // No triangle when sun is below horizon
@@ -1113,51 +1119,51 @@ Shadow Calculation:
         document.getElementById('angle-value').textContent = '—';
         return;
       }
-      
+
       const height = state.height;
       const shadowLength = calculateShadowLength(height, solar.altitude);
       const angle = solar.altitudeDeg;
-      
+
       // SVG coordinates
       const baseX = 80;
       const baseY = 190;
       const maxHeight = 120;
       const maxLength = 270;
-      
+
       // Scale to fit
       const scale = Math.min(
         maxHeight / height,
         maxLength / shadowLength
       );
-      
+
       const heightPx = height * scale;
       const lengthPx = shadowLength * scale;
-      
+
       const topX = baseX;
       const topY = baseY - heightPx;
       const endX = baseX + lengthPx;
       const endY = baseY;
-      
+
       // Update triangle paths
       const trianglePath = `M ${baseX} ${baseY} L ${topX} ${topY} L ${endX} ${endY} Z`;
       document.getElementById('triangle-fill-path').setAttribute('d', trianglePath);
       document.getElementById('triangle-path').setAttribute('d', trianglePath);
-      
+
       // Update angle arc (at bottom-right corner)
-	  const arcRadius = angle > 50 ? Math.max(10, 40 - (angle - 50) * 0.6) : 40;
+      const arcRadius = angle > 50 ? Math.max(10, 40 - (angle - 50) * 0.6) : 40;
       const angleRad = solar.altitude;
-      
+
       // Arc starts from horizontal (along shadow) and goes up to hypotenuse
       // Center of arc is at the end of the shadow (endX, endY)
       const arcStartX = endX - arcRadius; // Start left of the corner
       const arcStartY = endY;
       const arcEndX = endX - arcRadius * Math.cos(angleRad);
       const arcEndY = endY - arcRadius * Math.sin(angleRad);
-      
+
       // Arc goes from horizontal line up to the hypotenuse
       const arcPath = `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 0 1 ${arcEndX} ${arcEndY}`;
       document.getElementById('angle-arc').setAttribute('d', arcPath);
-      
+
       // Update labels
       // Height label (on left side)
       const heightLabelX = baseX - 25;
@@ -1166,7 +1172,7 @@ Shadow Calculation:
       document.getElementById('height-label').setAttribute('y', heightLabelY - 5);
       document.getElementById('height-value').setAttribute('x', heightLabelX);
       document.getElementById('height-value').setAttribute('y', heightLabelY + 15);
-      
+
       // Format height value
       let heightText;
       if (state.units === 'metric') {
@@ -1186,7 +1192,7 @@ Shadow Calculation:
         }
       }
       document.getElementById('height-value').textContent = heightText;
-      
+
       // Shadow label (on bottom)
       const shadowLabelX = baseX + lengthPx / 2;
       const shadowLabelY = baseY + 20;
@@ -1194,7 +1200,7 @@ Shadow Calculation:
       document.getElementById('shadow-label').setAttribute('y', shadowLabelY);
       document.getElementById('shadow-value').setAttribute('x', shadowLabelX);
       document.getElementById('shadow-value').setAttribute('y', shadowLabelY + 20);
-      
+
       // Format shadow value
       let shadowText;
       if (state.units === 'metric') {
@@ -1210,24 +1216,24 @@ Shadow Calculation:
         shadowText = `${ft}' ${inches}"`;
       }
       document.getElementById('shadow-value').textContent = shadowText;
-      
-	  // Angle label (positioned near the arc at bottom-right corner)
-	  const angleLabelX = endX - arcRadius - 15;
-	  const angleLabelY = endY - arcRadius / 2;
-	  const angleX = angle < 23 ? angleLabelX + 35 : angleLabelX + 5; // Shift right when angle < 23
-	  const angleY = angle < 23 ? angleLabelY - 10 : angleLabelY + 10; // Shift up when angle < 23  
 
-	  document.getElementById('angle-value').setAttribute('x', angleX);
-	  document.getElementById('angle-value').setAttribute('y', angleY);
-	  document.getElementById('angle-value').setAttribute('text-anchor', 'end');
-	  document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
+      // Angle label (positioned near the arc at bottom-right corner)
+      const angleLabelX = endX - arcRadius - 15;
+      const angleLabelY = endY - arcRadius / 2;
+      const angleX = angle < 23 ? angleLabelX + 35 : angleLabelX + 5; // Shift right when angle < 23
+      const angleY = angle < 23 ? angleLabelY - 10 : angleLabelY + 10; // Shift up when angle < 23  
+
+      document.getElementById('angle-value').setAttribute('x', angleX);
+      document.getElementById('angle-value').setAttribute('y', angleY);
+      document.getElementById('angle-value').setAttribute('text-anchor', 'end');
+      document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
     }
-    
+
     // ============================================================================
     // EVENT HANDLERS
     // ============================================================================
-    
-	function setCustomLocationFromSliders() {
+
+    function setCustomLocationFromSliders() {
       const citySelect = document.getElementById('city');
       // Keep the custom city entry in sync with the sliders
       CITIES[CUSTOM_CITY_INDEX].lat = state.lat;
@@ -1236,14 +1242,14 @@ Shadow Calculation:
       state.cityIndex = CUSTOM_CITY_INDEX;
       citySelect.value = String(CUSTOM_CITY_INDEX);
     }
-	
+
     function setupEventListeners() {
       // Mobile menu toggle
       document.getElementById('menu-toggle').addEventListener('click', () => {
         const sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('open');
       });
-      
+
       // Close sidebar when clicking outside on mobile
       document.getElementById('main').addEventListener('click', () => {
         const sidebar = document.getElementById('sidebar');
@@ -1251,7 +1257,7 @@ Shadow Calculation:
           sidebar.classList.remove('open');
         }
       });
-      
+
       // City selection
       // For Custom Location (value 0), this uses the last lat/lon set by sliders
       document.getElementById('city').addEventListener('change', (e) => {
@@ -1259,43 +1265,43 @@ Shadow Calculation:
         const city = CITIES[state.cityIndex];
         state.lat = city.lat;
         state.lon = city.lon;
-        
+
         // Update sliders
         document.getElementById('lat').value = state.lat;
         document.getElementById('lon').value = state.lon;
         updateLatLonDisplay();
         updateScene();
       });
-      
+
       // Latitude
       document.getElementById('lat').addEventListener('input', (e) => {
         state.lat = parseFloat(e.target.value);
-		setCustomLocationFromSliders();
+        setCustomLocationFromSliders();
         updateLatLonDisplay();
         updateScene();
       });
-      
+
       // Longitude
       document.getElementById('lon').addEventListener('input', (e) => {
         state.lon = parseFloat(e.target.value);
         setCustomLocationFromSliders();
-		updateLatLonDisplay();
+        updateLatLonDisplay();
         updateScene();
       });
-      
+
       // Date
       document.getElementById('date').addEventListener('change', (e) => {
         state.date = new Date(e.target.value + 'T12:00:00');
         updateScene();
       });
-      
+
       // Time
       document.getElementById('time').addEventListener('input', (e) => {
         state.timeMinutes = parseInt(e.target.value);
         updateTimeDisplay();
         updateScene();
       });
-      
+
       // Object type
       document.querySelectorAll('input[name="object-type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -1303,7 +1309,7 @@ Shadow Calculation:
           updateScene();
         });
       });
-      
+
       // Height
       document.getElementById('height').addEventListener('input', (e) => {
         let value = parseFloat(e.target.value);
@@ -1313,17 +1319,17 @@ Shadow Calculation:
         state.height = value;
         updateScene();
       });
-      
+
       // Units
       document.querySelectorAll('input[name="units"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
           const oldUnits = state.units;
           state.units = e.target.value;
-          
+
           // Convert height value in input
           const heightInput = document.getElementById('height');
           let currentValue = parseFloat(heightInput.value);
-          
+
           if (oldUnits === 'metric' && state.units === 'imperial') {
             // m to ft
             heightInput.value = (state.height * 3.28084).toFixed(2);
@@ -1335,85 +1341,114 @@ Shadow Calculation:
             heightInput.step = '0.1';
             document.getElementById('height-unit').textContent = 'm';
           }
-          
+
           updateScene();
         });
       });
-      
+
       // Grid toggle
       document.getElementById('show-grid').addEventListener('change', (e) => {
         state.showGrid = e.target.checked;
         updateScene();
       });
-      
+
       // Math details toggle
       document.getElementById('show-math').addEventListener('change', (e) => {
         state.showMath = e.target.checked;
         updateScene();
-  	    // Resize scene on desktop only
+        // Resize scene on desktop only
         if (window.innerWidth > 768) {
           setTimeout(onWindowResize, 50);
         }
       });
-	  
-	  // Triangle diagram toggle
-	  document.getElementById('show-triangle').addEventListener('change', (e) => {
-	    const triangleContainer = document.getElementById('triangle-container');
-	    if (e.target.checked) {
-		  triangleContainer.classList.remove('hidden');
-	    } else {
-		  triangleContainer.classList.add('hidden');
-	    }
-		// Resize scene on desktop only
+
+      // Triangle diagram toggle
+      document.getElementById('show-triangle').addEventListener('change', (e) => {
+        const triangleContainer = document.getElementById('triangle-container');
+        if (e.target.checked) {
+          triangleContainer.classList.remove('hidden');
+        } else {
+          triangleContainer.classList.add('hidden');
+        }
+        // Resize scene on desktop only
         if (window.innerWidth > 768) {
           setTimeout(onWindowResize, 50);
         }
-	  });
+      });
     }
-    
+
+    function handleLayoutChange() {
+      const locationSection = document.getElementById('location-section');
+      const mobileContainer = document.getElementById('mobile-location-container');
+      const sidebar = document.getElementById('sidebar');
+      const datetimeSection = document.getElementById('datetime-section');
+
+      if (window.innerWidth <= 768) {
+        // Mobile: Move location to main area
+        if (locationSection.parentElement !== mobileContainer) {
+          mobileContainer.appendChild(locationSection);
+        }
+      } else {
+        // Desktop: Move location back to sidebar
+        if (locationSection.parentElement !== sidebar) {
+          sidebar.insertBefore(locationSection, datetimeSection);
+        }
+      }
+    }
+
     function updateLatLonDisplay() {
       const latDisplay = document.getElementById('lat-display');
       const lonDisplay = document.getElementById('lon-display');
-      
+
       const latDir = state.lat >= 0 ? 'N' : 'S';
       const lonDir = state.lon >= 0 ? 'E' : 'W';
-      
+
       latDisplay.textContent = `${Math.abs(state.lat).toFixed(1)}°${latDir}`;
       lonDisplay.textContent = `${Math.abs(state.lon).toFixed(1)}°${lonDir}`;
     }
-    
+
     function updateTimeDisplay() {
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
       document.getElementById('time-display').textContent = timeStr;
     }
-    
+
     // ============================================================================
     // INITIALIZATION
     // ============================================================================
-    
+
     function init() {
       // Set default date to today
       const today = new Date();
       const dateStr = today.toISOString().split('T')[0];
       document.getElementById('date').value = dateStr;
       state.date = today;
-      
+
       // Initialize displays
       updateLatLonDisplay();
       updateTimeDisplay();
-      
+
       // Initialize Three.js scene
       initScene();
-      
+
       // Setup event listeners
       setupEventListeners();
-      
+
+      // Handle mobile defaults and layout
+      if (window.innerWidth <= 768) {
+        // Default triangle to hidden on mobile
+        document.getElementById('show-triangle').checked = false;
+        document.getElementById('triangle-container').classList.add('hidden');
+      }
+
+      handleLayoutChange();
+      window.addEventListener('resize', handleLayoutChange);
+
       // Initial scene update
       updateScene();
     }
-    
+
     // Start when page loads
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
@@ -1422,4 +1457,5 @@ Shadow Calculation:
     }
   </script>
 </body>
+
 </html>
