@@ -725,7 +725,7 @@
     // ============================================================================
     
     let scene, camera, renderer;
-    let objectMesh, shadowMesh, gridHelper;
+    let objectMesh, gridHelper;
     
     function initScene() {
       const container = document.getElementById('scene-container');
@@ -749,6 +749,8 @@
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
       
       // Lights
@@ -757,7 +759,26 @@
       
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
       directionalLight.position.set(5, 10, 5);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 2048;
+      directionalLight.shadow.mapSize.height = 2048;
+      directionalLight.shadow.camera.near = 0.5;
+      directionalLight.shadow.camera.far = 50;
+      const d = 10;
+      directionalLight.shadow.camera.left = -d;
+      directionalLight.shadow.camera.right = d;
+      directionalLight.shadow.camera.top = d;
+      directionalLight.shadow.camera.bottom = -d;
       scene.add(directionalLight);
+
+      // Ground Plane
+      const planeGeometry = new THREE.PlaneGeometry(20, 20);
+      const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.4 });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotation.x = -Math.PI / 2;
+      plane.position.y = 0.001;
+      plane.receiveShadow = true;
+      scene.add(plane);
       
       // Grid
       gridHelper = new THREE.GridHelper(10, 20, 0xaaaaaa, 0xdddddd);
@@ -815,12 +836,14 @@
         const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
         const body = new THREE.Mesh(bodyGeom, bodyMat);
         body.position.y = height * 0.3;
+        body.castShadow = true;
         
         // Head
         const headGeom = new THREE.SphereGeometry(height * 0.12, 16, 16);
         const headMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
         const head = new THREE.Mesh(headGeom, headMat);
         head.position.y = height * 0.65;
+        head.castShadow = true;
         
         objectMesh.add(body);
         objectMesh.add(head);
@@ -831,12 +854,14 @@
         const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7a4b2b });
         const trunk = new THREE.Mesh(trunkGeom, trunkMat);
         trunk.position.y = height * 0.2;
+        trunk.castShadow = true;
         
         // Canopy
         const canopyGeom = new THREE.SphereGeometry(height * 0.35, 20, 16);
         const canopyMat = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
         const canopy = new THREE.Mesh(canopyGeom, canopyMat);
         canopy.position.y = height * 0.55;
+        canopy.castShadow = true;
         
         objectMesh.add(trunk);
         objectMesh.add(canopy);
@@ -846,6 +871,7 @@
         const boxMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
         const box = new THREE.Mesh(boxGeom, boxMat);
         box.position.y = height / 2;
+        box.castShadow = true;
         
         objectMesh.add(box);
       }
@@ -947,117 +973,23 @@
       return height / Math.tan(altitude);
     }
     
-    function createShadow(solar) {
-      // Remove existing shadow
-      if (shadowMesh) {
-        scene.remove(shadowMesh);
-        if (shadowMesh.geometry) shadowMesh.geometry.dispose();
-        if (shadowMesh.material) shadowMesh.material.dispose();
+    function updateLightPosition(solar) {
+      const light = scene.children.find(c => c.isDirectionalLight);
+      if (!light) return;
+
+      if (solar.altitudeDeg <= 0) {
+        light.intensity = 0;
+      } else {
+        light.intensity = 0.5;
+        // Position light based on solar position
+        const dist = 20;
+        const x = Math.sin(solar.azimuth) * Math.cos(solar.altitude) * dist;
+        const y = Math.sin(solar.altitude) * dist;
+        const z = Math.cos(solar.azimuth) * Math.cos(solar.altitude) * dist;
+        
+        light.position.set(x, y, z);
+        light.updateMatrixWorld();
       }
-      
-      if (solar.altitudeDeg <= 0 || !objectMesh) {
-        return; // No shadow when sun is below horizon
-      }
-      
-      // Calculate shadow direction (opposite of sun direction)
-      const sunX = Math.sin(solar.azimuth) * Math.cos(solar.altitude);
-      const sunY = Math.sin(solar.altitude);
-      const sunZ = Math.cos(solar.azimuth) * Math.cos(solar.altitude);
-      
-      const lightDir = new THREE.Vector3(-sunX, -sunY, -sunZ);
-      
-      // Project all vertices to ground
-      const points = [];
-      objectMesh.updateMatrixWorld(true);
-      
-      objectMesh.traverse(child => {
-        if (child.isMesh && child.geometry) {
-          const positions = child.geometry.attributes.position;
-          const vertex = new THREE.Vector3();
-          
-          for (let i = 0; i < positions.count; i++) {
-            vertex.fromBufferAttribute(positions, i);
-            vertex.applyMatrix4(child.matrixWorld);
-            
-            // Project to ground (y=0)
-            if (Math.abs(lightDir.y) > 0.001) {
-              const t = -vertex.y / lightDir.y;
-              if (t > 0) {
-                const projected = vertex.clone().addScaledVector(lightDir, t);
-                points.push({ x: projected.x, z: projected.z });
-              }
-            }
-          }
-        }
-      });
-      
-      if (points.length === 0) return;
-      
-      // Calculate convex hull
-      const hull = convexHull2D(points);
-      if (!hull || hull.length < 3) return;
-      
-      // Create shadow mesh
-      const shape = new THREE.Shape();
-      shape.moveTo(hull[0].x, hull[0].z);
-      for (let i = 1; i < hull.length; i++) {
-        shape.lineTo(hull[i].x, hull[i].z);
-      }
-      shape.closePath();
-      
-      const geometry = new THREE.ShapeGeometry(shape);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        opacity: 0.4,
-        transparent: true
-      });
-      
-      shadowMesh = new THREE.Mesh(geometry, material);
-      shadowMesh.rotation.x = -Math.PI / 2;
-      shadowMesh.position.y = 0.001; // Slightly above ground to prevent z-fighting
-      
-      scene.add(shadowMesh);
-    }
-    
-    function convexHull2D(points) {
-      if (points.length < 3) return null;
-      
-      // Sort points
-      const sorted = points.slice().sort((a, b) => {
-        if (a.x === b.x) return a.z - b.z;
-        return a.x - b.x;
-      });
-      
-      const cross = (o, a, b) => 
-        (a.x - o.x) * (b.z - o.z) - (a.z - o.z) * (b.x - o.x);
-      
-      // Build lower hull
-      const lower = [];
-      for (const p of sorted) {
-        while (lower.length >= 2 && 
-               cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
-          lower.pop();
-        }
-        lower.push(p);
-      }
-      
-      // Build upper hull
-      const upper = [];
-      for (let i = sorted.length - 1; i >= 0; i--) {
-        const p = sorted[i];
-        while (upper.length >= 2 && 
-               cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
-          upper.pop();
-        }
-        upper.push(p);
-      }
-      
-      // Remove last point of each half because it's repeated
-      lower.pop();
-      upper.pop();
-      
-      const hull = lower.concat(upper);
-      return hull.length >= 3 ? hull : null;
     }
     
     // ============================================================================
@@ -1076,8 +1008,8 @@
       // Calculate solar position
       const solar = getSolarPosition();
       
-      // Update shadow
-      createShadow(solar);
+      // Update light position
+      updateLightPosition(solar);
       
       // Update UI
       updateSunStatus(solar);
