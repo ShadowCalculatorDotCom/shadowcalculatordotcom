@@ -733,6 +733,16 @@
     let scene, camera, renderer;
     let objectMesh, gridHelper;
 
+    // Helper function to detect mobile devices
+    function isMobile() {
+      return window.matchMedia('(max-width: 768px)').matches;
+    }
+
+    // Get appropriate viewSize based on device
+    function getViewSize() {
+      return isMobile() ? 4 : 6;
+    }
+
     function initScene() {
       const container = document.getElementById('scene-container');
 
@@ -742,7 +752,7 @@
 
       // Camera (orthographic for consistent shadow visualization)
       const aspect = container.clientWidth / container.clientHeight;
-      const viewSize = 6;
+      const viewSize = getViewSize();
       camera = new THREE.OrthographicCamera(
         -viewSize * aspect, viewSize * aspect,
         viewSize, -viewSize,
@@ -804,7 +814,7 @@
       const width = container.clientWidth;
       const height = container.clientHeight;
       const aspect = width / height;
-      const viewSize = 6;
+      const viewSize = getViewSize();
 
       camera.left = -viewSize * aspect;
       camera.right = viewSize * aspect;
