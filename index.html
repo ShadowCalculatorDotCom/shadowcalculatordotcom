@@ -1031,9 +1031,13 @@
       if (!light) return;
 
       if (solar.altitudeDeg <= 0) {
+        // Sun below horizon - disable light and shadows
         light.intensity = 0;
+        light.castShadow = false;
       } else {
+        // Sun above horizon - enable light and shadows
         light.intensity = 0.5;
+        light.castShadow = true;
         // Position light based on solar position
         const dist = 20;
         const x = Math.sin(solar.azimuth) * Math.cos(solar.altitude) * dist;
