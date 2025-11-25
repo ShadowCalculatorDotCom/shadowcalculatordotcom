@@ -169,6 +169,33 @@
       font-size: 0.9rem;
       transition: all 0.2s;
     }
+    
+    select {
+      background: #eaf2fe;                /* Pale blue background */
+      border: 1.5px solid var(--accent);  /* Blue border */
+      color: var(--accent-hover);         /* Darker blue text */
+      border-radius: 6px;
+      font-size: 1rem;
+      padding: 10px 38px 10px 12px;       /* Room for arrow on right */
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      transition: border 0.2s, box-shadow 0.2s;
+      font-weight: 600;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.13);
+      background: #d6eaff;
+    }
+    
+    select:disabled {
+      background: #f0f2f5;
+      color: #a0aec0;
+      border-color: #e0e3e8;
+    }
 
     input[type="number"]:focus,
     input[type="date"]:focus,
