@@ -645,7 +645,7 @@
           </label>
         </div>
         <div class="field">
-          <label>
+          <label class ="radio-item">
             <input type="checkbox" id="show-triangle" checked>
             <span>Show Triangle Diagram</span>
           </label>
@@ -1477,13 +1477,19 @@ Shadow Calculation:
     function init() {
       // Set default date to today
       const today = new Date();
-      const dateStr = today.toISOString().split('T')[0];
+      const dateStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
       document.getElementById('date').value = dateStr;
       state.date = today;
 
+	  // Set time to current local time
+	  const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
+	  state.timeMinutes = currentTimeMinutes;
+	  document.getElementById('time').value = currentTimeMinutes;
+
+
       // Initialize displays
       updateLatLonDisplay();
-      updateTimeDisplay();
+	  updateTimeDisplay();
 
       // Initialize Three.js scene
       initScene();
