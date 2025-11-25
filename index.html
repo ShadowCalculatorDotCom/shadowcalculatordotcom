@@ -196,6 +196,39 @@
       color: #a0aec0;
       border-color: #e0e3e8;
     }
+    
+    input[type="date"] {
+      background: #eaf2fe;
+      border: 1.5px solid var(--accent);
+      color: var(--accent-hover);
+      border-radius: 6px;
+      font-size: 1rem;
+      padding: 10px 12px;
+      font-weight: 600;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    
+    input[type="date"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.13);
+      background: #d6eaff;
+    }
+    
+    input[type="date"]:disabled {
+      background: #f0f2f5;
+      color: #a0aec0;
+      border-color: #e0e3e8;
+    }
+    
+    /* Optional: Remove the default calendar icon on Chrome/Safari/Edge and add your own */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(40%) sepia(79%) saturate(4228%) hue-rotate(202deg) brightness(98%) contrast(103%);
+      /* This makes the icon blue-ish, but can't fully replace it */
+    }
 
     input[type="number"]:focus,
     input[type="date"]:focus,
