@@ -153,6 +153,7 @@
       display: block;
       font-size: 0.875rem;
       font-weight: 500;
+
       margin-bottom: 6px;
     }
 
@@ -160,6 +161,8 @@
     input[type="date"],
     select {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
       padding: 8px 12px;
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -717,7 +720,7 @@
     function estimateTimezoneFromLongitude(lon) {
       // Rough timezone estimation: 15 degrees of longitude ≈ 1 hour
       const utcOffset = Math.round(lon / 15);
-      
+
       // Map common UTC offsets to timezone strings
       const tzMap = {
         '-12': 'Pacific/Wake',
@@ -746,7 +749,7 @@
         '11': 'Pacific/Guadalcanal',
         '12': 'Pacific/Fiji'
       };
-      
+
       return tzMap[utcOffset.toString()] || 'UTC';
     }
 
