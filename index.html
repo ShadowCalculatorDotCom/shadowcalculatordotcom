@@ -160,8 +160,8 @@
     input[type="number"],
     input[type="date"],
     select {
-      width: 100%;
-      max-width: 100%;
+      width: 80%;
+      max-width: 80%;
       min-width: 0;
       padding: 8px 12px;
       border: 1px solid var(--border);
@@ -1136,7 +1136,8 @@
       const length = calculateShadowLength(state.height, solar.altitude);
       const tanAlt = Math.tan(solar.altitude);
 
-      const dateStr = state.date.toISOString().split('T')[0];
+      //const dateStr = state.date.toISOString().split('T')[0];
+	  const dateStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
