@@ -50,9 +50,9 @@
       /* Softer, warmer text (Stone-900) */
       --text: #1C1917;
       --text-muted: #57534E;
-      /* Solar Amber Accent - Darkened for readability */
-      --accent: #D97706;
-      --accent-hover: #B45309;
+      /* Solar Green Accent */
+      --accent: #15803D;
+      --accent-hover: #14532D;
 
       /* Shadows */
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -215,8 +215,7 @@
       outline: none;
       background-color: #ffffff;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
-      /* Orange glow */
+      box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
     }
 
     input[type="range"] {
@@ -484,7 +483,7 @@
         border-radius: 50%;
         background: var(--accent);
         border: none;
-        box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+        box-shadow: 0 4px 15px rgba(21, 128, 61, 0.4);
         padding: 0;
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
@@ -563,9 +562,7 @@
 
       /* Show full header inside the sheet */
       #sidebar .header {
-        display: block;
-        border-bottom: none;
-        margin-bottom: 10px;
+        display: none;
       }
 
       #main {
@@ -994,14 +991,14 @@
       if (type === 'human') {
         // Body
         const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, height * 0.6, 16);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xD97706 });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x16A34A });
         const body = new THREE.Mesh(bodyGeom, bodyMat);
         body.position.y = height * 0.3;
         body.castShadow = true;
 
         // Head
         const headGeom = new THREE.SphereGeometry(height * 0.12, 16, 16);
-        const headMat = new THREE.MeshStandardMaterial({ color: 0xD97706 });
+        const headMat = new THREE.MeshStandardMaterial({ color: 0x16A34A });
         const head = new THREE.Mesh(headGeom, headMat);
         head.position.y = height * 0.65;
         head.castShadow = true;
