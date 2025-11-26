@@ -435,6 +435,13 @@
       margin-top: 4px;
     }
 
+    .context-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
     /* Triangle diagram */
     #triangle-container {
       display: flex;
@@ -832,6 +839,7 @@
         <div id="shadow-info">
           <div>Shadow Length</div>
           <div class="value" id="shadow-length">—</div>
+          <div class="context-info" id="shadow-context">—</div>
         </div>
         <div id="math-details"></div>
         <div id="triangle-container">
@@ -1296,6 +1304,7 @@
       // Update UI
       updateSunStatus(solar);
       updateShadowInfo(solar);
+      updateShadowContext();
       updateTriangle(solar);
       updateMathDetails(solar);
     }
@@ -1337,6 +1346,27 @@
         const inches = Math.round((feet - ft) * 12);
         lengthEl.textContent = `${ft}' ${inches}"`;
       }
+    }
+
+    function updateShadowContext() {
+      const contextEl = document.getElementById('shadow-context');
+
+      const city = CITIES[state.cityIndex];
+      const hours = Math.floor(state.timeMinutes / 60);
+      const minutes = state.timeMinutes % 60;
+      const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      const dateStr = new Date(state.date.getTime() - state.date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+      let locationStr;
+      if (state.cityIndex === CUSTOM_CITY_INDEX) {
+        const latDir = state.lat >= 0 ? 'N' : 'S';
+        const lonDir = state.lon >= 0 ? 'E' : 'W';
+        locationStr = `${Math.abs(state.lat).toFixed(1)}°${latDir}, ${Math.abs(state.lon).toFixed(1)}°${lonDir}`;
+      } else {
+        locationStr = city.name;
+      }
+
+      contextEl.textContent = `${dateStr} at ${timeStr} • ${locationStr}`;
     }
 
     function updateMathDetails(solar) {
