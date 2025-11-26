@@ -747,7 +747,7 @@
         <div class="field">
           <label class="radio-item">
             <input type="checkbox" id="show-triangle" checked>
-            <span>Show Triangle Diagram</span>
+            <span>Show triangle diagram</span>
           </label>
         </div>
       </div>
@@ -1237,7 +1237,7 @@
       const tanAlt = Math.tan(solar.altitude);
 
       //const dateStr = state.date.toISOString().split('T')[0];
-      const dateStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const dateStr = new Date(state.date.getTime() - state.date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
