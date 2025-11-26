@@ -325,10 +325,11 @@
       gap: 16px;
       overflow-x: hidden;
       overflow-y: auto;
+      height: 100vh;
     }
 
     #scene-container {
-      flex: 1;
+      flex: 0 0 60vh;
       position: relative;
       /* Beautiful sky gradient: Pale Blue -> White */
       background: linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 60%, #FAFAF9 100%);
@@ -573,9 +574,9 @@
       }
 
       #scene-container {
-        min-height: 45vh;
+        min-height: 300px;
         /* Taller scene on mobile */
-        flex: 0 0 auto;
+        flex: 0 0 50vh;
       }
 
       #triangle-container {
@@ -637,7 +638,7 @@
   </button>
 
   <div id="mobile-header">
-    <h2>Shadow Calculator</h2>
+    <h2>ShadowCalculator.com</h2>
     <a href="about.html">about</a>
   </div>
 
@@ -645,10 +646,8 @@
     <!-- Sidebar -->
     <div id="sidebar">
       <div class="header">
-        <h1>Shadow Calculator</h1>
-        <p class="subtitle">(alpha)</p>
-        <p class="subtitle">Visualize how objects cast shadows at any time and location using solar position
-          calculations. <a href="about.html">About</a></p>
+        <h1>ShadowCalculator.com</h1>
+        <p class="subtitle"><a href="about.html">about</a></p>
       </div>
 
       <div class="section" id="location-section">
@@ -757,13 +756,12 @@
     <!-- Main area -->
     <div id="main">
       <div id="scene-container"></div>
-      <div id="mobile-location-container"></div>
       <div id="info-panel">
         <div id="shadow-info">
           <div>Shadow Length</div>
           <div class="value" id="shadow-length">—</div>
         </div>
-
+        <div id="math-details"></div>
         <div id="triangle-container">
           <h3>Right Triangle – Side View</h3>
           <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
@@ -781,9 +779,9 @@
             <text id="angle-value" class="triangle-value" x="310" y="178" text-anchor="end">34.6°</text>
           </svg>
         </div>
-
-        <div id="math-details"></div>
       </div>
+
+      <div id="mobile-location-container"></div>
     </div>
   </div>
 
