@@ -1014,6 +1014,56 @@
       gridHelper.material.transparent = true;
       scene.add(gridHelper);
 
+      // Add "N" for North indicator
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#16A34A';
+      ctx.font = 'bold 100px Inter, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('N', 64, 64);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const northMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.7,
+        depthWrite: false
+      });
+
+      const northGeometry = new THREE.PlaneGeometry(0.8, 0.8);
+      const northMarker = new THREE.Mesh(northGeometry, northMaterial);
+      northMarker.rotation.x = -Math.PI / 2; // Lay flat on ground
+      northMarker.position.set(0, 0.01, -4.5); // Position at north edge of grid
+      scene.add(northMarker);
+
+      // Add "S" for South indicator
+      const canvasS = document.createElement('canvas');
+      canvasS.width = 128;
+      canvasS.height = 128;
+      const ctxS = canvasS.getContext('2d');
+      ctxS.fillStyle = '#16A34A';
+      ctxS.font = 'bold 100px Inter, Arial, sans-serif';
+      ctxS.textAlign = 'center';
+      ctxS.textBaseline = 'middle';
+      ctxS.fillText('S', 64, 64);
+
+      const textureS = new THREE.CanvasTexture(canvasS);
+      const southMaterial = new THREE.MeshBasicMaterial({
+        map: textureS,
+        transparent: true,
+        opacity: 0.7,
+        depthWrite: false
+      });
+
+      const southGeometry = new THREE.PlaneGeometry(0.8, 0.8);
+      const southMarker = new THREE.Mesh(southGeometry, southMaterial);
+      southMarker.rotation.x = -Math.PI / 2; // Lay flat on ground
+      southMarker.position.set(0, 0.01, 4.5); // Position at south edge of grid (positive Z)
+      scene.add(southMarker);
+
       // Start animation loop
       animate();
 
