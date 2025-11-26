@@ -35,15 +35,26 @@
     content="See how shadows move across your garden or yard throughout the day and year.">
   <meta name="twitter:image" content="https://shadowcalculator.com/social-preview.png">
 
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #f0f2f5;
+      /* Warm, sunny background (Stone-50) */
+      --bg: #FAFAF9;
       --panel-bg: #ffffff;
-      --border: #e0e3e8;
-      --text: #1a1a1a;
-      --text-muted: #6b7280;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
+      /* Warmer border (Stone-200) */
+      --border: #E7E5E4;
+      /* Softer, warmer text (Stone-900) */
+      --text: #1C1917;
+      --text-muted: #57534E;
+      /* Solar Amber Accent - Darkened for readability */
+      --accent: #D97706;
+      --accent-hover: #B45309;
+
+      /* Shadows */
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
       --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
       --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
@@ -57,11 +68,23 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text);
       background: var(--bg);
       height: 100vh;
       overflow: hidden;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
     }
 
     #app {
@@ -101,10 +124,17 @@
 
     /* Sidebar */
     #sidebar {
-      background: var(--panel-bg);
+      /* Glassmorphism background */
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      /* Safari support */
+
       padding: 24px;
       overflow-y: auto;
-      box-shadow: var(--shadow-lg);
+      border-right: 1px solid rgba(0, 0, 0, 0.05);
+      /* Softer border */
+      box-shadow: none;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -129,10 +159,15 @@
 
     .section {
       background: var(--panel-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow-sm);
+      /* Remove border, use shadow for definition */
+      border: none;
+      border-radius: 12px;
+      /* Increased radius */
+      padding: 20px;
+      /* More breathing room */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      margin-bottom: 16px;
+      /* Ensure spacing between cards */
     }
 
     .section h2 {
@@ -160,41 +195,57 @@
     input[type="number"],
     input[type="date"],
     select {
-      width: 80%;
-      max-width: 80%;
-      min-width: 0;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.9rem;
+      width: 100%;
+      /* Full width looks better in cards */
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      /* No visible border by default */
+      background-color: #F3F4F6;
+      /* Light gray fill */
+      border-radius: 8px;
+      font-size: 0.95rem;
       transition: all 0.2s;
+      font-family: inherit;
+      /* Ensure they use Inter */
     }
 
     input[type="number"]:focus,
     input[type="date"]:focus,
     select:focus {
       outline: none;
+      background-color: #ffffff;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+      /* Orange glow */
     }
 
     input[type="range"] {
       width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: var(--border);
+      height: 8px;
+      /* Taller track */
+      border-radius: 4px;
+      background: #E5E7EB;
+      /* Lighter gray track */
       outline: none;
       -webkit-appearance: none;
+      cursor: pointer;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: var(--accent);
       cursor: pointer;
-      box-shadow: var(--shadow-sm);
+      border: 2px solid #ffffff;
+      /* White ring for contrast */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -223,6 +274,7 @@
       width: 18px;
       height: 18px;
       cursor: pointer;
+      accent-color: var(--accent);
     }
 
     .input-with-unit {
@@ -279,9 +331,10 @@
     #scene-container {
       flex: 1;
       position: relative;
-      background: #e5e9f0;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-md);
+      /* Beautiful sky gradient: Pale Blue -> White */
+      background: linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 60%, #FAFAF9 100%);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
       overflow: hidden;
       min-height: 400px;
     }
@@ -293,11 +346,14 @@
     }
 
     #info-panel {
-      background: var(--panel-bg);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.9);
+      /* Slightly more opaque */
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      /* Soft shadow */
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -645,7 +701,7 @@
           </label>
         </div>
         <div class="field">
-          <label class ="radio-item">
+          <label class="radio-item">
             <input type="checkbox" id="show-triangle" checked>
             <span>Show Triangle Diagram</span>
           </label>
@@ -788,7 +844,8 @@
 
       // Scene
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xe5e9f0);
+      scene.background = null;
+      //scene.background = new THREE.Color(0xe5e9f0);
 
       // Camera (orthographic for consistent shadow visualization)
       const aspect = container.clientWidth / container.clientHeight;
@@ -802,7 +859,7 @@
       camera.lookAt(0, 0, 0);
 
       // Renderer
-      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.shadowMap.enabled = true;
@@ -889,14 +946,14 @@
       if (type === 'human') {
         // Body
         const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, height * 0.6, 16);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xD97706 });
         const body = new THREE.Mesh(bodyGeom, bodyMat);
         body.position.y = height * 0.3;
         body.castShadow = true;
 
         // Head
         const headGeom = new THREE.SphereGeometry(height * 0.12, 16, 16);
-        const headMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6 });
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xD97706 });
         const head = new THREE.Mesh(headGeom, headMat);
         head.position.y = height * 0.65;
         head.castShadow = true;
@@ -1137,7 +1194,7 @@
       const tanAlt = Math.tan(solar.altitude);
 
       //const dateStr = state.date.toISOString().split('T')[0];
-	  const dateStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const dateStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
@@ -1436,7 +1493,7 @@ Shadow Calculation:
 
     function handleLayoutChange() {
       const locationSection = document.getElementById('location-section');
-	  const objectSection = document.getElementById('object-section');
+      const objectSection = document.getElementById('object-section');
       const mobileContainer = document.getElementById('mobile-location-container');
       const sidebar = document.getElementById('sidebar');
       const datetimeSection = document.getElementById('datetime-section');
@@ -1445,13 +1502,13 @@ Shadow Calculation:
         // Mobile: Move location to main area
         if (locationSection.parentElement !== mobileContainer) {
           mobileContainer.appendChild(datetimeSection);
-		  mobileContainer.appendChild(locationSection);
+          mobileContainer.appendChild(locationSection);
         }
       } else {
         // Desktop: Move location back to sidebar
         if (locationSection.parentElement !== sidebar) {
           sidebar.insertBefore(dateTimeSection, objectSection);
-		  sidebar.insertBefore(locationSection, datetimeSection);
+          sidebar.insertBefore(locationSection, datetimeSection);
         }
       }
     }
@@ -1485,15 +1542,15 @@ Shadow Calculation:
       document.getElementById('date').value = dateStr;
       state.date = today;
 
-	  // Set time to current local time
-	  const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
-	  state.timeMinutes = currentTimeMinutes;
-	  document.getElementById('time').value = currentTimeMinutes;
+      // Set time to current local time
+      const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
+      state.timeMinutes = currentTimeMinutes;
+      document.getElementById('time').value = currentTimeMinutes;
 
 
       // Initialize displays
       updateLatLonDisplay();
-	  updateTimeDisplay();
+      updateTimeDisplay();
 
       // Initialize Three.js scene
       initScene();
