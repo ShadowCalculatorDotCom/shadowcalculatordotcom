@@ -1,34 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>About – Shadow Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      /* Warm, sunny background (Stone-50) */
+      --bg: #FAFAF9;
+      --panel-bg: #ffffff;
+      /* Warmer border (Stone-200) */
+      --border: #E7E5E4;
+      /* Softer, warmer text (Stone-900) */
+      --text: #1C1917;
+      --text-muted: #57534E;
+      /* Solar Green Accent */
+      --accent: #15803D;
+      --accent-hover: #14532D;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      --radius: 8px;
+    }
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f4f4f6;
       color: #222;
     }
-    header, main {
+
+    header,
+    main {
       max-width: 800px;
       margin: 0 auto;
       padding: 20px 16px;
     }
+
     header {
       border-bottom: 1px solid #d7d7dd;
       background: #ffffff;
     }
+
     a {
-      color: #2a7de1;
+      color: var(--accent);
       text-decoration: none;
+      transition: color 0.2s;
     }
+
     a:hover {
+      color: var(--accent-hover);
       text-decoration: underline;
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>Shadow Calculator</h1>
@@ -37,7 +66,7 @@
   <main>
     <h2>What this tool does</h2>
     <p>
-      Shadow Calculator is an educational, browser-based tool that shows how
+      Shadow Calculator is a browser-based tool that shows how
       shadow length and direction change with date, time, latitude, and object height.
     </p>
 
@@ -50,26 +79,23 @@
     <h2>Scientific assumptions</h2>
     <ul>
       <li>Flat ground (no terrain or slope).</li>
-      <li>Standard geometry: <code>L = H / tan(α)</code>, where <em>H</em> is object height and <em>α</em> is solar altitude.</li>
+      <li>Standard geometry: <code>L = H / tan(α)</code>, where <em>H</em> is object height and <em>α</em> is solar
+        altitude.</li>
       <li>Approximate city coordinates and time zones, suitable for visualization but not survey-grade work.</li>
     </ul>
 
     <h2>Disclaimer</h2>
+    <p>
+      I made this for fun.
+    </p>
+
     <p>
       This site is provided for informational and educational purposes only.
       It is <strong>not</strong> intended for navigation, engineering certification,
       safety-critical design, or any use where precise solar position or shadow
       length is required.
     </p>
-	
-	<p>
-      This was created as a fun and quick reference tool for family and friends.
-    </p>
-	
-    <p>
-      No guarantees are made about the accuracy or completeness of the results.
-      Use at your own risk.
-    </p>
+
 
     <h2>Privacy</h2>
     <p>
@@ -86,8 +112,10 @@
     </p>
 
     <p>
-      Questions or comments? See the <a href="https://github.com/ShadowCalculatorDotCom/shadowcalculatordotcom">project repository on GitHub<a>.
+      Questions or comments? See the <a href="https://github.com/ShadowCalculatorDotCom/shadowcalculatordotcom">project
+        repository on GitHub<a>.
     </p>
   </main>
 </body>
+
 </html>
