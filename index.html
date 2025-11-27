@@ -270,7 +270,7 @@
     /* Optional: Remove the default calendar icon on Chrome/Safari/Edge and add your own */
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(35%) sepia(85%) saturate(1200%) hue-rotate(95deg) brightness(95%) contrast(90%);
-      /* This makes the icon blue-ish, but can't fully replace it */
+      /* This makes the icon green-ish, but can't fully replace it */
     }
 
     input[type="number"]:focus,
@@ -290,6 +290,7 @@
       background: #E5E7EB;
       /* Lighter gray track */
       outline: none;
+      appearance: none;
       -webkit-appearance: none;
       cursor: pointer;
     }
@@ -756,13 +757,13 @@
       </div>
 
       <div class="section" id="datetime-section">
-        <h2>Date & Time</h2>
+        <h2>Date & Time at Location</h2>
         <div class="field">
           <label for="date">Date</label>
           <input type="date" id="date">
         </div>
         <div class="field">
-          <label>Time at location: <span id="time-display" class="value-display">12:00</span></label>
+          <label>Time: <span id="time-display" class="value-display">12:00</span></label>
           <input type="range" id="time" min="0" max="1439" step="1" value="720">
         </div>
         <div class="status" id="sun-status">Calculating sun position...</div>
@@ -940,7 +941,7 @@
       timeMinutes: 720, // 12:00
       objectType: 'human',
       height: 1.75, // meters
-      units: 'metric',
+      units: 'imperial',
       showGrid: true,
       showMath: false
     };
