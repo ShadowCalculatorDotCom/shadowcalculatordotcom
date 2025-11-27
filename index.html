@@ -425,8 +425,22 @@
     }
 
     #shadow-info {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      padding: 8px 12px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0);
+
       text-align: center;
-      font-size: 0.95rem;
+      min-width: 200px;
     }
 
     #shadow-info .value {
@@ -633,6 +647,19 @@
         transform: translateY(0);
       }
 
+      #shadow-info {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        left: auto;
+        transform: none;
+        z-index: 10;
+
+        text-align: center;
+        min-width: 200px;
+      }
+
+
       /* Show full header inside the sheet */
       #sidebar .header {
         display: none;
@@ -835,13 +862,14 @@
 
     <!-- Main area -->
     <div id="main">
-      <div id="scene-container"></div>
-      <div id="info-panel">
+      <div id="scene-container">
         <div id="shadow-info">
           <div>Shadow Length</div>
           <div class="value" id="shadow-length">—</div>
           <div class="context-info" id="shadow-context">—</div>
         </div>
+      </div>
+      <div id="info-panel">
         <div id="math-details"></div>
         <div id="triangle-container">
           <h3>Right Triangle – Side View</h3>
@@ -1537,6 +1565,18 @@ Shadow Calculation:
       document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
     }
 
+    function updateInfoPanelVisibility() {
+      const infoPanel = document.getElementById('info-panel');
+      const showMath = document.getElementById('show-math').checked;
+      const showTriangle = document.getElementById('show-triangle').checked;
+
+      if (!showMath && !showTriangle) {
+        infoPanel.style.display = 'none';
+      } else {
+        infoPanel.style.display = 'flex';
+      }
+    }
+
     // ============================================================================
     // EVENT HANDLERS
     // ============================================================================
@@ -1666,6 +1706,8 @@ Shadow Calculation:
       document.getElementById('show-math').addEventListener('change', (e) => {
         state.showMath = e.target.checked;
         updateScene();
+        updateInfoPanelVisibility();
+
         // Resize scene on desktop only
         if (window.innerWidth > 768) {
           setTimeout(onWindowResize, 50);
@@ -1680,6 +1722,8 @@ Shadow Calculation:
         } else {
           triangleContainer.classList.add('hidden');
         }
+        updateInfoPanelVisibility();
+
         // Resize scene on desktop only
         if (window.innerWidth > 768) {
           setTimeout(onWindowResize, 50);
@@ -1761,6 +1805,7 @@ Shadow Calculation:
         document.getElementById('triangle-container').classList.add('hidden');
       }
 
+      updateInfoPanelVisibility();
       handleLayoutChange();
       window.addEventListener('resize', handleLayoutChange);
 
