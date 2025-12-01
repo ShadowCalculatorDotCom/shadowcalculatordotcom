@@ -95,7 +95,7 @@
 
     #app {
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 480px 1fr;
       height: 100vh;
       width: 100vw;
     }
@@ -1846,9 +1846,9 @@ Shadow Calculation:
         // Create map centered on initial location
         map = L.map('map').setView([lat, lon], 10);
 
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
+        // Add CartoDB Positron tiles (clean, minimal style)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors, © CARTO',
           maxZoom: 19
         }).addTo(map);
 
