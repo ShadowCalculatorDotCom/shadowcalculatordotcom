@@ -40,6 +40,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- Leaflet map library -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
   <style>
     :root {
       /* Warm, sunny background (Stone-50) */
@@ -92,6 +98,54 @@
       grid-template-columns: 360px 1fr;
       height: 100vh;
       width: 100vw;
+    }
+
+    /* Leaflet map container */
+    #map {
+      height: 300px;
+      width: 100%;
+      border-radius: 8px;
+      margin: 12px 0;
+      border: 1px solid var(--border);
+      z-index: 1;
+    }
+
+    /* Make leaflet controls match your design */
+    .leaflet-control-geocoder {
+      border-radius: 8px !important;
+    }
+
+    .leaflet-bar {
+      border-radius: 6px !important;
+      border: 1px solid var(--border) !important;
+    }
+
+    /* Location button styling */
+    #use-current-location {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    #use-current-location:hover {
+      background: var(--accent-hover);
+    }
+
+    .coordinates-display {
+      padding: 10px 12px;
+      background: #F3F4F6;
+      border-radius: 6px;
+      font-weight: 600;
+      color: var(--accent-hover);
+      text-align: center;
     }
 
     /* Hamburger menu button */
@@ -754,8 +808,10 @@
 
       <div class="section" id="location-section">
         <h2>Location</h2>
+
+        <!-- Quick preset cities -->
         <div class="field">
-          <label for="city">City</label>
+          <label for="city">Quick Select</label>
           <select id="city">
             <option value="0">Custom Location</option>
             <option value="1" selected>New York, USA</option>
@@ -768,14 +824,20 @@
             <option value="8">Singapore</option>
           </select>
         </div>
+
+        <!-- Map container -->
+        <div id="map"></div>
+
+        <!-- Display selected coordinates -->
         <div class="field">
-          <label>Latitude: <span id="lat-display" class="value-display">40.7°N</span></label>
-          <input type="range" id="lat" min="-90" max="90" step="0.5" value="40.7">
+          <label>Selected Coordinates</label>
+          <div class="coordinates-display">
+            <span id="lat-display">40.7°N</span>, <span id="lon-display">74.0°W</span>
+          </div>
         </div>
-        <div class="field">
-          <label>Longitude: <span id="lon-display" class="value-display">74.0°W</span></label>
-          <input type="range" id="lon" min="-180" max="180" step="0.5" value="-74.0">
-        </div>
+
+        <!-- Use current location button -->
+        <button id="use-current-location">📍 Use My Location</button>
       </div>
 
       <div class="section" id="datetime-section">
@@ -903,6 +965,9 @@
     // ============================================================================
     // CONFIGURATION & STATE
     // ============================================================================
+
+    let map;
+    let marker;
 
     const CITIES = [
       // index 0 → value "0" → Custom Location
@@ -1617,27 +1682,30 @@ Shadow Calculation:
         state.lat = city.lat;
         state.lon = city.lon;
 
-        // Update sliders
-        document.getElementById('lat').value = state.lat;
-        document.getElementById('lon').value = state.lon;
         updateLatLonDisplay();
         updateScene();
+
+        initMap(state.lat, state.lon);
       });
 
-      // Latitude
-      document.getElementById('lat').addEventListener('input', (e) => {
-        state.lat = parseFloat(e.target.value);
-        setCustomLocationFromSliders();
-        updateLatLonDisplay();
-        updateScene();
-      });
-
-      // Longitude
-      document.getElementById('lon').addEventListener('input', (e) => {
-        state.lon = parseFloat(e.target.value);
-        setCustomLocationFromSliders();
-        updateLatLonDisplay();
-        updateScene();
+      // Use current location button
+      document.getElementById('use-current-location').addEventListener('click', () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              updateLocation(lat, lon);
+              map.setView([lat, lon], 13);
+              document.getElementById('city').value = '0'; // Set to "Custom Location"
+            },
+            (error) => {
+              alert('Unable to get your location. Please ensure location permissions are enabled.');
+            }
+          );
+        } else {
+          alert('Geolocation is not supported by your browser.');
+        }
       });
 
       // Date
@@ -1772,6 +1840,67 @@ Shadow Calculation:
       document.getElementById('time-display').textContent = timeStr;
     }
 
+    // Initialize Leaflet map
+    function initMap(lat, lon) {
+      if (!map) {
+        // Create map centered on initial location
+        map = L.map('map').setView([lat, lon], 10);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(map);
+
+        // Add geocoder (search) control
+        const geocoder = L.Control.Geocoder.nominatim();
+        L.Control.geocoder({
+          geocoder: geocoder,
+          defaultMarkGeocode: false
+        })
+          .on('markgeocode', function (e) {
+            const latlng = e.geocode.center;
+            updateLocation(latlng.lat, latlng.lng);
+            map.setView(latlng, 13);
+          })
+          .addTo(map);
+
+        // Add marker
+        marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+
+        // Update on marker drag
+        marker.on('dragend', function (e) {
+          const latlng = marker.getLatLng();
+          updateLocation(latlng.lat, latlng.lng);
+        });
+
+        // Update on map click
+        map.on('click', function (e) {
+          updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+      } else {
+        // Just update existing map
+        map.setView([lat, lon], map.getZoom());
+        marker.setLatLng([lat, lon]);
+      }
+    }
+
+    // Update location coordinates
+    function updateLocation(lat, lon) {
+      // Update marker position
+      marker.setLatLng([lat, lon]);
+
+      // Update state
+      state.lat = lat;
+      state.lon = lon;
+
+      // Update display
+      updateLatLonDisplay();
+
+      // Trigger your existing shadow calculation
+      updateScene();
+    }
+
     // ============================================================================
     // INITIALIZATION
     // ============================================================================
@@ -1820,6 +1949,10 @@ Shadow Calculation:
     } else {
       init();
     }
+
+    // Initialize map with default location (New York coordinates)
+    initMap(40.7, -74.0);
+
   </script>
 </body>
 
