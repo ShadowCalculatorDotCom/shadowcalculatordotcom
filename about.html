@@ -73,8 +73,10 @@
     <p>
       The app uses the open-source library <strong>SunCalc</strong> for solar position
       calculations, <strong>Three.js</strong> for 3D visualization,
-      <strong>Leaflet.js</strong> for interactive maps, and <strong>OpenStreetMap</strong>
-      for map tiles and location search. All shadow computations happen locally on your device.
+      <strong>Leaflet.js</strong> for interactive maps, and <strong>CARTO</strong>
+      (powered by <strong>OpenStreetMap</strong> data) for map tiles and rendering.
+      Location search uses <strong>Nominatim</strong> geocoding via Leaflet Control Geocoder.
+      All shadow computations happen locally on your device.
     </p>
 
     <h2>Scientific assumptions</h2>
@@ -116,17 +118,30 @@
       The interactive map feature requires loading resources from external services:
     </p>
     <ul>
-      <li><strong>OpenStreetMap (map tiles):</strong> When you view the map, your browser requests map image tiles from
-        OpenStreetMap servers. They see your IP address and which map areas you're viewing, similar to visiting any
-        website. OpenStreetMap is a non-profit that does not track users or sell data. See their <a
-          href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank">Privacy Policy</a>.</li>
-      <li><strong>Nominatim (location search):</strong> When you search for a city or address, your search query is sent
-        to OpenStreetMap's Nominatim geocoding service. They see your IP address and search terms. See their <a
-          href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Usage Policy</a>.</li>
-      <li><strong>GitHub Pages (hosting):</strong> This site is hosted on GitHub Pages, which may collect basic
-        technical logs (IP address, user agent, page views) as part of their standard hosting. See GitHub's <a
-          href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
-          target="_blank">Privacy Statement</a>.</li>
+      <li><strong>CARTO (map tiles):</strong> When you view the map, your browser requests
+        map image tiles from CARTO's servers. They see your IP address and which map areas
+        you're viewing, similar to visiting any website. The map data comes from OpenStreetMap
+        contributors. CARTO may collect standard web analytics. See CARTO's
+        <a href="https://carto.com/privacy/" target="_blank">Privacy Policy</a>.
+      </li>
+
+      <li><strong>Nominatim (location search):</strong> When you search for a city or address,
+        your search query is sent to OpenStreetMap's Nominatim geocoding service. They see your
+        IP address and search terms. See their
+        <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Usage Policy</a>.
+      </li>
+
+      <li><strong>Google Fonts:</strong> The Inter font is loaded from Google Fonts, which may
+        log your IP address and browser information. See Google's
+        <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a>.
+      </li>
+
+      <li><strong>GitHub Pages (hosting):</strong> This site is hosted on GitHub Pages, which
+        may collect basic technical logs (IP address, user agent, page views) as part of their
+        standard hosting. See GitHub's
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
+          target="_blank">Privacy Statement</a>.
+      </li>
     </ul>
 
     <h3>No Analytics or Tracking</h3>
