@@ -72,8 +72,9 @@
 
     <p>
       The app uses the open-source library <strong>SunCalc</strong> for solar position
-      calculations and <strong>Three.js</strong> for 3D visualization in your browser.
-      All computations happen locally on your device.
+      calculations, <strong>Three.js</strong> for 3D visualization,
+      <strong>Leaflet.js</strong> for interactive maps, and <strong>OpenStreetMap</strong>
+      for map tiles and location search. All shadow computations happen locally on your device.
     </p>
 
     <h2>Scientific assumptions</h2>
@@ -97,11 +98,41 @@
     </p>
 
 
-    <h2>Privacy</h2>
+    <h2>Privacy & Data Usage</h2>
+
+    <h3>What Stays Local (Private)</h3>
     <p>
-      This site does not require login and does not intentionally collect personal data.
-      Any parameters you set are processed within your browser. Being deployed with GitHub Pages,
-      GitHub may collect basic technical logs as part of their hosting.
+      The following data never leaves your device:
+    </p>
+    <ul>
+      <li><strong>Your exact location:</strong> When you click "Use My Location," your browser determines your
+        coordinates locally using GPS/WiFi. This location is not transmitted to any server.</li>
+      <li><strong>Shadow calculations:</strong> All sun position math and 3D rendering happens in your browser.</li>
+      <li><strong>Settings:</strong> Date, time, object height, and other parameters are processed locally.</li>
+    </ul>
+
+    <h3>What Is Sent to Third Parties</h3>
+    <p>
+      The interactive map feature requires loading resources from external services:
+    </p>
+    <ul>
+      <li><strong>OpenStreetMap (map tiles):</strong> When you view the map, your browser requests map image tiles from
+        OpenStreetMap servers. They see your IP address and which map areas you're viewing, similar to visiting any
+        website. OpenStreetMap is a non-profit that does not track users or sell data. See their <a
+          href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank">Privacy Policy</a>.</li>
+      <li><strong>Nominatim (location search):</strong> When you search for a city or address, your search query is sent
+        to OpenStreetMap's Nominatim geocoding service. They see your IP address and search terms. See their <a
+          href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Usage Policy</a>.</li>
+      <li><strong>GitHub Pages (hosting):</strong> This site is hosted on GitHub Pages, which may collect basic
+        technical logs (IP address, user agent, page views) as part of their standard hosting. See GitHub's <a
+          href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
+          target="_blank">Privacy Statement</a>.</li>
+    </ul>
+
+    <h3>No Analytics or Tracking</h3>
+    <p>
+      This site does not use Google Analytics, advertising cookies, or any tracking scripts.
+      We do not collect, store, or sell your personal information.
     </p>
 
     <h2>Open-source license</h2>
@@ -113,7 +144,7 @@
 
     <p>
       Questions or comments? See the <a href="https://github.com/ShadowCalculatorDotCom/shadowcalculatordotcom">project
-        repository on GitHub<a>.
+        repository on GitHub</a>.
     </p>
   </main>
 </body>
