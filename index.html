@@ -2176,12 +2176,22 @@ Shadow Calculation:
       mapLoadPending = true;
 
       // Small delay to ensure Three.js renders first
-      requestIdleCallback(() => {
-        loadLeaflet().then(() => {
-          initMap(state.lat, state.lon);
-          mapInitialized = true;
-        });
-      }, { timeout: 1000 });
+      // Polyfill/fallback for Safari which doesn't support requestIdleCallback
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          loadLeaflet().then(() => {
+            initMap(state.lat, state.lon);
+            mapInitialized = true;
+          });
+        }, { timeout: 1000 });
+      } else {
+        setTimeout(() => {
+          loadLeaflet().then(() => {
+            initMap(state.lat, state.lon);
+            mapInitialized = true;
+          });
+        }, 100);
+      }
     }
 
     // Initialize Leaflet map
@@ -2282,6 +2292,12 @@ Shadow Calculation:
       // Setup event listeners
       setupEventListeners();
 
+      updateInfoPanelVisibility();
+
+      // MOVED: Handle layout before setting up observers
+      handleLayoutChange();
+      window.addEventListener('resize', handleLayoutChange);
+
       // Handle mobile defaults and layout
       if (window.innerWidth <= 768) {
         // Mobile: true lazy load with IntersectionObserver
@@ -2305,10 +2321,6 @@ Shadow Calculation:
         lazyInitMap();
       }
 
-      updateInfoPanelVisibility();
-      handleLayoutChange();
-      window.addEventListener('resize', handleLayoutChange);
-
       // Initial scene update
       updateScene();
     }
@@ -2319,7 +2331,6 @@ Shadow Calculation:
     } else {
       init();
     }
-
   </script>
 </body>
 
