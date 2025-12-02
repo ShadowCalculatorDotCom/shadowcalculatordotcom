@@ -1286,6 +1286,8 @@
 
     let scene, camera, renderer;
     let objectMesh, gridHelper;
+    let currentObjectType = null; // Track current type to avoid unnecessary rebuilds
+    let pendingUpdate = false; // For RAF throttling
 
     // Helper function to detect mobile devices
     function isMobile() {
@@ -1439,89 +1441,78 @@
     // OBJECT CREATION
     // ============================================================================
 
+    // Base height for creating objects (scale from this to actual height)
+    const BASE_HEIGHT = 1;
+
     function createObject(type, height) {
-      // Remove existing object
-      if (objectMesh) {
-        scene.remove(objectMesh);
-        objectMesh.traverse(child => {
-          if (child.geometry) child.geometry.dispose();
-          if (child.material) child.material.dispose();
-        });
+      // Only rebuild geometry if type changed
+      if (type !== currentObjectType) {
+        // Remove existing object
+        if (objectMesh) {
+          scene.remove(objectMesh);
+          objectMesh.traverse(child => {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) child.material.dispose();
+          });
+        }
+
+        objectMesh = new THREE.Group();
+        currentObjectType = type;
+
+        // Build geometry at BASE_HEIGHT (1 meter)
+        if (type === 'human') {
+          // Body
+          const bodyGeom = new THREE.CylinderGeometry(0.1, 0.1, BASE_HEIGHT * 0.6, 16);
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x16A34A });
+          const body = new THREE.Mesh(bodyGeom, bodyMat);
+          body.position.y = BASE_HEIGHT * 0.3;
+          body.castShadow = true;
+
+          // Head
+          const headGeom = new THREE.SphereGeometry(BASE_HEIGHT * 0.12, 16, 16);
+          const headMat = new THREE.MeshStandardMaterial({ color: 0x16A34A });
+          const head = new THREE.Mesh(headGeom, headMat);
+          head.position.y = BASE_HEIGHT * 0.65;
+          head.castShadow = true;
+
+          objectMesh.add(body);
+          objectMesh.add(head);
+
+        } else if (type === 'tree') {
+          // Trunk
+          const trunkGeom = new THREE.CylinderGeometry(BASE_HEIGHT * 0.05, BASE_HEIGHT * 0.08, BASE_HEIGHT * 0.4, 12);
+          const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7a4b2b });
+          const trunk = new THREE.Mesh(trunkGeom, trunkMat);
+          trunk.position.y = BASE_HEIGHT * 0.2;
+          trunk.castShadow = true;
+
+          // Canopy
+          const canopyGeom = new THREE.SphereGeometry(BASE_HEIGHT * 0.35, 20, 16);
+          const canopyMat = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
+          const canopy = new THREE.Mesh(canopyGeom, canopyMat);
+          canopy.position.y = BASE_HEIGHT * 0.55;
+          canopy.castShadow = true;
+
+          objectMesh.add(trunk);
+          objectMesh.add(canopy);
+
+        } else { // box
+          const boxGeom = new THREE.BoxGeometry(BASE_HEIGHT * 0.3, BASE_HEIGHT, BASE_HEIGHT * 0.3);
+          const boxMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+          const box = new THREE.Mesh(boxGeom, boxMat);
+          box.position.y = BASE_HEIGHT / 2;
+          box.castShadow = true;
+
+          objectMesh.add(box);
+        }
+
+        scene.add(objectMesh);
       }
 
-      objectMesh = new THREE.Group();
-
-      if (type === 'human') {
-        // Body
-        const bodyGeom = new THREE.CylinderGeometry(0.15, 0.15, height * 0.6, 16);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x16A34A });
-        const body = new THREE.Mesh(bodyGeom, bodyMat);
-        body.position.y = height * 0.3;
-        body.castShadow = true;
-
-        // Head
-        const headGeom = new THREE.SphereGeometry(height * 0.12, 16, 16);
-        const headMat = new THREE.MeshStandardMaterial({ color: 0x16A34A });
-        const head = new THREE.Mesh(headGeom, headMat);
-        head.position.y = height * 0.65;
-        head.castShadow = true;
-
-        objectMesh.add(body);
-        objectMesh.add(head);
-
-      } else if (type === 'tree') {
-        // Trunk
-        const trunkGeom = new THREE.CylinderGeometry(height * 0.05, height * 0.08, height * 0.4, 12);
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x7a4b2b });
-        const trunk = new THREE.Mesh(trunkGeom, trunkMat);
-        trunk.position.y = height * 0.2;
-        trunk.castShadow = true;
-
-        // Canopy
-        const canopyGeom = new THREE.SphereGeometry(height * 0.35, 20, 16);
-        const canopyMat = new THREE.MeshStandardMaterial({ color: 0x2f7d35 });
-        const canopy = new THREE.Mesh(canopyGeom, canopyMat);
-        canopy.position.y = height * 0.55;
-        canopy.castShadow = true;
-
-        objectMesh.add(trunk);
-        objectMesh.add(canopy);
-
-      } else { // box
-        const boxGeom = new THREE.BoxGeometry(height * 0.3, height, height * 0.3);
-        const boxMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
-        const box = new THREE.Mesh(boxGeom, boxMat);
-        box.position.y = height / 2;
-        box.castShadow = true;
-
-        objectMesh.add(box);
-      }
-
-      normalizeObjectHeight(objectMesh, height);
-
-      scene.add(objectMesh);
-    }
-
-    function normalizeObjectHeight(group, targetHeight) {
-      // Ensure world matrices are up to date
-      group.updateMatrixWorld(true);
-
-      const box = new THREE.Box3().setFromObject(group);
-      const currentHeight = box.max.y - box.min.y;
-
-      if (!isFinite(currentHeight) || currentHeight <= 0) return;
-
-      // Scale in Y so the total height equals targetHeight
-      const scaleY = targetHeight / currentHeight;
-      group.scale.set(1, scaleY, 1);
-
-      // Recompute bounding box after scaling
-      group.updateMatrixWorld(true);
-      box.setFromObject(group);
-
-      // Shift so the bottom sits exactly on the ground plane (y = 0)
-      const yOffset = -box.min.y;
-      group.position.y += yOffset;
+      // Scale to target height (uniform scale preserves proportions)
+      const scale = height / BASE_HEIGHT;
+      objectMesh.scale.set(scale, scale, scale);
+      objectMesh.position.y = 0; // Reset position after scaling
     }
 
 
@@ -1965,11 +1956,19 @@ Shadow Calculation:
         updateScene();
       });
 
-      // Time
+      // Time (throttled with RAF for smooth performance)
       dom.time.addEventListener('input', (e) => {
         state.timeMinutes = parseInt(e.target.value);
-        updateTimeDisplay();
-        updateScene();
+        updateTimeDisplay(); // Always update display immediately
+
+        // Throttle expensive updates to animation frame
+        if (!pendingUpdate) {
+          pendingUpdate = true;
+          requestAnimationFrame(() => {
+            updateScene();
+            pendingUpdate = false;
+          });
+        }
       });
 
       // Object type
