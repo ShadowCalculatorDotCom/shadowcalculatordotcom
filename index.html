@@ -1039,7 +1039,7 @@
       </div>
       <div id="info-panel">
         <div id="math-details"></div>
-        <div id="triangle-container">
+        <div id="triangle-container" class="hidden">
           <h3>Right Triangle – Side View</h3>
           <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
             <!-- Triangle fill -->
@@ -1690,6 +1690,11 @@ Shadow Calculation:
     }
 
     function updateTriangle(solar) {
+      // Skip all calculations if triangle is hidden
+      if (document.getElementById('triangle-container').classList.contains('hidden')) {
+        return;
+      }
+
       if (solar.altitudeDeg <= 0) {
         // No triangle when sun is below horizon
         document.getElementById('triangle-fill-path').setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
@@ -1976,6 +1981,8 @@ Shadow Calculation:
         const triangleContainer = document.getElementById('triangle-container');
         if (e.target.checked) {
           triangleContainer.classList.remove('hidden');
+          // Update triangle now that it's visible
+          updateTriangle(getSolarPosition());
         } else {
           triangleContainer.classList.add('hidden');
         }
@@ -2143,11 +2150,14 @@ Shadow Calculation:
 
         observer.observe(document.getElementById('map'));
 
-        // Default triangle to hidden on mobile
+        // Default triangle to hidden on mobile (already hidden via class in HTML)
         document.getElementById('show-triangle').checked = false;
-        document.getElementById('triangle-container').classList.add('hidden');
       } else {
-        // Desktop: defer to not block Three.js, but load quickly
+        // Desktop: show triangle by default and sync checkbox
+        document.getElementById('show-triangle').checked = true;
+        document.getElementById('triangle-container').classList.remove('hidden');
+
+        // Desktop: defer map load to not block Three.js, but load quickly
         lazyInitMap();
       }
 
