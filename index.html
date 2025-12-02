@@ -48,6 +48,10 @@
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
 
+  <!-- Preload critical scripts -->
+  <link rel="preload" href="https://unpkg.com/three@0.158.0/build/three.min.js" as="script">
+  <link rel="preload" href="https://unpkg.com/suncalc@1.9.0/suncalc.js" as="script">
+
   <!-- Leaflet loaded dynamically when map is needed -->
 
   <style>
@@ -1223,6 +1227,59 @@
       showMath: false
     };
 
+    // Cached DOM elements (populated in init)
+    const dom = {};
+
+    function cacheDOMElements() {
+      // Triangle elements
+      dom.triangleContainer = document.getElementById('triangle-container');
+      dom.triangleFillPath = document.getElementById('triangle-fill-path');
+      dom.trianglePath = document.getElementById('triangle-path');
+      dom.angleArc = document.getElementById('angle-arc');
+      dom.heightLabel = document.getElementById('height-label');
+      dom.heightValue = document.getElementById('height-value');
+      dom.shadowLabel = document.getElementById('shadow-label');
+      dom.shadowValue = document.getElementById('shadow-value');
+      dom.angleValue = document.getElementById('angle-value');
+
+      // Info panel elements
+      dom.infoPanel = document.getElementById('info-panel');
+      dom.mathDetails = document.getElementById('math-details');
+      dom.sunStatus = document.getElementById('sun-status');
+      dom.shadowLength = document.getElementById('shadow-length');
+      dom.shadowContext = document.getElementById('shadow-context');
+
+      // Controls
+      dom.showTriangle = document.getElementById('show-triangle');
+      dom.showMath = document.getElementById('show-math');
+      dom.showGrid = document.getElementById('show-grid');
+      dom.city = document.getElementById('city');
+      dom.date = document.getElementById('date');
+      dom.time = document.getElementById('time');
+      dom.timeDisplay = document.getElementById('time-display');
+
+      // Height inputs
+      dom.heightMetric = document.getElementById('height-metric');
+      dom.heightMetricContainer = document.getElementById('height-metric-container');
+      dom.heightImperialContainer = document.getElementById('height-imperial-container');
+      dom.heightFt = document.getElementById('height-ft');
+      dom.heightIn = document.getElementById('height-in');
+
+      // Location
+      dom.latDisplay = document.getElementById('lat-display');
+      dom.lonDisplay = document.getElementById('lon-display');
+      dom.map = document.getElementById('map');
+
+      // Layout elements
+      dom.sidebar = document.getElementById('sidebar');
+      dom.menuToggle = document.getElementById('menu-toggle');
+      dom.sceneContainer = document.getElementById('scene-container');
+      dom.locationSection = document.getElementById('location-section');
+      dom.objectSection = document.getElementById('object-section');
+      dom.datetimeSection = document.getElementById('datetime-section');
+      dom.mobileLocationContainer = document.getElementById('mobile-location-container');
+    }
+
     // ============================================================================
     // THREE.JS SCENE
     // ============================================================================
@@ -1241,7 +1298,7 @@
     }
 
     function initScene() {
-      const container = document.getElementById('scene-container');
+      const container = dom.sceneContainer;
 
       // Scene
       scene = new THREE.Scene();
@@ -1358,7 +1415,7 @@
     }
 
     function onWindowResize() {
-      const container = document.getElementById('scene-container');
+      const container = dom.sceneContainer;
       const width = container.clientWidth;
       const height = container.clientHeight;
       const aspect = width / height;
@@ -1588,25 +1645,22 @@
     }
 
     function updateSunStatus(solar) {
-      const statusEl = document.getElementById('sun-status');
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
       if (solar.altitudeDeg <= 0) {
-        statusEl.textContent = `Sun is below horizon at ${timeStr}. No shadow cast.`;
-        statusEl.className = 'status error';
+        dom.sunStatus.textContent = `Sun is below horizon at ${timeStr}. No shadow cast.`;
+        dom.sunStatus.className = 'status error';
       } else {
-        statusEl.textContent = `Sun altitude: ${solar.altitudeDeg.toFixed(1)}° at ${timeStr}`;
-        statusEl.className = 'status success';
+        dom.sunStatus.textContent = `Sun altitude: ${solar.altitudeDeg.toFixed(1)}° at ${timeStr}`;
+        dom.sunStatus.className = 'status success';
       }
     }
 
     function updateShadowInfo(solar) {
-      const lengthEl = document.getElementById('shadow-length');
-
       if (solar.altitudeDeg <= 0) {
-        lengthEl.textContent = 'No shadow';
+        dom.shadowLength.textContent = 'No shadow';
         return;
       }
 
@@ -1614,21 +1668,19 @@
 
       if (state.units === 'metric') {
         if (length < 1) {
-          lengthEl.textContent = `${(length * 100).toFixed(0)} cm`;
+          dom.shadowLength.textContent = `${(length * 100).toFixed(0)} cm`;
         } else {
-          lengthEl.textContent = `${length.toFixed(2)} m`;
+          dom.shadowLength.textContent = `${length.toFixed(2)} m`;
         }
       } else {
         const feet = length * 3.28084;
         const ft = Math.floor(feet);
         const inches = Math.round((feet - ft) * 12);
-        lengthEl.textContent = `${ft}' ${inches}"`;
+        dom.shadowLength.textContent = `${ft}' ${inches}"`;
       }
     }
 
     function updateShadowContext() {
-      const contextEl = document.getElementById('shadow-context');
-
       const city = CITIES[state.cityIndex];
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
@@ -1644,21 +1696,19 @@
         locationStr = city.name;
       }
 
-      contextEl.textContent = `${dateStr} at ${timeStr} • ${locationStr}`;
+      dom.shadowContext.textContent = `${dateStr} at ${timeStr} • ${locationStr}`;
     }
 
     function updateMathDetails(solar) {
-      const mathEl = document.getElementById('math-details');
-
       if (!state.showMath) {
-        mathEl.classList.remove('visible');
+        dom.mathDetails.classList.remove('visible');
         return;
       }
 
-      mathEl.classList.add('visible');
+      dom.mathDetails.classList.add('visible');
 
       if (solar.altitudeDeg <= 0) {
-        mathEl.textContent = 'No shadow math: Sun is below horizon';
+        dom.mathDetails.textContent = 'No shadow math: Sun is below horizon';
         return;
       }
 
@@ -1672,7 +1722,7 @@
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-      mathEl.textContent = `Location: ${city.name}
+      dom.mathDetails.textContent = `Location: ${city.name}
 Date: ${dateStr}
 Time: ${timeStr} (local)
 
@@ -1695,18 +1745,18 @@ Shadow Calculation:
 
     function updateTriangle(solar) {
       // Skip all calculations if triangle is hidden
-      if (document.getElementById('triangle-container').classList.contains('hidden')) {
+      if (dom.triangleContainer.classList.contains('hidden')) {
         return;
       }
 
       if (solar.altitudeDeg <= 0) {
         // No triangle when sun is below horizon
-        document.getElementById('triangle-fill-path').setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
-        document.getElementById('triangle-path').setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
-        document.getElementById('angle-arc').setAttribute('d', '');
-        document.getElementById('height-value').textContent = '—';
-        document.getElementById('shadow-value').textContent = '—';
-        document.getElementById('angle-value').textContent = '—';
+        dom.triangleFillPath.setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
+        dom.trianglePath.setAttribute('d', 'M 80 190 L 80 190 L 80 190 Z');
+        dom.angleArc.setAttribute('d', '');
+        dom.heightValue.textContent = '—';
+        dom.shadowValue.textContent = '—';
+        dom.angleValue.textContent = '—';
         return;
       }
 
@@ -1736,8 +1786,8 @@ Shadow Calculation:
 
       // Update triangle paths
       const trianglePath = `M ${baseX} ${baseY} L ${topX} ${topY} L ${endX} ${endY} Z`;
-      document.getElementById('triangle-fill-path').setAttribute('d', trianglePath);
-      document.getElementById('triangle-path').setAttribute('d', trianglePath);
+      dom.triangleFillPath.setAttribute('d', trianglePath);
+      dom.trianglePath.setAttribute('d', trianglePath);
 
       // Update angle arc (at bottom-right corner)
       const arcRadius = angle > 50 ? Math.max(10, 40 - (angle - 50) * 0.6) : 40;
@@ -1752,16 +1802,16 @@ Shadow Calculation:
 
       // Arc goes from horizontal line up to the hypotenuse
       const arcPath = `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 0 1 ${arcEndX} ${arcEndY}`;
-      document.getElementById('angle-arc').setAttribute('d', arcPath);
+      dom.angleArc.setAttribute('d', arcPath);
 
       // Update labels
       // Height label (on left side)
       const heightLabelX = baseX - 25;
       const heightLabelY = baseY - heightPx / 2;
-      document.getElementById('height-label').setAttribute('x', heightLabelX);
-      document.getElementById('height-label').setAttribute('y', heightLabelY - 5);
-      document.getElementById('height-value').setAttribute('x', heightLabelX);
-      document.getElementById('height-value').setAttribute('y', heightLabelY + 15);
+      dom.heightLabel.setAttribute('x', heightLabelX);
+      dom.heightLabel.setAttribute('y', heightLabelY - 5);
+      dom.heightValue.setAttribute('x', heightLabelX);
+      dom.heightValue.setAttribute('y', heightLabelY + 15);
 
       // Format height value
       let heightText;
@@ -1781,15 +1831,15 @@ Shadow Calculation:
           heightText = `${ft}' ${inches}"`;
         }
       }
-      document.getElementById('height-value').textContent = heightText;
+      dom.heightValue.textContent = heightText;
 
       // Shadow label (on bottom)
       const shadowLabelX = baseX + lengthPx / 2;
       const shadowLabelY = baseY + 20;
-      document.getElementById('shadow-label').setAttribute('x', shadowLabelX);
-      document.getElementById('shadow-label').setAttribute('y', shadowLabelY);
-      document.getElementById('shadow-value').setAttribute('x', shadowLabelX);
-      document.getElementById('shadow-value').setAttribute('y', shadowLabelY + 20);
+      dom.shadowLabel.setAttribute('x', shadowLabelX);
+      dom.shadowLabel.setAttribute('y', shadowLabelY);
+      dom.shadowValue.setAttribute('x', shadowLabelX);
+      dom.shadowValue.setAttribute('y', shadowLabelY + 20);
 
       // Format shadow value
       let shadowText;
@@ -1805,7 +1855,7 @@ Shadow Calculation:
         const inches = Math.round((feet - ft) * 12);
         shadowText = `${ft}' ${inches}"`;
       }
-      document.getElementById('shadow-value').textContent = shadowText;
+      dom.shadowValue.textContent = shadowText;
 
       // Angle label (positioned near the arc at bottom-right corner)
       const angleLabelX = endX - arcRadius - 15;
@@ -1813,41 +1863,37 @@ Shadow Calculation:
       const angleX = angle < 23 ? angleLabelX + 35 : angleLabelX + 5; // Shift right when angle < 23
       const angleY = angle < 23 ? angleLabelY - 10 : angleLabelY + 10; // Shift up when angle < 23  
 
-      document.getElementById('angle-value').setAttribute('x', angleX);
-      document.getElementById('angle-value').setAttribute('y', angleY);
-      document.getElementById('angle-value').setAttribute('text-anchor', 'end');
-      document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
+      dom.angleValue.setAttribute('x', angleX);
+      dom.angleValue.setAttribute('y', angleY);
+      dom.angleValue.setAttribute('text-anchor', 'end');
+      dom.angleValue.textContent = `${angle.toFixed(1)}°`;
     }
 
     function updateHeightInputsFromState() {
-      const metricContainer = document.getElementById('height-metric-container');
-      const imperialContainer = document.getElementById('height-imperial-container');
-
       if (state.units === 'metric') {
-        metricContainer.style.display = 'flex';
-        imperialContainer.style.display = 'none';
-        document.getElementById('height-metric').value = state.height.toFixed(2);
+        dom.heightMetricContainer.style.display = 'flex';
+        dom.heightImperialContainer.style.display = 'none';
+        dom.heightMetric.value = state.height.toFixed(2);
       } else {
-        metricContainer.style.display = 'none';
-        imperialContainer.style.display = 'flex';
+        dom.heightMetricContainer.style.display = 'none';
+        dom.heightImperialContainer.style.display = 'flex';
         // Convert meters to feet/inches
         const totalFeet = state.height * 3.28084;
         const ft = Math.floor(totalFeet);
         const inches = Math.round((totalFeet - ft) * 12);
-        document.getElementById('height-ft').value = ft;
-        document.getElementById('height-in').value = inches;
+        dom.heightFt.value = ft;
+        dom.heightIn.value = inches;
       }
     }
 
     function updateInfoPanelVisibility() {
-      const infoPanel = document.getElementById('info-panel');
-      const showMath = document.getElementById('show-math').checked;
-      const showTriangle = document.getElementById('show-triangle').checked;
+      const showMath = dom.showMath.checked;
+      const showTriangle = dom.showTriangle.checked;
 
       if (!showMath && !showTriangle) {
-        infoPanel.style.display = 'none';
+        dom.infoPanel.style.display = 'none';
       } else {
-        infoPanel.style.display = 'flex';
+        dom.infoPanel.style.display = 'flex';
       }
     }
 
@@ -1856,7 +1902,6 @@ Shadow Calculation:
     // ============================================================================
 
     function setCustomLocationFromSliders() {
-      const citySelect = document.getElementById('city');
       // Keep the custom city entry in sync with the sliders
       CITIES[CUSTOM_CITY_INDEX].lat = state.lat;
       CITIES[CUSTOM_CITY_INDEX].lon = state.lon;
@@ -1864,27 +1909,25 @@ Shadow Calculation:
       CITIES[CUSTOM_CITY_INDEX].tz = estimateTimezoneFromLongitude(state.lon);
       // Switch state and dropdown to Custom
       state.cityIndex = CUSTOM_CITY_INDEX;
-      citySelect.value = String(CUSTOM_CITY_INDEX);
+      dom.city.value = String(CUSTOM_CITY_INDEX);
     }
 
     function setupEventListeners() {
       // Mobile menu toggle
-      document.getElementById('menu-toggle').addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('open');
+      dom.menuToggle.addEventListener('click', () => {
+        dom.sidebar.classList.toggle('open');
       });
 
       // Close sidebar when clicking outside on mobile
       document.getElementById('main').addEventListener('click', () => {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar.classList.contains('open') && window.innerWidth <= 768) {
-          sidebar.classList.remove('open');
+        if (dom.sidebar.classList.contains('open') && window.innerWidth <= 768) {
+          dom.sidebar.classList.remove('open');
         }
       });
 
       // City selection
       // For Custom Location (value 0), this uses the last lat/lon set by sliders
-      document.getElementById('city').addEventListener('change', (e) => {
+      dom.city.addEventListener('change', (e) => {
         state.cityIndex = parseInt(e.target.value);
         const city = CITIES[state.cityIndex];
         state.lat = city.lat;
@@ -1905,7 +1948,7 @@ Shadow Calculation:
               const lon = position.coords.longitude;
               updateLocation(lat, lon);
               map.setView([lat, lon], 13);
-              document.getElementById('city').value = '0'; // Set to "Custom Location"
+              dom.city.value = '0'; // Set to "Custom Location"
             },
             (error) => {
               alert('Unable to get your location. Please ensure location permissions are enabled.');
@@ -1917,13 +1960,13 @@ Shadow Calculation:
       });
 
       // Date
-      document.getElementById('date').addEventListener('change', (e) => {
+      dom.date.addEventListener('change', (e) => {
         state.date = new Date(e.target.value + 'T12:00:00');
         updateScene();
       });
 
       // Time
-      document.getElementById('time').addEventListener('input', (e) => {
+      dom.time.addEventListener('input', (e) => {
         state.timeMinutes = parseInt(e.target.value);
         updateTimeDisplay();
         updateScene();
@@ -1938,21 +1981,21 @@ Shadow Calculation:
       });
 
       // Height (Metric)
-      document.getElementById('height-metric').addEventListener('input', (e) => {
+      dom.heightMetric.addEventListener('input', (e) => {
         state.height = parseFloat(e.target.value);
         updateScene();
       });
 
       // Height (Imperial)
       const updateImperialHeight = () => {
-        const ft = parseFloat(document.getElementById('height-ft').value) || 0;
-        const inches = parseFloat(document.getElementById('height-in').value) || 0;
+        const ft = parseFloat(dom.heightFt.value) || 0;
+        const inches = parseFloat(dom.heightIn.value) || 0;
         // Convert feet/inches to meters
         state.height = (ft * 0.3048) + (inches * 0.0254);
         updateScene();
       };
-      document.getElementById('height-ft').addEventListener('input', updateImperialHeight);
-      document.getElementById('height-in').addEventListener('input', updateImperialHeight);
+      dom.heightFt.addEventListener('input', updateImperialHeight);
+      dom.heightIn.addEventListener('input', updateImperialHeight);
 
       // Units Change
       document.querySelectorAll('input[name="units"]').forEach(radio => {
@@ -1963,13 +2006,13 @@ Shadow Calculation:
         });
       });
       // Grid toggle
-      document.getElementById('show-grid').addEventListener('change', (e) => {
+      dom.showGrid.addEventListener('change', (e) => {
         state.showGrid = e.target.checked;
         updateScene();
       });
 
       // Math details toggle
-      document.getElementById('show-math').addEventListener('change', (e) => {
+      dom.showMath.addEventListener('change', (e) => {
         state.showMath = e.target.checked;
         updateScene();
         updateInfoPanelVisibility();
@@ -1981,14 +2024,13 @@ Shadow Calculation:
       });
 
       // Triangle diagram toggle
-      document.getElementById('show-triangle').addEventListener('change', (e) => {
-        const triangleContainer = document.getElementById('triangle-container');
+      dom.showTriangle.addEventListener('change', (e) => {
         if (e.target.checked) {
-          triangleContainer.classList.remove('hidden');
+          dom.triangleContainer.classList.remove('hidden');
           // Update triangle now that it's visible
           updateTriangle(getSolarPosition());
         } else {
-          triangleContainer.classList.add('hidden');
+          dom.triangleContainer.classList.add('hidden');
         }
         updateInfoPanelVisibility();
 
@@ -2000,43 +2042,34 @@ Shadow Calculation:
     }
 
     function handleLayoutChange() {
-      const locationSection = document.getElementById('location-section');
-      const objectSection = document.getElementById('object-section');
-      const mobileContainer = document.getElementById('mobile-location-container');
-      const sidebar = document.getElementById('sidebar');
-      const datetimeSection = document.getElementById('datetime-section');
-
       if (window.innerWidth <= 768) {
         // Mobile: Move location to main area
-        if (locationSection.parentElement !== mobileContainer) {
-          mobileContainer.appendChild(datetimeSection);
-          mobileContainer.appendChild(locationSection);
+        if (dom.locationSection.parentElement !== dom.mobileLocationContainer) {
+          dom.mobileLocationContainer.appendChild(dom.datetimeSection);
+          dom.mobileLocationContainer.appendChild(dom.locationSection);
         }
       } else {
         // Desktop: Move location back to sidebar
-        if (locationSection.parentElement !== sidebar) {
-          sidebar.insertBefore(dateTimeSection, objectSection);
-          sidebar.insertBefore(locationSection, datetimeSection);
+        if (dom.locationSection.parentElement !== dom.sidebar) {
+          dom.sidebar.insertBefore(dom.datetimeSection, dom.objectSection);
+          dom.sidebar.insertBefore(dom.locationSection, dom.datetimeSection);
         }
       }
     }
 
     function updateLatLonDisplay() {
-      const latDisplay = document.getElementById('lat-display');
-      const lonDisplay = document.getElementById('lon-display');
-
       const latDir = state.lat >= 0 ? 'N' : 'S';
       const lonDir = state.lon >= 0 ? 'E' : 'W';
 
-      latDisplay.textContent = `${Math.abs(state.lat).toFixed(1)}°${latDir}`;
-      lonDisplay.textContent = `${Math.abs(state.lon).toFixed(1)}°${lonDir}`;
+      dom.latDisplay.textContent = `${Math.abs(state.lat).toFixed(1)}°${latDir}`;
+      dom.lonDisplay.textContent = `${Math.abs(state.lon).toFixed(1)}°${lonDir}`;
     }
 
     function updateTimeDisplay() {
       const hours = Math.floor(state.timeMinutes / 60);
       const minutes = state.timeMinutes % 60;
       const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      document.getElementById('time-display').textContent = timeStr;
+      dom.timeDisplay.textContent = timeStr;
     }
 
     function loadLeaflet() {
@@ -2139,7 +2172,7 @@ Shadow Calculation:
       state.lon = lon;
 
       state.cityIndex = 0; // Set state to Custom
-      document.getElementById('city').value = '0'; // Update dropdown
+      dom.city.value = '0'; // Update dropdown
 
       // Update display
       updateLatLonDisplay();
@@ -2153,16 +2186,19 @@ Shadow Calculation:
     // ============================================================================
 
     function init() {
+      // Cache DOM elements first
+      cacheDOMElements();
+
       // Set default date to today
       const today = new Date();
       const dateStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-      document.getElementById('date').value = dateStr;
+      dom.date.value = dateStr;
       state.date = today;
 
       // Set time to current local time
       const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
       state.timeMinutes = currentTimeMinutes;
-      document.getElementById('time').value = currentTimeMinutes;
+      dom.time.value = currentTimeMinutes;
 
 
       // Initialize displays
@@ -2186,14 +2222,14 @@ Shadow Calculation:
           }
         }, { rootMargin: '100px' }); // Load 100px before it's visible
 
-        observer.observe(document.getElementById('map'));
+        observer.observe(dom.map);
 
         // Default triangle to hidden on mobile (already hidden via class in HTML)
-        document.getElementById('show-triangle').checked = false;
+        dom.showTriangle.checked = false;
       } else {
         // Desktop: show triangle by default and sync checkbox
-        document.getElementById('show-triangle').checked = true;
-        document.getElementById('triangle-container').classList.remove('hidden');
+        dom.showTriangle.checked = true;
+        dom.triangleContainer.classList.remove('hidden');
 
         // Desktop: defer map load to not block Three.js, but load quickly
         lazyInitMap();
