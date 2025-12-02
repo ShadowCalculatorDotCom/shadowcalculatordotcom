@@ -880,10 +880,23 @@
           </div>
         </div>
         <div class="field">
-          <label for="height">Height</label>
-          <div class="input-with-unit">
-            <input type="number" id="height" min="0.1" max="100" step="0.1" value="5.74">
-            <span class="unit" id="height-unit">ft</span>
+          <label>Height</label>
+          <!-- Metric Input (Hidden by default if starting in Imperial) -->
+          <div id="height-metric-container" class="input-with-unit" style="display: none;">
+            <input type="number" id="height-metric" min="0.1" max="100" step="0.01">
+            <span class="unit">m</span>
+          </div>
+
+          <!-- Imperial Input -->
+          <div id="height-imperial-container" class="radio-group" style="gap: 10px;">
+            <div class="input-with-unit">
+              <input type="number" id="height-ft" min="0" max="100" step="1">
+              <span class="unit">ft</span>
+            </div>
+            <div class="input-with-unit">
+              <input type="number" id="height-in" min="0" max="11" step="1">
+              <span class="unit">in</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1635,6 +1648,26 @@ Shadow Calculation:
       document.getElementById('angle-value').textContent = `${angle.toFixed(1)}°`;
     }
 
+    function updateHeightInputsFromState() {
+      const metricContainer = document.getElementById('height-metric-container');
+      const imperialContainer = document.getElementById('height-imperial-container');
+
+      if (state.units === 'metric') {
+        metricContainer.style.display = 'flex';
+        imperialContainer.style.display = 'none';
+        document.getElementById('height-metric').value = state.height.toFixed(2);
+      } else {
+        metricContainer.style.display = 'none';
+        imperialContainer.style.display = 'flex';
+        // Convert meters to feet/inches
+        const totalFeet = state.height * 3.28084;
+        const ft = Math.floor(totalFeet);
+        const inches = Math.round((totalFeet - ft) * 12);
+        document.getElementById('height-ft').value = ft;
+        document.getElementById('height-in').value = inches;
+      }
+    }
+
     function updateInfoPanelVisibility() {
       const infoPanel = document.getElementById('info-panel');
       const showMath = document.getElementById('show-math').checked;
@@ -1733,42 +1766,31 @@ Shadow Calculation:
         });
       });
 
-      // Height
-      document.getElementById('height').addEventListener('input', (e) => {
-        let value = parseFloat(e.target.value);
-        if (state.units === 'imperial') {
-          value = value * 0.3048; // feet to meters
-        }
-        state.height = value;
+      // Height (Metric)
+      document.getElementById('height-metric').addEventListener('input', (e) => {
+        state.height = parseFloat(e.target.value);
         updateScene();
       });
 
-      // Units
+      // Height (Imperial)
+      const updateImperialHeight = () => {
+        const ft = parseFloat(document.getElementById('height-ft').value) || 0;
+        const inches = parseFloat(document.getElementById('height-in').value) || 0;
+        // Convert feet/inches to meters
+        state.height = (ft * 0.3048) + (inches * 0.0254);
+        updateScene();
+      };
+      document.getElementById('height-ft').addEventListener('input', updateImperialHeight);
+      document.getElementById('height-in').addEventListener('input', updateImperialHeight);
+
+      // Units Change
       document.querySelectorAll('input[name="units"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-          const oldUnits = state.units;
           state.units = e.target.value;
-
-          // Convert height value in input
-          const heightInput = document.getElementById('height');
-          let currentValue = parseFloat(heightInput.value);
-
-          if (oldUnits === 'metric' && state.units === 'imperial') {
-            // m to ft
-            heightInput.value = (state.height * 3.28084).toFixed(2);
-            heightInput.step = '0.1';
-            document.getElementById('height-unit').textContent = 'ft';
-          } else if (oldUnits === 'imperial' && state.units === 'metric') {
-            // ft to m
-            heightInput.value = state.height.toFixed(2);
-            heightInput.step = '0.1';
-            document.getElementById('height-unit').textContent = 'm';
-          }
-
+          updateHeightInputsFromState();
           updateScene();
         });
       });
-
       // Grid toggle
       document.getElementById('show-grid').addEventListener('change', (e) => {
         state.showGrid = e.target.checked;
@@ -1925,6 +1947,7 @@ Shadow Calculation:
       // Initialize displays
       updateLatLonDisplay();
       updateTimeDisplay();
+      updateHeightInputsFromState();
 
       // Initialize Three.js scene
       initScene();
