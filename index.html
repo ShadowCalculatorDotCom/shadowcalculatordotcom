@@ -2090,13 +2090,24 @@ Shadow Calculation:
         geocoderCss.href = 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css';
         document.head.appendChild(geocoderCss);
 
-        // Load Leaflet JS first, then Geocoder
+        // Gesture handling CSS (for two-finger scroll on mobile)
+        const gestureCss = document.createElement('link');
+        gestureCss.rel = 'stylesheet';
+        gestureCss.href = 'https://unpkg.com/leaflet-gesture-handling/dist/leaflet-gesture-handling.min.css';
+        document.head.appendChild(gestureCss);
+
+        // Load Leaflet JS first, then Geocoder, then Gesture Handling
         const leafletJs = document.createElement('script');
         leafletJs.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
         leafletJs.onload = () => {
           const geocoderJs = document.createElement('script');
           geocoderJs.src = 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js';
-          geocoderJs.onload = resolve;
+          geocoderJs.onload = () => {
+            const gestureJs = document.createElement('script');
+            gestureJs.src = 'https://unpkg.com/leaflet-gesture-handling/dist/leaflet-gesture-handling.min.js';
+            gestureJs.onload = resolve;
+            document.head.appendChild(gestureJs);
+          };
           document.head.appendChild(geocoderJs);
         };
         document.head.appendChild(leafletJs);
@@ -2120,7 +2131,10 @@ Shadow Calculation:
     function initMap(lat, lon) {
       if (!map) {
         // Create map centered on initial location
-        map = L.map('map').setView([lat, lon], 10);
+        // gestureHandling requires two-finger touch on mobile to pan
+        map = L.map('map', {
+          gestureHandling: true
+        }).setView([lat, lon], 10);
 
         // Add CartoDB Positron tiles (clean, minimal style)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
