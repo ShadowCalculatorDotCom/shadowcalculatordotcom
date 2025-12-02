@@ -40,11 +40,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Leaflet map library -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <!-- Preconnect for lazy-loaded resources -->
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+
+  <!-- Leaflet loaded dynamically when map is needed -->
 
   <style>
     :root {
@@ -2035,14 +2035,48 @@ Shadow Calculation:
       document.getElementById('time-display').textContent = timeStr;
     }
 
+    function loadLeaflet() {
+      return new Promise((resolve) => {
+        // Check if already loaded
+        if (window.L && window.L.Control.Geocoder) {
+          resolve();
+          return;
+        }
+
+        // Load CSS files
+        const leafletCss = document.createElement('link');
+        leafletCss.rel = 'stylesheet';
+        leafletCss.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(leafletCss);
+
+        const geocoderCss = document.createElement('link');
+        geocoderCss.rel = 'stylesheet';
+        geocoderCss.href = 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css';
+        document.head.appendChild(geocoderCss);
+
+        // Load Leaflet JS first, then Geocoder
+        const leafletJs = document.createElement('script');
+        leafletJs.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        leafletJs.onload = () => {
+          const geocoderJs = document.createElement('script');
+          geocoderJs.src = 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js';
+          geocoderJs.onload = resolve;
+          document.head.appendChild(geocoderJs);
+        };
+        document.head.appendChild(leafletJs);
+      });
+    }
+
     function lazyInitMap() {
       if (mapInitialized || mapLoadPending) return;
       mapLoadPending = true;
 
       // Small delay to ensure Three.js renders first
       requestIdleCallback(() => {
-        initMap(state.lat, state.lon);
-        mapInitialized = true;
+        loadLeaflet().then(() => {
+          initMap(state.lat, state.lon);
+          mapInitialized = true;
+        });
       }, { timeout: 1000 });
     }
 
