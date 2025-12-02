@@ -1073,6 +1073,8 @@
 
     let map;
     let marker;
+    let mapInitialized = false;
+    let mapLoadPending = false;
 
     const CITIES = [
       // index 0 → value "0" → Custom Location
@@ -2026,6 +2028,17 @@ Shadow Calculation:
       document.getElementById('time-display').textContent = timeStr;
     }
 
+    function lazyInitMap() {
+      if (mapInitialized || mapLoadPending) return;
+      mapLoadPending = true;
+
+      // Small delay to ensure Three.js renders first
+      requestIdleCallback(() => {
+        initMap(state.lat, state.lon);
+        mapInitialized = true;
+      }, { timeout: 1000 });
+    }
+
     // Initialize Leaflet map
     function initMap(lat, lon) {
       if (!map) {
@@ -2120,9 +2133,22 @@ Shadow Calculation:
 
       // Handle mobile defaults and layout
       if (window.innerWidth <= 768) {
+        // Mobile: true lazy load with IntersectionObserver
+        const observer = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            lazyInitMap();
+            observer.disconnect();
+          }
+        }, { rootMargin: '100px' }); // Load 100px before it's visible
+
+        observer.observe(document.getElementById('map'));
+
         // Default triangle to hidden on mobile
         document.getElementById('show-triangle').checked = false;
         document.getElementById('triangle-container').classList.add('hidden');
+      } else {
+        // Desktop: defer to not block Three.js, but load quickly
+        lazyInitMap();
       }
 
       updateInfoPanelVisibility();
@@ -2139,9 +2165,6 @@ Shadow Calculation:
     } else {
       init();
     }
-
-    // Initialize map with default location (New York coordinates)
-    initMap(40.7, -74.0);
 
   </script>
 </body>
