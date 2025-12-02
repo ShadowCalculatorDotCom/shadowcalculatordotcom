@@ -2080,6 +2080,9 @@ Shadow Calculation:
       state.lat = lat;
       state.lon = lon;
 
+      state.cityIndex = 0; // Set state to Custom
+      document.getElementById('city').value = '0'; // Update dropdown
+
       // Update display
       updateLatLonDisplay();
 
