@@ -1,6 +1,6 @@
 # shadowcalculatordotcom
 
-Shadow Calculator is an educational web app that visualizes how shadows change
+Shadow Calculator is an educational web app hosted on [ShadowCalculator.com](https://ShadowCalculator.com/) that visualizes how shadows change
 with date, time, latitude, and object height.
 
 - Live 3D visualization using [Three.js](https://threejs.org/)
@@ -35,4 +35,5 @@ This is a static site. To run it locally:
 
    ```bash
    python -m http.server 8000
+
 3. Visit http://localhost:8000
