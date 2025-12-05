@@ -4,6 +4,38 @@ import { getSolarPosition, calculateShadowLength } from './math.js';
 import { updateLightPosition, onWindowResize } from './scene.js';
 import { createObject } from './objects.js';
 
+import { updateUrlFromState } from './utils.js';
+
+export function initShareButton() {
+    const btn = document.getElementById('share-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+
+            // Show feedback
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Copied!
+            `;
+            btn.classList.add('success');
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('success');
+            }, 2000);
+
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy URL');
+        }
+    });
+}
+
 export function updateScene() {
     // Update grid visibility
     if (sceneState.gridHelper) {
@@ -25,6 +57,9 @@ export function updateScene() {
     updateShadowContext();
     updateTriangle(solar);
     updateMathDetails(solar);
+
+    // Update deep link URL
+    updateUrlFromState(state);
 }
 
 function updateSunStatus(solar) {

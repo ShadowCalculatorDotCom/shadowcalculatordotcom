@@ -9,9 +9,10 @@ import {
     updateLatLonDisplay,
     updateTimeDisplay,
     handleLayoutChange,
-    updateTriangle
+    updateTriangle,
+    initShareButton
 } from './ui.js';
-import { estimateTimezoneFromLongitude } from './utils.js';
+import { estimateTimezoneFromLongitude, getParamsFromUrl, updateUrlFromState } from './utils.js';
 import { getSolarPosition } from './math.js';
 
 function setupEventListeners() {
@@ -161,19 +162,47 @@ function init() {
     dom.date.value = dateStr;
     state.date = today;
 
-    // Set random city on load (excluding custom index 0)
-    // Math.random() gives [0, 1). Multiplied by (length - 1) gives [0, length - 1). 
-    // Plus 1 gives [1, length). Floor gives integer index from 1 to length-1.
-    const randomCityIndex = Math.floor(Math.random() * (CITIES.length - 1)) + 1;
-    state.cityIndex = randomCityIndex;
-    const city = CITIES[randomCityIndex];
-    state.lat = city.lat;
-    state.lon = city.lon;
-    dom.city.value = randomCityIndex;
+    // Check for URL parameters first
+    const params = getParamsFromUrl();
+    const hasLocationParams = params.lat && params.lon;
 
-    // Set time to mid-day (12:00 = 720 minutes)
-    state.timeMinutes = 720;
-    dom.time.value = 720;
+    if (hasLocationParams) {
+        // Hydrate from URL
+        state.lat = parseFloat(params.lat);
+        state.lon = parseFloat(params.lon);
+        state.cityIndex = 0; // Custom location
+        dom.city.value = '0';
+
+        if (params.date) {
+            state.date = new Date(params.date + 'T12:00:00');
+            dom.date.value = params.date;
+        }
+
+        if (params.time) {
+            state.timeMinutes = parseInt(params.time);
+            dom.time.value = state.timeMinutes;
+        }
+
+        if (params.object) {
+            state.objectType = params.object;
+            // Sync radio button
+            const radio = document.querySelector(`input[name="object-type"][value="${params.object}"]`);
+            if (radio) radio.checked = true;
+        }
+
+    } else {
+        // Fallback: Set random city on load
+        const randomCityIndex = Math.floor(Math.random() * (CITIES.length - 1)) + 1;
+        state.cityIndex = randomCityIndex;
+        const city = CITIES[randomCityIndex];
+        state.lat = city.lat;
+        state.lon = city.lon;
+        dom.city.value = randomCityIndex;
+
+        // Set time to mid-day
+        state.timeMinutes = 720;
+        dom.time.value = 720;
+    }
 
 
     // Initialize displays
@@ -188,6 +217,9 @@ function init() {
     setupEventListeners();
 
     updateInfoPanelVisibility();
+
+    // Initialize share button
+    initShareButton();
 
     // MOVED: Handle layout before setting up observers
     handleLayoutChange();

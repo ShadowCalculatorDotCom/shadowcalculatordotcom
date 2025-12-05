@@ -44,3 +44,37 @@ export function estimateTimezoneFromLongitude(lon) {
 
     return tzMap[utcOffset.toString()] || 'UTC';
 }
+
+// Parse URL query parameters
+export function getParamsFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        lat: params.get('lat'),
+        lon: params.get('lon'),
+        date: params.get('date'),
+        time: params.get('time'),
+        object: params.get('obj'),
+        height: params.get('h')
+    };
+}
+
+// Update URL without reloading
+let urlUpdateTimeout;
+export function updateUrlFromState(state) {
+    // Debounce updates to avoid spamming history
+    clearTimeout(urlUpdateTimeout);
+    urlUpdateTimeout = setTimeout(() => {
+        const params = new URLSearchParams();
+        params.set('lat', parseFloat(state.lat).toFixed(4));
+        params.set('lon', parseFloat(state.lon).toFixed(4));
+
+        const dateStr = state.date.toISOString().split('T')[0];
+        params.set('date', dateStr);
+
+        params.set('time', state.timeMinutes);
+        params.set('obj', state.objectType);
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+    }, 500);
+}
