@@ -161,10 +161,19 @@ function init() {
     dom.date.value = dateStr;
     state.date = today;
 
-    // Set time to current local time
-    const currentTimeMinutes = today.getHours() * 60 + today.getMinutes();
-    state.timeMinutes = currentTimeMinutes;
-    dom.time.value = currentTimeMinutes;
+    // Set random city on load (excluding custom index 0)
+    // Math.random() gives [0, 1). Multiplied by (length - 1) gives [0, length - 1). 
+    // Plus 1 gives [1, length). Floor gives integer index from 1 to length-1.
+    const randomCityIndex = Math.floor(Math.random() * (CITIES.length - 1)) + 1;
+    state.cityIndex = randomCityIndex;
+    const city = CITIES[randomCityIndex];
+    state.lat = city.lat;
+    state.lon = city.lon;
+    dom.city.value = randomCityIndex;
+
+    // Set time to mid-day (12:00 = 720 minutes)
+    state.timeMinutes = 720;
+    dom.time.value = 720;
 
 
     // Initialize displays
