@@ -1,19 +1,33 @@
 import { dom, sceneState } from './state.js';
 
 import { getViewSize } from './utils.js';
-import * as THREE from 'three';
+
+import {
+    Scene,
+    OrthographicCamera,
+    WebGLRenderer,
+    PCFSoftShadowMap,
+    AmbientLight,
+    DirectionalLight,
+    PlaneGeometry,
+    ShadowMaterial,
+    Mesh,
+    GridHelper,
+    CanvasTexture,
+    MeshBasicMaterial
+} from 'three';
 
 export function initScene() {
     const container = dom.sceneContainer;
 
     // Scene
-    sceneState.scene = new THREE.Scene();
+    sceneState.scene = new Scene();
     sceneState.scene.background = null;
 
     // Camera (orthographic for consistent shadow visualization)
     const aspect = container.clientWidth / container.clientHeight;
     const viewSize = getViewSize();
-    sceneState.camera = new THREE.OrthographicCamera(
+    sceneState.camera = new OrthographicCamera(
         -viewSize * aspect, viewSize * aspect,
         viewSize, -viewSize,
         0.1, 1000
@@ -22,18 +36,18 @@ export function initScene() {
     sceneState.camera.lookAt(0, 0, 0);
 
     // Renderer
-    sceneState.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    sceneState.renderer = new WebGLRenderer({ antialias: true, alpha: true });
     sceneState.renderer.setSize(container.clientWidth, container.clientHeight);
     sceneState.renderer.setPixelRatio(window.devicePixelRatio);
     sceneState.renderer.shadowMap.enabled = true;
-    sceneState.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    sceneState.renderer.shadowMap.type = PCFSoftShadowMap;
     container.appendChild(sceneState.renderer.domElement);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambientLight = new AmbientLight(0xffffff, 0.6);
     sceneState.scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const directionalLight = new DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(5, 10, 5);
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
@@ -48,16 +62,16 @@ export function initScene() {
     sceneState.scene.add(directionalLight);
 
     // Ground Plane
-    const planeGeometry = new THREE.PlaneGeometry(20, 20);
-    const planeMaterial = new THREE.ShadowMaterial({ opacity: 0.4 });
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    const planeGeometry = new PlaneGeometry(20, 20);
+    const planeMaterial = new ShadowMaterial({ opacity: 0.4 });
+    const plane = new Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
     plane.position.y = 0.001;
     plane.receiveShadow = true;
     sceneState.scene.add(plane);
 
     // Grid
-    sceneState.gridHelper = new THREE.GridHelper(10, 20, 0xaaaaaa, 0xdddddd);
+    sceneState.gridHelper = new GridHelper(10, 20, 0xaaaaaa, 0xdddddd);
     sceneState.gridHelper.material.opacity = 0.38;
     sceneState.gridHelper.material.transparent = true;
     sceneState.scene.add(sceneState.gridHelper);
@@ -73,16 +87,16 @@ export function initScene() {
     ctx.textBaseline = 'middle';
     ctx.fillText('N', 64, 64);
 
-    const texture = new THREE.CanvasTexture(canvas);
-    const northMaterial = new THREE.MeshBasicMaterial({
+    const texture = new CanvasTexture(canvas);
+    const northMaterial = new MeshBasicMaterial({
         map: texture,
         transparent: true,
         opacity: 0.7,
         depthWrite: false
     });
 
-    const northGeometry = new THREE.PlaneGeometry(0.8, 0.8);
-    const northMarker = new THREE.Mesh(northGeometry, northMaterial);
+    const northGeometry = new PlaneGeometry(0.8, 0.8);
+    const northMarker = new Mesh(northGeometry, northMaterial);
     northMarker.rotation.x = -Math.PI / 2; // Lay flat on ground
     northMarker.position.set(0, 0.01, -4.5); // Position at north edge of grid
     sceneState.scene.add(northMarker);
@@ -98,16 +112,16 @@ export function initScene() {
     ctxS.textBaseline = 'middle';
     ctxS.fillText('S', 64, 64);
 
-    const textureS = new THREE.CanvasTexture(canvasS);
-    const southMaterial = new THREE.MeshBasicMaterial({
+    const textureS = new CanvasTexture(canvasS);
+    const southMaterial = new MeshBasicMaterial({
         map: textureS,
         transparent: true,
         opacity: 0.7,
         depthWrite: false
     });
 
-    const southGeometry = new THREE.PlaneGeometry(0.8, 0.8);
-    const southMarker = new THREE.Mesh(southGeometry, southMaterial);
+    const southGeometry = new PlaneGeometry(0.8, 0.8);
+    const southMarker = new Mesh(southGeometry, southMaterial);
     southMarker.rotation.x = -Math.PI / 2; // Lay flat on ground
     southMarker.position.set(0, 0.01, 4.5); // Position at south edge of grid (positive Z)
     sceneState.scene.add(southMarker);
