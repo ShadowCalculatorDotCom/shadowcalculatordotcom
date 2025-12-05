@@ -150,8 +150,8 @@ a:hover {
 }
 
 h1 {
-    font-size: 1.75rem;
-    margin-bottom: 8px;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
     font-weight: 700;
 }
 
@@ -175,25 +175,38 @@ h1 {
 }
 
 .section h2 {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     margin-bottom: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+}
+
+.section h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
     font-weight: 600;
+    margin-top: 4px;
 }
 
 .field {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
 
 .field:last-child {
     margin-bottom: 0;
 }
 
-label {
+label,
+.field>span {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-
-    margin-bottom: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
 }
 
 input[type="number"],
