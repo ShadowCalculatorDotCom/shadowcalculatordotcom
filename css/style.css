@@ -778,3 +778,42 @@ input[type="checkbox"] {
         /* Prevents zoom on iOS */
     }
 }
+
+#rotate-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    /* Bouncy spring */
+    color: var(--text-muted);
+    z-index: 1000;
+}
+
+#rotate-btn:hover {
+    background: white;
+    color: var(--accent);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+#rotate-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5px;
+    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+#rotate-btn:hover svg {
+    transform: rotate(90deg);
+}
