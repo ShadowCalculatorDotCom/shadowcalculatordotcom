@@ -6,7 +6,8 @@ import {
     MeshStandardMaterial,
     Mesh,
     SphereGeometry,
-    BoxGeometry
+    BoxGeometry,
+    ConeGeometry
 } from 'three';
 
 // Base height for creating objects (scale from this to actual height)
@@ -120,6 +121,55 @@ export function createObject(type, height) {
 
             sceneState.objectMesh.add(trunk);
             sceneState.objectMesh.add(canopy);
+
+        } else if (type === 'house') {
+            // House Body (Pure White)
+            const bodyGeom = new BoxGeometry(BASE_HEIGHT * 0.8, BASE_HEIGHT * 0.6, BASE_HEIGHT * 0.8);
+            const bodyMat = new MeshStandardMaterial({ color: 0xffffff }); // White
+            const body = new Mesh(bodyGeom, bodyMat);
+            body.position.y = BASE_HEIGHT * 0.3;
+            body.castShadow = true;
+            body.receiveShadow = true;
+            sceneState.objectMesh.add(body);
+
+            // Roof (Red/Terracotta, low poly pyramid)
+            const roofGeom = new ConeGeometry(BASE_HEIGHT * 0.65, BASE_HEIGHT * 0.4, 4);
+            const roofMat = new MeshStandardMaterial({ color: 0xCD5C5C }); // IndianRed
+            const roof = new Mesh(roofGeom, roofMat);
+            roof.position.y = BASE_HEIGHT * 0.8;
+            roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true;
+            sceneState.objectMesh.add(roof);
+
+            // Door (Brown)
+            const doorGeom = new BoxGeometry(BASE_HEIGHT * 0.2, BASE_HEIGHT * 0.35, BASE_HEIGHT * 0.05);
+            const doorMat = new MeshStandardMaterial({ color: 0x8B4513 }); // SaddleBrown
+            const door = new Mesh(doorGeom, doorMat);
+            door.position.set(0, BASE_HEIGHT * 0.175, BASE_HEIGHT * 0.4); // slightly in front of body
+            door.castShadow = true;
+            sceneState.objectMesh.add(door);
+
+            // Side Windows (Square, SkyBlue)
+            const winGeom = new BoxGeometry(BASE_HEIGHT * 0.05, BASE_HEIGHT * 0.25, BASE_HEIGHT * 0.25);
+            const winMat = new MeshStandardMaterial({ color: 0x87CEEB }); // SkyBlue
+
+            // Left Window
+            const leftWin = new Mesh(winGeom, winMat);
+            leftWin.position.set(-BASE_HEIGHT * 0.4, BASE_HEIGHT * 0.3, 0); // On left wall
+            sceneState.objectMesh.add(leftWin);
+
+            // Right Window
+            const rightWin = new Mesh(winGeom, winMat);
+            rightWin.position.set(BASE_HEIGHT * 0.4, BASE_HEIGHT * 0.3, 0); // On right wall
+            sceneState.objectMesh.add(rightWin);
+
+            // Chimney
+            const chimGeom = new BoxGeometry(BASE_HEIGHT * 0.15, BASE_HEIGHT * 0.4, BASE_HEIGHT * 0.15);
+            const chimMat = new MeshStandardMaterial({ color: 0x808080 }); // Gray
+            const chimney = new Mesh(chimGeom, chimMat);
+            chimney.position.set(BASE_HEIGHT * 0.2, BASE_HEIGHT * 0.8, -BASE_HEIGHT * 0.1);
+            chimney.castShadow = true;
+            sceneState.objectMesh.add(chimney);
 
         } else { // box
             const boxGeom = new BoxGeometry(BASE_HEIGHT * 0.3, BASE_HEIGHT, BASE_HEIGHT * 0.3);
