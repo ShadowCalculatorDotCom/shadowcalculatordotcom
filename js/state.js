@@ -77,5 +77,6 @@ export const sceneState = {
     map: null,
     marker: null,
     mapInitialized: false,
-    mapLoadPending: false
+    mapLoadPending: false,
+    cameraAngle: 0
 };

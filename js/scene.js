@@ -208,3 +208,31 @@ export function updateLightPosition(solar) {
         light.updateMatrixWorld();
     }
 }
+
+export function rotateCamera() {
+    sceneState.cameraAngle = (sceneState.cameraAngle + 1) % 4;
+
+    // Distance from center on XZ plane
+    const radius = Math.sqrt(6 * 6 + 6 * 6); // approx 8.48
+
+    // Default 45 degrees offset (started at 6,6,6)
+    // We rotate in 90 degree increments
+    // 0: 6, 6
+    // 1: 6, -6
+    // 2: -6, -6
+    // 3: -6, 6
+
+    let x, z;
+    switch (sceneState.cameraAngle) {
+        case 0: x = 6; z = 6; break;
+        case 1: x = 6; z = -6; break;
+        case 2: x = -6; z = -6; break;
+        case 3: x = -6; z = 6; break;
+    }
+
+    sceneState.camera.position.set(x, 6, z);
+    sceneState.camera.lookAt(0, 0, 0);
+
+    // Re-render
+    sceneState.renderer.render(sceneState.scene, sceneState.camera);
+}

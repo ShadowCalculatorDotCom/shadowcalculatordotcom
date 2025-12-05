@@ -1,7 +1,7 @@
 import { state, dom, sceneState } from './state.js';
 import { CITIES, CUSTOM_CITY_INDEX } from './data.js';
 import { getSolarPosition, calculateShadowLength } from './math.js';
-import { updateLightPosition, onWindowResize, updateCameraSize } from './scene.js';
+import { updateLightPosition, onWindowResize, updateCameraSize, rotateCamera } from './scene.js';
 import { createObject } from './objects.js';
 
 import { updateUrlFromState } from './utils.js';
@@ -34,6 +34,12 @@ export function initShareButton() {
             alert('Failed to copy URL');
         }
     });
+}
+
+export function initRotateButton() {
+    const btn = document.getElementById('rotate-btn');
+    if (!btn) return;
+    btn.addEventListener('click', rotateCamera);
 }
 
 export function updateScene() {

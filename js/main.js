@@ -10,7 +10,8 @@ import {
     updateTimeDisplay,
     handleLayoutChange,
     updateTriangle,
-    initShareButton
+    initShareButton,
+    initRotateButton
 } from './ui.js';
 import { estimateTimezoneFromLongitude, getParamsFromUrl, updateUrlFromState } from './utils.js';
 import { getSolarPosition } from './math.js';
@@ -242,6 +243,7 @@ function init() {
 
     // Initialize share button
     initShareButton();
+    initRotateButton();
 
     // MOVED: Handle layout before setting up observers
     handleLayoutChange();
