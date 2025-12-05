@@ -84,7 +84,7 @@ export function initMap(lat, lon) {
 
         // Add geocoder (search) control
         const geocoder = window.L.Control.Geocoder.nominatim();
-        window.L.Control.geocoder({
+        const geocoderControl = window.L.Control.geocoder({
             geocoder: geocoder,
             defaultMarkGeocode: false
         })
@@ -94,6 +94,14 @@ export function initMap(lat, lon) {
                 sceneState.map.setView(latlng, 13);
             })
             .addTo(sceneState.map);
+
+        // Fix accessibility warning (missing id/name)
+        const geocoderContainer = geocoderControl.getContainer();
+        const searchInput = geocoderContainer.querySelector('input');
+        if (searchInput) {
+            searchInput.setAttribute('id', 'location-search');
+            searchInput.setAttribute('name', 'location-search');
+        }
 
         // Add marker
         sceneState.marker = window.L.marker([lat, lon], { draggable: true }).addTo(sceneState.map);

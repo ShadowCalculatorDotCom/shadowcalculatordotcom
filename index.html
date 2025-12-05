@@ -54,7 +54,7 @@
   <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
 
   <!-- Preload critical scripts -->
-  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js">
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.min.js">
   <link rel="preload" href="https://unpkg.com/suncalc@1.9.0/suncalc.js" as="script">
 
   <!-- Main Styles -->
@@ -193,7 +193,7 @@
 
         <!-- Display selected coordinates -->
         <div class="field">
-          <label>Selected Coordinates</label>
+          <span>Selected Coordinates</span>
           <div class="coordinates-display">
             <span id="lat-display">40.7°N</span>, <span id="lon-display">74.0°W</span>
           </div>
@@ -210,7 +210,7 @@
           <input type="date" id="date">
         </div>
         <div class="field">
-          <label>Time: <span id="time-display" class="value-display">12:00</span></label>
+          <label for="time">Time: <span id="time-display" class="value-display">12:00</span></label>
           <input type="range" id="time" min="0" max="1439" step="1" value="720">
         </div>
         <div class="status" id="sun-status">Calculating sun position...</div>
@@ -226,7 +226,7 @@
       <div class="section" id="object-section">
         <h2>Object</h2>
         <div class="field">
-          <label>Type</label>
+          <h3>Type</h3>
           <div class="radio-group">
             <label class="radio-item">
               <input type="radio" name="object-type" value="human" checked>
@@ -243,7 +243,7 @@
           </div>
         </div>
         <div class="field">
-          <label>Height</label>
+          <h3>Height</h3>
           <!-- Metric Input (Hidden by default if starting in Imperial) -->
           <div id="height-metric-container" class="input-with-unit" style="display: none;">
             <input type="number" id="height-metric" min="0.1" max="100" step="0.01">
@@ -267,7 +267,7 @@
       <div class="section">
         <h2>Settings</h2>
         <div class="field">
-          <label>Units</label>
+          <h3>Units</h3>
           <div class="radio-group">
             <label class="radio-item">
               <input type="radio" name="units" value="metric">
@@ -339,11 +339,11 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js"
+        "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.min.js"
       }
     }
   </script>
-  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js" defer></script>
 
   <!-- Application Logic -->
   <script type="module" src="js/main.js"></script>
