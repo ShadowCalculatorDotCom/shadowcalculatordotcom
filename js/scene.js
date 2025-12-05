@@ -61,8 +61,8 @@ export function initScene() {
     directionalLight.shadow.camera.bottom = -d;
     sceneState.scene.add(directionalLight);
 
-    // Ground Plane
-    const planeGeometry = new PlaneGeometry(20, 20);
+    // Ground Plane - make it huge to catch long shadows
+    const planeGeometry = new PlaneGeometry(2000, 2000);
     const planeMaterial = new ShadowMaterial({ opacity: 0.4 });
     const plane = new Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = -Math.PI / 2;
@@ -138,15 +138,45 @@ export function onWindowResize() {
     const width = container.clientWidth;
     const height = container.clientHeight;
     const aspect = width / height;
-    const viewSize = getViewSize();
+    // Get view size based on current object height
+    const viewSize = getViewSize(sceneState.currentObjectHeight || 1.75);
 
     sceneState.camera.left = -viewSize * aspect;
     sceneState.camera.right = viewSize * aspect;
     sceneState.camera.top = viewSize;
     sceneState.camera.bottom = -viewSize;
+
     sceneState.camera.updateProjectionMatrix();
 
     sceneState.renderer.setSize(width, height);
+}
+
+// Helper to update camera when object changes
+export function updateCameraSize(height) {
+    sceneState.currentObjectHeight = height;
+
+    // Update main camera
+    onWindowResize();
+
+    // Update Shadow Camera
+    const light = sceneState.scene.children.find(c => c.isDirectionalLight);
+    if (light) {
+        // Use the same viewSize logic but slightly larger to ensure shadows don't clip
+        // getViewSize calculates the scale based on object height.
+        // We multiply by a factor (e.g., 4) because shadows can get very long at low angles.
+        const viewSize = getViewSize(height);
+        const d = viewSize * 3; // Shadow box size
+
+        light.shadow.camera.left = -d;
+        light.shadow.camera.right = d;
+        light.shadow.camera.top = d;
+        light.shadow.camera.bottom = -d;
+
+        // Also increase far plane if needed for tall objects
+        light.shadow.camera.far = 50 + (height * 5);
+
+        light.shadow.camera.updateProjectionMatrix();
+    }
 }
 
 function animate() {

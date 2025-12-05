@@ -3,9 +3,14 @@ export function isMobile() {
     return window.matchMedia('(max-width: 768px)').matches;
 }
 
-// Get appropriate viewSize based on device
-export function getViewSize() {
-    return isMobile() ? 4 : 6;
+// Get appropriate viewSize based on device and object height
+export function getViewSize(objectHeight = 1.75) {
+    const baseSize = isMobile() ? 4 : 6;
+    // Scale up if object is taller than standard (approx 2m)
+    // We want the view size to be at least baseSize, but larger for tall objects.
+    // Factor of 1.5 provides some padding.
+    const scaledSize = Math.max(baseSize, objectHeight * 1.5);
+    return scaledSize;
 }
 
 // Estimate timezone from longitude (approximate, based on UTC offset)

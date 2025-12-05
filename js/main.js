@@ -87,6 +87,28 @@ function setupEventListeners() {
     document.querySelectorAll('input[name="object-type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             state.objectType = e.target.value;
+
+            // set default heights based on type
+            // Human: 1.75m (approx 5'9")
+            // Tree: 10m (approx 33ft - mature garden tree)
+            // Box/Post: 2m (approx 6.5ft - tall fence)
+            // House: 6m (approx 20ft - 2 story house)
+            switch (state.objectType) {
+                case 'human':
+                    state.height = 1.75;
+                    break;
+                case 'tree':
+                    state.height = 10;
+                    break;
+                case 'box':
+                    state.height = 2;
+                    break;
+                case 'house':
+                    state.height = 6;
+                    break;
+            }
+
+            updateHeightInputsFromState();
             updateScene();
         });
     });
