@@ -236,7 +236,7 @@ export function rotateCamera() {
     }
 
     const startAngle = sceneState.targetCameraAngle;
-    const endAngle = startAngle - (Math.PI / 2); // Rotate right (CW)
+    const endAngle = startAngle + (Math.PI / 2); // Rotate left (CCW)
     sceneState.targetCameraAngle = endAngle;
 
     // Radius on XZ plane (distance from 0,0,0)
