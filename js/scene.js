@@ -209,30 +209,66 @@ export function updateLightPosition(solar) {
     }
 }
 
+// Rotation state
+let isRotating = false;
+
 export function rotateCamera() {
-    sceneState.cameraAngle = (sceneState.cameraAngle + 1) % 4;
+    if (isRotating) return;
+    isRotating = true;
 
-    // Distance from center on XZ plane
-    const radius = Math.sqrt(6 * 6 + 6 * 6); // approx 8.48
+    const duration = 600; // ms
+    const startTime = performance.now();
 
-    // Default 45 degrees offset (started at 6,6,6)
-    // We rotate in 90 degree increments
-    // 0: 6, 6
-    // 1: 6, -6
-    // 2: -6, -6
-    // 3: -6, 6
+    // We rotate 90 degrees clockwise
+    // Current angle index is 0-3.
+    // We were setting position based on fixed quadrants.
+    // Better strategy: Tween the angle itself.
 
-    let x, z;
-    switch (sceneState.cameraAngle) {
-        case 0: x = 6; z = 6; break;
-        case 1: x = 6; z = -6; break;
-        case 2: x = -6; z = -6; break;
-        case 3: x = -6; z = 6; break;
+    // Calculate current angle logic: 
+    // 0 (6,6) = 45 deg = PI/4
+    // 1 (6,-6) = -45 deg = -PI/4
+    // 2 (-6,-6) = -135 deg = -3PI/4
+    // 3 (-6,6) = 135 deg = 3PI/4
+
+    // Simplification: Just track total rotation in radians
+    if (sceneState.targetCameraAngle === undefined) {
+        sceneState.targetCameraAngle = Math.PI / 4; // Start at 45 deg
     }
 
-    sceneState.camera.position.set(x, 6, z);
-    sceneState.camera.lookAt(0, 0, 0);
+    const startAngle = sceneState.targetCameraAngle;
+    const endAngle = startAngle - (Math.PI / 2); // Rotate right (CW)
+    sceneState.targetCameraAngle = endAngle;
 
-    // Re-render
-    sceneState.renderer.render(sceneState.scene, sceneState.camera);
+    // Radius on XZ plane (distance from 0,0,0)
+    // x=6, z=6 => r = sqrt(6^2 + 6^2) = sqrt(72)
+    const radius = Math.sqrt(72);
+
+    function animateRotation(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Easing: easeOutCubic
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        const currentAngle = startAngle + (endAngle - startAngle) * ease;
+
+        // Convert polar to cartesian
+        // In Three.js: x is right, z is forward/back used for depth
+        const x = radius * Math.sin(currentAngle);
+        const z = radius * Math.cos(currentAngle);
+
+        sceneState.camera.position.set(x, 6, z);
+        sceneState.camera.lookAt(0, 0, 0);
+
+        // We rely on the main animate loop to render, but force update matrix
+        sceneState.camera.updateMatrixWorld();
+
+        if (progress < 1) {
+            requestAnimationFrame(animateRotation);
+        } else {
+            isRotating = false;
+        }
+    }
+
+    requestAnimationFrame(animateRotation);
 }
