@@ -64,22 +64,18 @@ export function getParamsFromUrl() {
 }
 
 // Update URL without reloading
-let urlUpdateTimeout;
-export function updateUrlFromState(state) {
-    // Debounce updates to avoid spamming history
-    clearTimeout(urlUpdateTimeout);
-    urlUpdateTimeout = setTimeout(() => {
-        const params = new URLSearchParams();
-        params.set('lat', parseFloat(state.lat).toFixed(4));
-        params.set('lon', parseFloat(state.lon).toFixed(4));
+// Generate share URL from state without updating browser history
+export function getShareUrl(state) {
+    const params = new URLSearchParams();
+    params.set('lat', parseFloat(state.lat).toFixed(4));
+    params.set('lon', parseFloat(state.lon).toFixed(4));
 
-        const dateStr = state.date.toISOString().split('T')[0];
-        params.set('date', dateStr);
+    const dateStr = state.date.toISOString().split('T')[0];
+    params.set('date', dateStr);
 
-        params.set('time', state.timeMinutes);
-        params.set('obj', state.objectType);
+    params.set('time', state.timeMinutes);
+    params.set('obj', state.objectType);
+    params.set('h', state.height);
 
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.replaceState({}, '', newUrl);
-    }, 500);
+    return `${window.location.protocol}//${window.location.host}${window.location.pathname}?${params.toString()}`;
 }

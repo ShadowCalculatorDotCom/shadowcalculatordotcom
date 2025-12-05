@@ -4,7 +4,7 @@ import { getSolarPosition, calculateShadowLength } from './math.js';
 import { updateLightPosition, onWindowResize, updateCameraSize, rotateCamera } from './scene.js';
 import { createObject } from './objects.js';
 
-import { updateUrlFromState } from './utils.js';
+import { getShareUrl } from './utils.js';
 
 export function initShareButton() {
     const btn = document.getElementById('share-btn');
@@ -12,7 +12,8 @@ export function initShareButton() {
 
     btn.addEventListener('click', async () => {
         try {
-            await navigator.clipboard.writeText(window.location.href);
+            const shareUrl = getShareUrl(state);
+            await navigator.clipboard.writeText(shareUrl);
 
             // Show feedback
             const originalHTML = btn.innerHTML;
@@ -67,8 +68,7 @@ export function updateScene() {
     updateTriangle(solar);
     updateMathDetails(solar);
 
-    // Update deep link URL
-    updateUrlFromState(state);
+
 }
 
 function updateSunStatus(solar) {

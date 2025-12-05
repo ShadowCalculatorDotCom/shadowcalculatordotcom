@@ -13,7 +13,7 @@ import {
     initShareButton,
     initRotateButton
 } from './ui.js';
-import { estimateTimezoneFromLongitude, getParamsFromUrl, updateUrlFromState } from './utils.js';
+import { estimateTimezoneFromLongitude, getParamsFromUrl } from './utils.js';
 import { getSolarPosition } from './math.js';
 
 function setupEventListeners() {
@@ -211,6 +211,15 @@ function init() {
             // Sync radio button
             const radio = document.querySelector(`input[name="object-type"][value="${params.object}"]`);
             if (radio) radio.checked = true;
+        }
+
+        if (params.height) {
+            const h = parseFloat(params.height);
+            if (!isNaN(h)) {
+                state.height = h;
+                // Update inputs will happen via updateHeightInputsFromState call later or we call it explicitly
+                // For now just setting state is enough as updateScene will use it
+            }
         }
 
     } else {
