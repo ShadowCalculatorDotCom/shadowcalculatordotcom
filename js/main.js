@@ -196,6 +196,11 @@ function init() {
         state.cityIndex = 0; // Custom location
         dom.city.value = '0';
 
+        // Update Custom Location data
+        CITIES[CUSTOM_CITY_INDEX].lat = state.lat;
+        CITIES[CUSTOM_CITY_INDEX].lon = state.lon;
+        CITIES[CUSTOM_CITY_INDEX].tz = estimateTimezoneFromLongitude(state.lon);
+
         if (params.date) {
             state.date = new Date(params.date + 'T12:00:00');
             dom.date.value = params.date;

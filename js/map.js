@@ -1,5 +1,7 @@
 import { state, dom, sceneState } from './state.js';
 import { updateLatLonDisplay, updateScene } from './ui.js';
+import { estimateTimezoneFromLongitude } from './utils.js';
+import { CITIES, CUSTOM_CITY_INDEX } from './data.js';
 
 function loadLeaflet() {
     return new Promise((resolve) => {
@@ -134,7 +136,12 @@ export function updateLocation(lat, lon) {
     state.lat = lat;
     state.lon = lon;
 
-    state.cityIndex = 0; // Set state to Custom
+    // Update Custom Location data
+    state.cityIndex = CUSTOM_CITY_INDEX; // Set state to Custom
+    CITIES[CUSTOM_CITY_INDEX].lat = lat;
+    CITIES[CUSTOM_CITY_INDEX].lon = lon;
+    CITIES[CUSTOM_CITY_INDEX].tz = estimateTimezoneFromLongitude(lon);
+
     dom.city.value = '0'; // Update dropdown
 
     // Update display
