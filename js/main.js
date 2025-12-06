@@ -20,12 +20,14 @@ function setupEventListeners() {
     // Mobile menu toggle
     dom.menuToggle.addEventListener('click', () => {
         dom.sidebar.classList.toggle('open');
+        dom.menuToggle.classList.toggle('open');
     });
 
     // Close sidebar when clicking outside on mobile
     document.getElementById('main').addEventListener('click', () => {
         if (dom.sidebar.classList.contains('open') && window.innerWidth <= 768) {
             dom.sidebar.classList.remove('open');
+            dom.menuToggle.classList.remove('open');
         }
     });
 
