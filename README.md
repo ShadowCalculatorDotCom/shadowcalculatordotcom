@@ -8,6 +8,8 @@ with date, time, latitude, and object height.
 - Supports human and simple garden-object heights
 - Shows the actual trig used to compute shadow length
 
+This is a truly vibe coded app with no guarantee of functionality or long term maintenance. This was made for fun and to brush up on git and general web development. 
+
 ## How it works
 
 For a given location, date, and time:

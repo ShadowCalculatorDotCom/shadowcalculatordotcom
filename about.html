@@ -6,6 +6,8 @@
   <title>About – Shadow Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&family=Noto+Sans+Math&display=swap');
+
     :root {
       /* Warm, sunny background (Stone-50) */
       --bg: #FAFAF9;
@@ -28,9 +30,22 @@
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f4f4f6;
       color: #222;
+    }
+
+    h2,
+    h3 {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    h1 {
+      font-family: 'Noto Sans Math', sans-serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
     }
 
     header,
@@ -60,13 +75,14 @@
 
 <body>
   <header>
-    <h1>ShadowCalculator.com</h1>
+    <h1>Shadow Calculator</h1>
     <p><a href="index.html">back to the calculator</a></p>
   </header>
   <main>
     <h2>What this tool does</h2>
     <p>
-      ShadowCalculator.com is a browser-based tool that shows how
+      ShadowCalculator.com (also referred to as just Shadow Calculator on this website) is a browser-based
+      tool that shows how
       shadow length and direction change with date, time, latitude, and object height.
     </p>
 
@@ -89,14 +105,13 @@
 
     <h2>Disclaimer</h2>
     <p>
-      I made this for fun.
+      This is a truly vibe coded site with no guarantee of functionality or long term maintenance.
     </p>
 
     <p>
-      This site is provided for informational and educational purposes only.
-      It is <strong>not</strong> intended for navigation, engineering certification,
-      safety-critical design, or any use where precise solar position or shadow
-      length is required.
+      This site is provided for informational and educational purposes only. Use it as a quick reference for shadow
+      length and direction, but not for navigation, engineering certification, safety-critical design, or any use where
+      precise solar position or shadow length is required.
     </p>
 
 
