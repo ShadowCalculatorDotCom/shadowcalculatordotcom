@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shadow Calculator – Shadow Length Tool | ShadowCalculator.com</title>
+  <title>Shadow Calculator - Solar Position & Shadow Length Map</title>
   <meta name="description"
-    content="Interactive 3D shadow calculator for gardeners, landscapers, and solar planning. Visualize how objects cast shadows at any date, time, and location.">
+    content="Free online shadow calculator. For any time and date, visualize sun position and calculate shadow length/direction for any location on a map.">
 
   <!-- Basic SEO -->
   <link rel="canonical" href="https://shadowcalculator.com/">
@@ -59,6 +59,23 @@
 
   <!-- Main Styles -->
   <link rel="stylesheet" href="css/style.css">
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Shadow Calculator",
+      "url": "https://shadowcalculator.com/",
+      "applicationCategory": "Utility",
+      "operatingSystem": "Any",
+      "description": "Interactive tool to calculate shadow length and sun position on a map.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -69,7 +86,7 @@
   </button>
 
   <div id="mobile-header">
-    <h1>Shadow Calculator</h1>
+    <div class="brand-title">Shadow Calculator</div>
     <a href="about.html">about</a>
   </div>
 
@@ -302,6 +319,23 @@
             <input type="checkbox" id="show-triangle" checked>
             <span>Show triangle diagram</span>
           </label>
+        </div>
+      </div>
+
+      <div class="section" id="how-it-works">
+        <h2>How It Works</h2>
+        <div style="font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);">
+          <p style="margin-bottom: 10px;">
+            ShadowCalculator.com is a free online tool that calculates shadow length and direction for any object based
+            on solar position, height, and coordinates.
+          </p>
+          <p style="margin-bottom: 8px;"><strong>Inputs:</strong></p>
+          <ul style="padding-left: 20px; list-style-type: disc; margin-bottom: 10px;">
+            <li><strong>Location:</strong> Select a city or custom coordinates on the map.</li>
+            <li><strong>Date & Time:</strong> Adjust to see sun position for any moment.</li>
+            <li><strong>Height:</strong> Set the object height to see accurate shadow length.</li>
+          </ul>
+          <p><strong>Outputs:</strong> Real-time shadow length and direction on the 3D map.</p>
         </div>
       </div>
 

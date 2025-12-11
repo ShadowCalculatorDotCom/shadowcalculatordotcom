@@ -692,7 +692,8 @@ input[type="checkbox"] {
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    #mobile-header h1 {
+    #mobile-header h1,
+    #mobile-header .brand-title {
         font-family: 'Inter', sans-serif;
         font-size: 2rem;
         font-weight: 700;
