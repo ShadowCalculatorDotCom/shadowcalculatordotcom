@@ -320,12 +320,12 @@ export function updateTriangle(solar) {
     if (sunIcon) {
         sunIcon.style.display = 'block';
         // Orbit radius relative to the top vertex of the object
-        const orbitRadius = 60; 
+        const orbitRadius = 60;
         // Sun position relative to the TOP vertex (topX, topY)
         // We want the sun to be "up and to the left" based on altitude
         // 0 degrees altitude = horizon (left)
         // 90 degrees altitude = zenith (top)
-        
+
         // Calculate offsets
         // cos(0) = 1 -> full left offset
         // sin(0) = 0 -> no vertical offset (horizon)
@@ -340,10 +340,10 @@ export function updateTriangle(solar) {
     }
 
     // Update Quick Calculator Results
-    updateCalculatorResults(shadowText, solar.azimuthDeg, solar.altitudeDeg);
+    updateCalculatorResults(shadowText, solar.azimuthDeg, solar.altitudeDeg, height, shadowLength);
 }
 
-function updateCalculatorResults(lengthText, azimuth, altitude) {
+function updateCalculatorResults(lengthText, azimuth, altitude, heightVal, rawShadowLength) {
     const quickLength = document.getElementById('quick-shadow-length');
     const quickAzimuth = document.getElementById('quick-sun-azimuth');
 
@@ -351,8 +351,35 @@ function updateCalculatorResults(lengthText, azimuth, altitude) {
         if (altitude <= 0) {
             quickLength.textContent = "—";
             quickAzimuth.textContent = "—";
+
+            if (dom.calcH) {
+                dom.calcH.textContent = heightVal.toFixed(2);
+                dom.calcAlpha.textContent = "—";
+                dom.calcResultFinal.textContent = "—";
+            }
         } else {
             quickLength.textContent = lengthText;
+
+            // Live Formula Update
+            if (dom.calcH) {
+                let displayH = heightVal;
+                let displayL = rawShadowLength;
+                let unitText = 'm';
+
+                if (state.units === 'imperial') {
+                    // Convert meters to decimal feet for formula clarity
+                    // 1 meter = 3.28084 feet
+                    displayH = heightVal * 3.28084;
+                    displayL = rawShadowLength * 3.28084;
+                    unitText = 'ft';
+                }
+
+                dom.calcH.textContent = displayH.toFixed(2);
+                dom.calcAlpha.textContent = `${altitude.toFixed(1)}°`;
+                dom.calcResultFinal.textContent = displayL.toFixed(2);
+                if (dom.calcUnit) dom.calcUnit.textContent = unitText;
+            }
+
             // Convert azimuth to cardinal direction roughly
             // 0 = South, 90 = West, 180 = North, 270 = East
             let cardinal = "";

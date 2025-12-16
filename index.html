@@ -95,27 +95,70 @@
     <div id="sidebar">
       <div class="header">
         <h1>Shadow Calculator</h1>
-        <p class="intro-text">
-          Free online tool to calculate shadow length and direction for any time, date, and location. Perfect for gardening, photography, and architecture.
-        </p>
+        <!-- Advanced SEO & Math Intro -->
+        <div class="intro-math-section">
+          <p class="seo-text">
+            <strong>Shadow Calculator</strong> uses the <strong>solar altitude angle (α)</strong> to solve the right
+            triangle formed by an object and its shadow.
+            By calculating the precise sun position for your location and date, we determine the exact shadow length
+            (L).
+          </p>
+          <div class="formula-box">
+            <div class="formula-row main-formula">
+              <span class="var">L</span> = <span class="var">h</span> / tan(<span class="var">α</span>)
+            </div>
+            <div class="formula-legend">
+              <span>Where:</span>
+              <span><strong>L</strong> = Shadow Length</span>
+              <span><strong>h</strong> = Object Height</span>
+              <span><strong>α</strong> = Sun Altitude</span>
+            </div>
+          </div>
+
+          <div class="intro-math-section" style="margin-top: 16px;">
+            <p class="seo-text">
+              <strong>Shadow Direction</strong> depends on the <strong>Sun Azimuth</strong>, calculated from your
+              Latitude (<span class="var">φ</span>), Solar Declination (<span class="var">δ</span>), and Local Hour
+              Angle (<span class="var">H</span>).
+            </p>
+            <div class="formula-box">
+              <div class="formula-row main-formula" style="font-size: 0.9rem;">
+                cos(Az) = (sin(<span class="var">δ</span>) - sin(<span class="var">φ</span>) · sin(<span
+                  class="var">α</span>)) / (cos(<span class="var">φ</span>) · cos(<span class="var">α</span>))
+              </div>
+              <div class="formula-legend">
+                <span style="width: 100%; margin-bottom: 4px;">The shadow falls opposite to the sun: <strong>Direction =
+                    Azimuth + 180°</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="subtitle-row">
           <p class="subtitle"><a href="about.html">About & Help</a></p>
         </div>
       </div>
 
-      <!-- Quick Results Panel (New for Calculator Feel) -->
+      <!-- Quick Results Panel (Calculator Feel + Live Math) -->
       <div class="section result-section">
-         <h2>Current Shadow</h2>
-         <div class="result-grid">
-            <div class="result-item">
-               <span class="label">Length</span>
-               <span class="value" id="quick-shadow-length">—</span>
-            </div>
-            <div class="result-item">
-               <span class="label">Direction</span>
-               <span class="value" id="quick-sun-azimuth">—</span>
-            </div>
-         </div>
+        <h2>Current Calculation</h2>
+
+        <!-- Live Formula Display -->
+        <div class="live-formula" id="live-formula-display">
+          <span class="calc-line">
+            <span class="var-val" id="calc-L">L</span> =
+            <span class="var-val" id="calc-h">1.75</span> / tan(<span class="var-val" id="calc-alpha">34.6°</span>)
+          </span>
+          <span class="calc-result">
+            = <span id="calc-result-final">2.54</span> <span id="calc-unit">m</span>
+          </span>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-item" style="grid-column: 1 / -1;">
+            <span class="label">Sun Direction (Azimuth)</span>
+            <span class="value" id="quick-sun-azimuth">—</span>
+          </div>
+        </div>
       </div>
 
       <div class="section" id="location-section">
@@ -340,22 +383,6 @@
         </div>
       </div>
 
-      <div class="section" id="how-it-works">
-        <h2>How It Works</h2>
-        <div style="font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);">
-          <p style="margin-bottom: 10px;">
-            ShadowCalculator.com is a free online tool that calculates shadow length and direction for any object based
-            on solar position, height, and coordinates.
-          </p>
-          <p style="margin-bottom: 8px;"><strong>Inputs:</strong></p>
-          <ul style="padding-left: 20px; list-style-type: disc; margin-bottom: 10px;">
-            <li><strong>Location:</strong> Select a city or custom coordinates on the map.</li>
-            <li><strong>Date & Time:</strong> Adjust to see sun position for any moment.</li>
-            <li><strong>Height:</strong> Set the object height to see accurate shadow length.</li>
-          </ul>
-          <p><strong>Outputs:</strong> Real-time shadow length and direction on the 3D map.</p>
-        </div>
-      </div>
 
     </div>
 
@@ -393,18 +420,18 @@
             <path id="triangle-path" class="triangle-path" d="M 80 190 L 80 70 L 350 190 Z" />
             <!-- Angle arc -->
             <path id="angle-arc" class="triangle-angle-arc" d="" />
-            
+
             <!-- Sun Icon (Dynamic) -->
             <g id="sun-icon" transform="translate(0,0)" style="display: none;">
-               <circle cx="0" cy="0" r="8" fill="#FDB813" stroke="#F59E0B" stroke-width="2" />
-               <line x1="0" y1="-14" x2="0" y2="-20" stroke="#FDB813" stroke-width="2" />
-               <line x1="0" y1="14" x2="0" y2="20" stroke="#FDB813" stroke-width="2" />
-               <line x1="-14" y1="0" x2="-20" y2="0" stroke="#FDB813" stroke-width="2" />
-               <line x1="14" y1="0" x2="20" y2="0" stroke="#FDB813" stroke-width="2" />
-               <line x1="10" y1="-10" x2="14" y2="-14" stroke="#FDB813" stroke-width="2" />
-               <line x1="-10" y1="-10" x2="-14" y2="-14" stroke="#FDB813" stroke-width="2" />
-               <line x1="10" y1="10" x2="14" y2="14" stroke="#FDB813" stroke-width="2" />
-               <line x1="-10" y1="10" x2="-14" y2="14" stroke="#FDB813" stroke-width="2" />
+              <circle cx="0" cy="0" r="8" fill="#FDB813" stroke="#F59E0B" stroke-width="2" />
+              <line x1="0" y1="-14" x2="0" y2="-20" stroke="#FDB813" stroke-width="2" />
+              <line x1="0" y1="14" x2="0" y2="20" stroke="#FDB813" stroke-width="2" />
+              <line x1="-14" y1="0" x2="-20" y2="0" stroke="#FDB813" stroke-width="2" />
+              <line x1="14" y1="0" x2="20" y2="0" stroke="#FDB813" stroke-width="2" />
+              <line x1="10" y1="-10" x2="14" y2="-14" stroke="#FDB813" stroke-width="2" />
+              <line x1="-10" y1="-10" x2="-14" y2="-14" stroke="#FDB813" stroke-width="2" />
+              <line x1="10" y1="10" x2="14" y2="14" stroke="#FDB813" stroke-width="2" />
+              <line x1="-10" y1="10" x2="-14" y2="14" stroke="#FDB813" stroke-width="2" />
             </g>
 
             <!-- Labels -->

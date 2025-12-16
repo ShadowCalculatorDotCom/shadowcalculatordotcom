@@ -70,6 +70,13 @@ export function cacheDOMElements() {
     // Quick Calculator Results
     dom.quickShadowLength = document.getElementById('quick-shadow-length');
     dom.quickSunAzimuth = document.getElementById('quick-sun-azimuth');
+
+    // Live Formula Elements
+    dom.calcL = document.getElementById('calc-L');
+    dom.calcH = document.getElementById('calc-h');
+    dom.calcAlpha = document.getElementById('calc-alpha');
+    dom.calcResultFinal = document.getElementById('calc-result-final');
+    dom.calcUnit = document.getElementById('calc-unit');
 }
 
 // Global scene/map variables (mutable)
