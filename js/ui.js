@@ -314,6 +314,61 @@ export function updateTriangle(solar) {
     dom.angleValue.setAttribute('y', angleY);
     dom.angleValue.setAttribute('text-anchor', 'end');
     dom.angleValue.textContent = `${angle.toFixed(1)}°`;
+
+    // --- Dynamic Sun Icon Update ---
+    const sunIcon = document.getElementById('sun-icon');
+    if (sunIcon) {
+        sunIcon.style.display = 'block';
+        // Orbit radius relative to the top vertex of the object
+        const orbitRadius = 60; 
+        // Sun position relative to the TOP vertex (topX, topY)
+        // We want the sun to be "up and to the left" based on altitude
+        // 0 degrees altitude = horizon (left)
+        // 90 degrees altitude = zenith (top)
+        
+        // Calculate offsets
+        // cos(0) = 1 -> full left offset
+        // sin(0) = 0 -> no vertical offset (horizon)
+        const sunOffsetX = -orbitRadius * Math.cos(solar.altitude);
+        const sunOffsetY = -orbitRadius * Math.sin(solar.altitude);
+
+        // Apply translation relative to the top vertex
+        const sunX = topX + sunOffsetX;
+        const sunY = topY + sunOffsetY;
+
+        sunIcon.setAttribute('transform', `translate(${sunX}, ${sunY})`);
+    }
+
+    // Update Quick Calculator Results
+    updateCalculatorResults(shadowText, solar.azimuthDeg, solar.altitudeDeg);
+}
+
+function updateCalculatorResults(lengthText, azimuth, altitude) {
+    const quickLength = document.getElementById('quick-shadow-length');
+    const quickAzimuth = document.getElementById('quick-sun-azimuth');
+
+    if (quickLength && quickAzimuth) {
+        if (altitude <= 0) {
+            quickLength.textContent = "—";
+            quickAzimuth.textContent = "—";
+        } else {
+            quickLength.textContent = lengthText;
+            // Convert azimuth to cardinal direction roughly
+            // 0 = South, 90 = West, 180 = North, 270 = East
+            let cardinal = "";
+            const az = (azimuth + 360) % 360;
+            if (az >= 337.5 || az < 22.5) cardinal = "S";
+            else if (az >= 22.5 && az < 67.5) cardinal = "SW";
+            else if (az >= 67.5 && az < 112.5) cardinal = "W";
+            else if (az >= 112.5 && az < 157.5) cardinal = "NW";
+            else if (az >= 157.5 && az < 202.5) cardinal = "N";
+            else if (az >= 202.5 && az < 247.5) cardinal = "NE";
+            else if (az >= 247.5 && az < 292.5) cardinal = "E";
+            else if (az >= 292.5 && az < 337.5) cardinal = "SE";
+
+            quickAzimuth.textContent = `${az.toFixed(1)}° (${cardinal})`;
+        }
+    }
 }
 
 export function updateHeightInputsFromState() {

@@ -602,6 +602,53 @@ input[type="checkbox"] {
     display: block;
 }
 
+/* Intro Text */
+.intro-text {
+   color: var(--text);
+   font-size: 0.95rem;
+   line-height: 1.5;
+   margin-bottom: 12px;
+}
+
+/* Result Section (Calculator Feel) */
+.result-section {
+   border-left: 4px solid var(--accent); /* Highlight this box */
+   background: white; 
+}
+
+.result-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 16px;
+   margin-top: 10px;
+}
+
+.result-item {
+   display: flex;
+   flex-direction: column;
+   background: #F3F4F6;
+   padding: 12px;
+   border-radius: 8px;
+   text-align: center;
+}
+
+.result-item .label {
+   font-size: 0.75rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: var(--text-muted);
+   font-weight: 600;
+   margin-bottom: 4px;
+}
+
+.result-item .value {
+   font-size: 1.25rem;
+   font-weight: 700;
+   color: var(--accent);
+   font-family: 'Outfit', sans-serif;
+}
+
+/* Triangle Diagram Improvements */
 #triangle-container {
     display: flex;
     flex-direction: column;
@@ -610,6 +657,14 @@ input[type="checkbox"] {
     background: #f9fafb;
     border-radius: var(--radius);
     border: 1px solid var(--border);
+}
+
+#triangle-container h3 {
+   align-self: flex-start; /* Align title to left */
+   width: 100%;
+   border-bottom: 1px solid var(--border);
+   padding-bottom: 8px;
+   margin-bottom: 16px;
 }
 
 #triangle-container.hidden {

@@ -63,6 +63,13 @@ export function cacheDOMElements() {
     dom.objectSection = document.getElementById('object-section');
     dom.datetimeSection = document.getElementById('datetime-section');
     dom.mobileLocationContainer = document.getElementById('mobile-location-container');
+
+    // Sun Icon and Logic
+    dom.sunIcon = document.getElementById('sun-icon');
+
+    // Quick Calculator Results
+    dom.quickShadowLength = document.getElementById('quick-shadow-length');
+    dom.quickSunAzimuth = document.getElementById('quick-sun-azimuth');
 }
 
 // Global scene/map variables (mutable)

@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shadow Calculator - Solar Position & Shadow Length Map</title>
+  <title>Shadow Calculator - Calculate Sun Position & Shadow Length</title>
   <meta name="description"
-    content="Free online shadow calculator. For any time and date, visualize sun position and calculate shadow length/direction for any location on a map.">
+    content="Free online shadow calculator. Calculate shadow length and direction for any object (tree, house, human) at any time, date, and location. Visualize sun position on a map.">
 
   <!-- Basic SEO -->
   <link rel="canonical" href="https://shadowcalculator.com/">
 
   <meta name="keywords"
-    content="shadow calculator, garden shade, tree shadow, fence shadow, pergola shade, raised bed sun, fruit tree placement, vegetable garden planning, landscape design sun, solar angle calculator">
+    content="shadow calculator, sun position calculator, shadow length calculator, sun angle, garden shade planner, solar position, landscape design, architecture shadow analysis">
   <meta name="author" content="shadowcalculator.com">
   <meta name="robots" content="index,follow">
 
@@ -22,9 +22,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <!-- Open Graph / social preview -->
-  <meta property="og:title" content="Shadow Calculator – Garden Shade & Sun Planning">
+  <meta property="og:title" content="Shadow Calculator - Calculate Sun Position & Shadow Length">
   <meta property="og:description"
-    content="Visualize how trees, fences, pergolas and people cast shadows in your garden at any date, time, and location.">
+    content="Free tool to calculate shadow length and direction. Visualize how sun position affects shadows for gardening, photography, and solar planning.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://shadowcalculator.com/">
   <meta property="og:image" content="https://shadowcalculator.com/social-preview.png">
@@ -33,9 +33,9 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Shadow Calculator – Garden Shade & Sun Planning">
+  <meta name="twitter:title" content="Shadow Calculator - Calculate Sun Position & Shadow Length">
   <meta name="twitter:description"
-    content="See how shadows move across your garden or yard throughout the day and year.">
+    content="Calculate shadow length and direction for any location. Plan your garden, photography shoot, or solar panels with precise sun data.">
   <meta name="twitter:image" content="https://shadowcalculator.com/social-preview.png">
 
   <!-- Google Fonts: Inter (non-blocking) -->
@@ -66,9 +66,10 @@
       "@type": "WebApplication",
       "name": "Shadow Calculator",
       "url": "https://shadowcalculator.com/",
-      "applicationCategory": "Utility",
+      "applicationCategory": "UtilityApplications",
       "operatingSystem": "Any",
-      "description": "Interactive tool to calculate shadow length and sun position on a map.",
+      "description": "Free online tool to calculate shadow length and sun position for any date and location.",
+      "featureList": "Calculate shadow length, visualize sun direction, map interface, 3D visualization",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -87,7 +88,6 @@
 
   <div id="mobile-header">
     <div class="brand-title">Shadow Calculator</div>
-    <a href="about.html">about</a>
   </div>
 
   <div id="app">
@@ -95,9 +95,27 @@
     <div id="sidebar">
       <div class="header">
         <h1>Shadow Calculator</h1>
+        <p class="intro-text">
+          Free online tool to calculate shadow length and direction for any time, date, and location. Perfect for gardening, photography, and architecture.
+        </p>
         <div class="subtitle-row">
-          <p class="subtitle"><a href="about.html">about</a></p>
+          <p class="subtitle"><a href="about.html">About & Help</a></p>
         </div>
+      </div>
+
+      <!-- Quick Results Panel (New for Calculator Feel) -->
+      <div class="section result-section">
+         <h2>Current Shadow</h2>
+         <div class="result-grid">
+            <div class="result-item">
+               <span class="label">Length</span>
+               <span class="value" id="quick-shadow-length">—</span>
+            </div>
+            <div class="result-item">
+               <span class="label">Direction</span>
+               <span class="value" id="quick-sun-azimuth">—</span>
+            </div>
+         </div>
       </div>
 
       <div class="section" id="location-section">
@@ -223,7 +241,7 @@
       </div>
 
       <div class="section" id="datetime-section">
-        <h2>Date & Time at Location</h2>
+        <h2>Date & Time</h2>
         <div class="field">
           <h3>Date</h3>
           <input type="date" id="date">
@@ -243,7 +261,7 @@
       </div>
 
       <div class="section" id="object-section">
-        <h2>Object</h2>
+        <h2>Object Dimensions</h2>
         <div class="field">
           <h3>Type</h3>
           <div class="radio-group">
@@ -367,7 +385,7 @@
       <div id="info-panel">
         <div id="math-details"></div>
         <div id="triangle-container" class="hidden">
-          <h3>Right Triangle – Side View</h3>
+          <h3>Calculated Shadow Geometry</h3>
           <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
             <!-- Triangle fill -->
             <path id="triangle-fill-path" class="triangle-fill" d="M 80 190 L 80 190 L 80 190 Z" />
@@ -375,6 +393,20 @@
             <path id="triangle-path" class="triangle-path" d="M 80 190 L 80 70 L 350 190 Z" />
             <!-- Angle arc -->
             <path id="angle-arc" class="triangle-angle-arc" d="" />
+            
+            <!-- Sun Icon (Dynamic) -->
+            <g id="sun-icon" transform="translate(0,0)" style="display: none;">
+               <circle cx="0" cy="0" r="8" fill="#FDB813" stroke="#F59E0B" stroke-width="2" />
+               <line x1="0" y1="-14" x2="0" y2="-20" stroke="#FDB813" stroke-width="2" />
+               <line x1="0" y1="14" x2="0" y2="20" stroke="#FDB813" stroke-width="2" />
+               <line x1="-14" y1="0" x2="-20" y2="0" stroke="#FDB813" stroke-width="2" />
+               <line x1="14" y1="0" x2="20" y2="0" stroke="#FDB813" stroke-width="2" />
+               <line x1="10" y1="-10" x2="14" y2="-14" stroke="#FDB813" stroke-width="2" />
+               <line x1="-10" y1="-10" x2="-14" y2="-14" stroke="#FDB813" stroke-width="2" />
+               <line x1="10" y1="10" x2="14" y2="14" stroke="#FDB813" stroke-width="2" />
+               <line x1="-10" y1="10" x2="-14" y2="14" stroke="#FDB813" stroke-width="2" />
+            </g>
+
             <!-- Labels -->
             <text id="height-label" class="triangle-label" x="55" y="120" text-anchor="end">Height</text>
             <text id="height-value" class="triangle-value" x="55" y="140" text-anchor="end">1.75 m</text>
