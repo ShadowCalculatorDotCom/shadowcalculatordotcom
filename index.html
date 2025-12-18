@@ -96,49 +96,14 @@
       <div class="header">
         <h1>Shadow Calculator</h1>
         <!-- Advanced SEO & Math Intro -->
-        <div class="intro-math-section">
-          <p class="seo-text">
-            <strong>Shadow Calculator</strong> uses the <strong>solar altitude angle (α)</strong> to solve the right
-            triangle formed by an object and its shadow.
-            By calculating the precise sun position for your location and date, we determine the exact shadow length
-            (L).
-          </p>
-          <div class="formula-box">
-            <div class="formula-row main-formula">
-              <span class="var">L</span> = <span class="var">h</span> / tan(<span class="var">α</span>)
-            </div>
-            <div class="formula-legend">
-              <span>Where:</span>
-              <span><strong>L</strong> = Shadow Length</span>
-              <span><strong>h</strong> = Object Height</span>
-              <span><strong>α</strong> = Sun Altitude</span>
-            </div>
-          </div>
 
-          <div class="intro-math-section" style="margin-top: 16px;">
-            <p class="seo-text">
-              <strong>Shadow Direction</strong> depends on the <strong>Sun Azimuth</strong>, calculated from your
-              Latitude (<span class="var">φ</span>), Solar Declination (<span class="var">δ</span>), and Local Hour
-              Angle (<span class="var">H</span>).
-            </p>
-            <div class="formula-box">
-              <div class="formula-row main-formula" style="font-size: 0.9rem;">
-                cos(Az) = (sin(<span class="var">δ</span>) - sin(<span class="var">φ</span>) · sin(<span
-                  class="var">α</span>)) / (cos(<span class="var">φ</span>) · cos(<span class="var">α</span>))
-              </div>
-              <div class="formula-legend">
-                <span style="width: 100%; margin-bottom: 4px;">The shadow falls opposite to the sun: <strong>Direction =
-                    Azimuth + 180°</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="subtitle-row">
           <p class="subtitle"><a href="about.html">About & Help</a></p>
         </div>
       </div>
 
       <!-- Quick Results Panel moved to overlay -->
+      <h2 style="margin: 0; padding-left: 4px; font-size: 1.8rem; color: var(--text);">Inputs</h2>
 
       <div class="section" id="location-section">
         <h2>Location</h2>
@@ -275,12 +240,7 @@
         <div class="status" id="sun-status">Calculating sun position...</div>
       </div>
 
-      <div style="text-align: center;">
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-          data-name="bmc-button" data-slug="shadowcalculator" data-color="#15803D" data-emoji="" data-font="Cookie"
-          data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff"
-          data-coffee-color="#B3826C"></script>
-      </div>
+
 
       <div class="section" id="object-section">
         <h2>Object Dimensions</h2>
@@ -345,23 +305,64 @@
         <div class="field">
           <label class="radio-item">
             <input type="checkbox" id="show-grid" checked>
-            <span>Show grid</span>
+            <span>Show Grid</span>
           </label>
         </div>
-        <div class="field">
-          <label class="radio-item">
-            <input type="checkbox" id="show-math">
-            <span>Show math details</span>
-          </label>
-        </div>
+
         <div class="field">
           <label class="radio-item">
             <input type="checkbox" id="show-triangle" checked>
-            <span>Show triangle diagram</span>
+            <span>Show 2D View</span>
           </label>
         </div>
       </div>
 
+      <h2 style="margin: 24px 0 0 0; padding-left: 4px; font-size: 1.8rem; color: var(--text);">What's Happening</h2>
+      <!-- Advanced SEO & Math Intro -->
+      <div class="intro-math-section">
+        <p class="seo-text">
+          <strong>Shadow Calculator</strong> uses the <strong>solar altitude angle (α)</strong> to solve the right
+          triangle formed by an object and its shadow.
+          By calculating the precise sun position for your location and date, we determine the exact shadow length
+          (L).
+        </p>
+        <div class="formula-box">
+          <div class="formula-row main-formula">
+            <span class="var">L</span> = <span class="var">h</span> / tan(<span class="var">α</span>)
+          </div>
+          <div class="formula-legend">
+            <span>Where:</span>
+            <span><strong>L</strong> = Shadow Length</span>
+            <span><strong>h</strong> = Object Height</span>
+            <span><strong>α</strong> = Sun Altitude</span>
+          </div>
+        </div>
+
+        <div class="intro-math-section" style="margin-top: 16px;">
+          <p class="seo-text">
+            <strong>Shadow Direction</strong> depends on the <strong>Sun Azimuth</strong>, calculated from your
+            Latitude (<span class="var">φ</span>), Solar Declination (<span class="var">δ</span>), and Solar Altitude
+            (<span class="var">α</span>).
+          </p>
+          <div class="formula-box">
+            <div class="formula-row main-formula" style="font-size: 0.9rem;">
+              cos(Az) = (sin(<span class="var">δ</span>) - sin(<span class="var">φ</span>) · sin(<span
+                class="var">α</span>)) / (cos(<span class="var">φ</span>) · cos(<span class="var">α</span>))
+            </div>
+            <div class="formula-legend">
+              <span style="width: 100%; margin-bottom: 4px;">The shadow falls opposite to the sun: <strong>Direction =
+                  Azimuth + 180°</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center;">
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+          data-name="bmc-button" data-slug="shadowcalculator" data-color="#15803D" data-emoji="" data-font="Cookie"
+          data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff"
+          data-coffee-color="#B3826C"></script>
+      </div>
 
     </div>
 
@@ -386,19 +387,24 @@
       <div id="info-panel">
         <div id="shadow-info">
           <!-- Header -->
-          <div class="shadow-header-row"
-            style="display: flex; flex-direction: row; align-items: center; gap: 20px; width: 100%; justify-content: flex-start;">
-            <div style="text-align: center;">
-              <div
-                style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
-                Shadow Length</div>
-              <div class="value" id="shadow-length">—</div>
-            </div>
+          <!-- Header -->
+          <h3
+            style="width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; font-size: 1rem; font-weight: 600; color: var(--text); text-align: left;">
+            Calculations</h3>
 
-            <div id="live-formula-display" class="overlay-formula" style="margin: 0;">
+          <div
+            style="display: flex; flex-direction: row; align-items: center; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap; margin-bottom: 16px;">
+            <span style="font-weight: 600; font-size: 1.1rem; color: var(--text);">Shadow Length =</span>
+            <div class="value" id="shadow-length" style="margin: 0;">—</div>
+
+            <div id="live-formula-display" class="overlay-formula" style="margin: 0; margin-left: 12px;">
               <span class="calc-line">
-                <span class="var-val" id="calc-L">L</span> =
-                <span class="var-val" id="calc-h">1.75</span> / tan(<span class="var-val" id="calc-alpha">34.6°</span>)
+                <span class="var-val" id="calc-L"
+                  data-tooltip="Shadow Length (L): The resulting length of the shadow.">L</span> =
+                <span class="var-val" id="calc-h"
+                  data-tooltip="Object Height (h): The physical height of the object.">1.75</span> / tan(<span
+                  class="var-val" id="calc-alpha"
+                  data-tooltip="Solar Altitude (α): The angle of the sun above the horizon.">34.6°</span>)
               </span>
               <span class="calc-result">
                 = <span id="calc-result-final">2.54</span> <span id="calc-unit">m</span>
@@ -406,25 +412,25 @@
             </div>
           </div>
 
-          <div class="overlay-details">
+          <div class="overlay-details" style="margin-bottom: 0;">
             <div class="overlay-azimuth" id="azimuth-details">
               <!-- Explicit Equation -->
               <div class="overlay-formula"
-                style="font-size: 0.75rem; line-height: 1.5; text-align: left; padding: 10px; margin-top: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
+                style="font-size: 0.75rem; line-height: 1.5; text-align: center; padding: 10px; margin-top: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
                   <span style="font-weight: 600; color: var(--text);">Solar Azimuth = arccos</span>
                   <div style="display: flex; flex-direction: column; align-items: center;">
                     <div style="border-bottom: 1px solid var(--text-muted); padding-bottom: 2px; margin-bottom: 2px;">
                       sin(<span id="eq-delta"
-                        title="Solar Declination (δ): The angle between the sun rays and the Earth's equatorial plane.">δ</span>)
+                        data-tooltip="Solar Declination (δ): The angle between the sun rays and the Earth's equatorial plane.">δ</span>)
                       - sin(<span id="eq-phi"
-                        title="Latitude (φ): Your location's distance north or south of the Equator.">φ</span>) ·
+                        data-tooltip="Latitude (φ): Your location's distance north or south of the Equator.">φ</span>) ·
                       sin(<span id="eq-alpha"
-                        title="Solar Altitude (α): The angle of the sun above the horizon.">α</span>)
+                        data-tooltip="Solar Altitude (α): The angle of the sun above the horizon.">α</span>)
                     </div>
                     <div>
-                      cos(<span id="eq-phi-2" title="Latitude (φ)">φ</span>) · cos(<span id="eq-alpha-2"
-                        title="Solar Altitude (α)">α</span>)
+                      cos(<span id="eq-phi-2" data-tooltip="Latitude (φ)">φ</span>) · cos(<span id="eq-alpha-2"
+                        data-tooltip="Solar Altitude (α)">α</span>)
                     </div>
                   </div>
                   <span style="font-weight: 600; color: var(--text); white-space: nowrap;"> = <span id="eq-az-result"
@@ -434,7 +440,8 @@
             </div>
 
             <!-- Shadow Direction Block -->
-            <div class="overlay-formula" style="font-size: 0.75rem; margin-top: 8px; color: var(--text-muted);">
+            <div class="overlay-formula"
+              style="font-size: 0.75rem; margin-top: 8px; color: var(--text-muted); text-align: center;">
               <span style="font-weight: 600; color: var(--text);">Shadow Direction</span> =
               <span id="sd-az-val">0°</span> + 180° =
               <span id="sd-final-result" style="color: var(--accent); font-weight: 700;">—</span>
@@ -444,9 +451,9 @@
           <div class="context-info" id="shadow-context">—</div>
         </div>
 
-        <div id="math-details"></div>
+
         <div id="triangle-container" class="hidden">
-          <h3>Triangle Geometry</h3>
+          <h3>2D View</h3>
           <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
             <!-- Triangle fill -->
             <path id="triangle-fill-path" class="triangle-fill" d="M 80 190 L 80 190 L 80 190 Z" />

@@ -147,17 +147,7 @@ function setupEventListeners() {
         updateScene();
     });
 
-    // Math details toggle
-    dom.showMath.addEventListener('change', (e) => {
-        state.showMath = e.target.checked;
-        updateScene();
-        updateInfoPanelVisibility();
 
-        // Resize scene on desktop only
-        if (window.innerWidth > 768) {
-            setTimeout(onWindowResize, 50);
-        }
-    });
 
     // Triangle diagram toggle
     dom.showTriangle.addEventListener('change', (e) => {

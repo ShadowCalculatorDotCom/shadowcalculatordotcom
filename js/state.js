@@ -8,8 +8,7 @@ export const state = {
     objectType: 'human',
     height: 1.75, // meters
     units: 'imperial',
-    showGrid: true,
-    showMath: false
+    showGrid: true
 };
 
 // Cached DOM elements
@@ -29,14 +28,12 @@ export function cacheDOMElements() {
 
     // Info panel elements
     dom.infoPanel = document.getElementById('info-panel');
-    dom.mathDetails = document.getElementById('math-details');
     dom.sunStatus = document.getElementById('sun-status');
     dom.shadowLength = document.getElementById('shadow-length');
     dom.shadowContext = document.getElementById('shadow-context');
 
     // Controls
     dom.showTriangle = document.getElementById('show-triangle');
-    dom.showMath = document.getElementById('show-math');
     dom.showGrid = document.getElementById('show-grid');
     dom.city = document.getElementById('city');
     dom.date = document.getElementById('date');

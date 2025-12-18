@@ -86,7 +86,6 @@ export function updateScene() {
     updateShadowInfo(solar);
     updateShadowContext();
     updateTriangle(solar);
-    updateMathDetails(solar);
 
 
 }
@@ -99,32 +98,42 @@ function updateSunStatus(solar) {
     if (solar.altitudeDeg <= 0) {
         dom.sunStatus.textContent = `Sun is below horizon at ${timeStr}. No shadow cast.`;
         dom.sunStatus.className = 'status error';
+        dom.sunStatus.style.display = 'block';
     } else {
-        dom.sunStatus.textContent = `Sun altitude: ${solar.altitudeDeg.toFixed(1)}° at ${timeStr}`;
-        dom.sunStatus.className = 'status success';
+        dom.sunStatus.textContent = '';
+        dom.sunStatus.className = '';
+        dom.sunStatus.style.display = 'none';
     }
 }
 
 function updateShadowInfo(solar) {
     if (solar.altitudeDeg <= 0) {
         dom.shadowLength.textContent = 'No shadow';
+        // Clear detailed results
+        updateCalculatorResults("—", state.height, 0, solar);
         return;
     }
 
     const length = calculateShadowLength(state.height, solar.altitude);
 
+    let lengthText = "";
     if (state.units === 'metric') {
         if (length < 1) {
-            dom.shadowLength.textContent = `${(length * 100).toFixed(0)} cm`;
+            lengthText = `${(length * 100).toFixed(0)} cm`;
+            dom.shadowLength.textContent = lengthText;
         } else {
-            dom.shadowLength.textContent = `${length.toFixed(2)} m`;
+            lengthText = `${length.toFixed(2)} m`;
+            dom.shadowLength.textContent = lengthText;
         }
     } else {
         const feet = length * 3.28084;
         const ft = Math.floor(feet);
         const inches = Math.round((feet - ft) * 12);
-        dom.shadowLength.textContent = `${ft}' ${inches}"`;
+        lengthText = `${ft}' ${inches}"`;
+        dom.shadowLength.textContent = lengthText;
     }
+
+    updateCalculatorResults(lengthText, state.height, length, solar);
 }
 
 function updateShadowContext() {
@@ -146,49 +155,7 @@ function updateShadowContext() {
     dom.shadowContext.textContent = `${dateStr} at ${timeStr} • ${locationStr}`;
 }
 
-function updateMathDetails(solar) {
-    if (!state.showMath) {
-        dom.mathDetails.classList.remove('visible');
-        return;
-    }
 
-    dom.mathDetails.classList.add('visible');
-
-    if (solar.altitudeDeg <= 0) {
-        dom.mathDetails.textContent = 'No shadow math: Sun is below horizon';
-        return;
-    }
-
-    const city = CITIES[state.cityIndex];
-    const length = calculateShadowLength(state.height, solar.altitude);
-    const tanAlt = Math.tan(solar.altitude);
-
-    //const dateStr = state.date.toISOString().split('T')[0];
-    const dateStr = new Date(state.date.getTime() - state.date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-    const hours = Math.floor(state.timeMinutes / 60);
-    const minutes = state.timeMinutes % 60;
-    const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-
-    dom.mathDetails.textContent = `Location: ${city.name}
-Date: ${dateStr}
-Time: ${timeStr} (local)
-
-Sun Position:
-  Altitude (angle above horizon): ${solar.altitudeDeg.toFixed(2)}°
-  Azimuth: ${solar.azimuthDeg.toFixed(2)}°
-  (0° = south, +90° = west in SunCalc convention)
-
-Shadow Calculation:
-  Formula: L = H / tan(α)
-  Where:
-    L = shadow length
-    H = object height = ${state.height.toFixed(2)} m
-    α = sun altitude = ${solar.altitudeDeg.toFixed(2)}°
-  
-  tan(${solar.altitudeDeg.toFixed(2)}°) = ${tanAlt.toFixed(4)}
-  L = ${state.height.toFixed(2)} / ${tanAlt.toFixed(4)}
-  L = ${length.toFixed(2)} m`;
-}
 
 export function updateTriangle(solar) {
     // Skip all calculations if triangle is hidden
@@ -340,7 +307,6 @@ export function updateTriangle(solar) {
     }
 
     // Update Quick Calculator Results
-    updateCalculatorResults(shadowText, height, shadowLength, solar);
 }
 
 function updateCalculatorResults(lengthText, heightVal, rawShadowLength, solar) {
@@ -456,14 +422,8 @@ export function updateHeightInputsFromState() {
 }
 
 export function updateInfoPanelVisibility() {
-    const showMath = dom.showMath.checked;
-    const showTriangle = dom.showTriangle.checked;
-
-    if (!showMath && !showTriangle) {
-        dom.infoPanel.style.display = 'none';
-    } else {
-        dom.infoPanel.style.display = 'flex';
-    }
+    // Info panel always visible now since Shadow Info is permanent
+    dom.infoPanel.style.display = 'flex';
 }
 
 export function handleLayoutChange() {
