@@ -134,6 +134,10 @@ function updateShadowInfo(solar) {
     }
 
     updateCalculatorResults(lengthText, state.height, length, solar);
+
+    if (dom.mobileShadowValue) {
+        dom.mobileShadowValue.textContent = lengthText;
+    }
 }
 
 function updateShadowContext() {
@@ -427,17 +431,36 @@ export function updateInfoPanelVisibility() {
 }
 
 export function handleLayoutChange() {
+    // Safety check for required elements
+    if (!dom.mobileLocationContainer || !dom.locationSection || !dom.shadowInfo || !dom.datetimeSection || !dom.triangleContainer) {
+        // Elements not ready yet
+        return;
+    }
+
     if (window.innerWidth <= 768) {
-        // Mobile: Move location to main area
-        if (dom.locationSection.parentElement !== dom.mobileLocationContainer) {
+        // Mobile: Move sections to main area below scene
+        // Order: Date/Time -> Location -> 2D View -> Calculations
+        if (dom.locationSection.parentElement !== dom.mobileLocationContainer ||
+            dom.shadowInfo.parentElement !== dom.mobileLocationContainer) {
+
             dom.mobileLocationContainer.appendChild(dom.datetimeSection);
             dom.mobileLocationContainer.appendChild(dom.locationSection);
+            dom.mobileLocationContainer.appendChild(dom.triangleContainer);
+            dom.mobileLocationContainer.appendChild(dom.shadowInfo);
         }
     } else {
-        // Desktop: Move location back to sidebar
+        // Desktop: Restore locations
+
+        // Restore sidebar items
         if (dom.locationSection.parentElement !== dom.sidebar) {
             dom.sidebar.insertBefore(dom.datetimeSection, dom.objectSection);
             dom.sidebar.insertBefore(dom.locationSection, dom.datetimeSection);
+        }
+
+        // Restore Info Panel items
+        if (dom.shadowInfo.parentElement !== dom.infoPanel) {
+            dom.infoPanel.appendChild(dom.shadowInfo); // Calculations (Left)
+            dom.infoPanel.appendChild(dom.triangleContainer); // Triangle (Right)
         }
     }
 }

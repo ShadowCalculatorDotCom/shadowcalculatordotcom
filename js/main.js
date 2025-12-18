@@ -268,7 +268,9 @@ function init() {
         observer.observe(dom.map);
 
         // Default triangle to hidden on mobile (already hidden via class in HTML)
-        dom.showTriangle.checked = false;
+        // dom.showTriangle.checked = false; // User wants it visible now
+        dom.showTriangle.checked = true;
+        dom.triangleContainer.classList.remove('hidden');
         updateInfoPanelVisibility();
     } else {
         // Desktop: show triangle by default and sync checkbox

@@ -460,7 +460,7 @@ input[type="checkbox"] {
     display: flex;
     flex-direction: column;
     padding: 16px;
-    gap: 16px;
+    gap: 0;
     overflow-x: hidden;
     overflow-y: auto;
     height: 100vh;
@@ -488,7 +488,7 @@ input[type="checkbox"] {
 /* Info Panel (Bottom Area) */
 #info-panel {
     z-index: 10;
-    margin-top: 20px;
+    margin-top: 16px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -993,7 +993,7 @@ input[type="checkbox"] {
     }
 
     #main {
-        padding: 80px 16px 100px 16px;
+        padding: 16px 16px 100px 16px;
         /* Extra bottom padding for FAB space */
         height: 100vh;
         overflow-y: auto;
@@ -1094,4 +1094,62 @@ input[type="checkbox"] {
 
 #rotate-btn:hover svg {
     transform: rotate(90deg);
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+    #mobile-shadow-summary {
+        display: block !important;
+    }
+
+    #shadow-info,
+    #triangle-container {
+        position: relative !important;
+        z-index: 0 !important;
+        min-width: unset !important;
+        width: 100% !important;
+        order: 99 !important;
+
+        /* Match .section styles exactly on mobile */
+        padding: 20px !important;
+        margin-bottom: 16px !important;
+        border: none !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+        border-radius: 12px !important;
+        background: var(--panel-bg) !important;
+
+        /* Reset flex alignment to default block-like behavior */
+        align-items: stretch !important;
+        text-align: left !important;
+    }
+
+    #triangle-svg {
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+    }
+
+    #mobile-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 16px 24px !important;
+        width: 100% !important;
+        background: #fff !important;
+        position: relative !important;
+        z-index: 10 !important;
+        margin-bottom: 0 !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+}
+
+@media (min-width: 769px) {
+    #mobile-shadow-summary {
+        display: none !important;
+    }
+
+    /* Hide the mobile container wrapper explicitly on desktop so it takes 0 space */
+    #mobile-location-container {
+        display: none !important;
+    }
 }

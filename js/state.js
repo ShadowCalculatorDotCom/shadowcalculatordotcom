@@ -86,6 +86,13 @@ export function cacheDOMElements() {
     // Shadow Direction Elements
     dom.sdAzVal = document.getElementById('sd-az-val');
     dom.sdFinalResult = document.getElementById('sd-final-result');
+
+    // Mobile Overlay
+    dom.mobileShadowSummary = document.getElementById('mobile-shadow-summary');
+    dom.mobileShadowValue = document.getElementById('mobile-shadow-value');
+
+    // Calculations Pane (Calculations)
+    dom.shadowInfo = document.getElementById('shadow-info');
 }
 
 // Global scene/map variables (mutable)
