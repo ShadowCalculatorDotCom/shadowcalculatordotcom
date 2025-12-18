@@ -138,28 +138,7 @@
         </div>
       </div>
 
-      <!-- Quick Results Panel (Calculator Feel + Live Math) -->
-      <div class="section result-section">
-        <h2>Current Calculation</h2>
-
-        <!-- Live Formula Display -->
-        <div class="live-formula" id="live-formula-display">
-          <span class="calc-line">
-            <span class="var-val" id="calc-L">L</span> =
-            <span class="var-val" id="calc-h">1.75</span> / tan(<span class="var-val" id="calc-alpha">34.6°</span>)
-          </span>
-          <span class="calc-result">
-            = <span id="calc-result-final">2.54</span> <span id="calc-unit">m</span>
-          </span>
-        </div>
-
-        <div class="result-grid">
-          <div class="result-item" style="grid-column: 1 / -1;">
-            <span class="label">Sun Direction (Azimuth)</span>
-            <span class="value" id="quick-sun-azimuth">—</span>
-          </div>
-        </div>
-      </div>
+      <!-- Quick Results Panel moved to overlay -->
 
       <div class="section" id="location-section">
         <h2>Location</h2>
@@ -403,16 +382,71 @@
             <path d="M21.5 2v6h-6M21.34 5.5A10 10 0 1 1 11.26 2.88"></path>
           </svg>
         </button>
-        <div id="shadow-info">
-          <div>Shadow Length</div>
-          <div class="value" id="shadow-length">—</div>
-          <div class="context-info" id="shadow-context">—</div>
-        </div>
       </div>
       <div id="info-panel">
+        <div id="shadow-info">
+          <!-- Header -->
+          <div class="shadow-header-row"
+            style="display: flex; flex-direction: row; align-items: center; gap: 20px; width: 100%; justify-content: flex-start;">
+            <div style="text-align: center;">
+              <div
+                style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+                Shadow Length</div>
+              <div class="value" id="shadow-length">—</div>
+            </div>
+
+            <div id="live-formula-display" class="overlay-formula" style="margin: 0;">
+              <span class="calc-line">
+                <span class="var-val" id="calc-L">L</span> =
+                <span class="var-val" id="calc-h">1.75</span> / tan(<span class="var-val" id="calc-alpha">34.6°</span>)
+              </span>
+              <span class="calc-result">
+                = <span id="calc-result-final">2.54</span> <span id="calc-unit">m</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="overlay-details">
+            <div class="overlay-azimuth" id="azimuth-details">
+              <!-- Explicit Equation -->
+              <div class="overlay-formula"
+                style="font-size: 0.75rem; line-height: 1.5; text-align: left; padding: 10px; margin-top: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-weight: 600; color: var(--text);">Solar Azimuth = arccos</span>
+                  <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div style="border-bottom: 1px solid var(--text-muted); padding-bottom: 2px; margin-bottom: 2px;">
+                      sin(<span id="eq-delta"
+                        title="Solar Declination (δ): The angle between the sun rays and the Earth's equatorial plane.">δ</span>)
+                      - sin(<span id="eq-phi"
+                        title="Latitude (φ): Your location's distance north or south of the Equator.">φ</span>) ·
+                      sin(<span id="eq-alpha"
+                        title="Solar Altitude (α): The angle of the sun above the horizon.">α</span>)
+                    </div>
+                    <div>
+                      cos(<span id="eq-phi-2" title="Latitude (φ)">φ</span>) · cos(<span id="eq-alpha-2"
+                        title="Solar Altitude (α)">α</span>)
+                    </div>
+                  </div>
+                  <span style="font-weight: 600; color: var(--text); white-space: nowrap;"> = <span id="eq-az-result"
+                      style="color: var(--accent);">—</span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shadow Direction Block -->
+            <div class="overlay-formula" style="font-size: 0.75rem; margin-top: 8px; color: var(--text-muted);">
+              <span style="font-weight: 600; color: var(--text);">Shadow Direction</span> =
+              <span id="sd-az-val">0°</span> + 180° =
+              <span id="sd-final-result" style="color: var(--accent); font-weight: 700;">—</span>
+            </div>
+          </div>
+
+          <div class="context-info" id="shadow-context">—</div>
+        </div>
+
         <div id="math-details"></div>
         <div id="triangle-container" class="hidden">
-          <h3>Calculated Shadow Geometry</h3>
+          <h3>Triangle Geometry</h3>
           <svg id="triangle-svg" viewBox="0 0 450 240" preserveAspectRatio="xMidYMid meet">
             <!-- Triangle fill -->
             <path id="triangle-fill-path" class="triangle-fill" d="M 80 190 L 80 190 L 80 190 Z" />

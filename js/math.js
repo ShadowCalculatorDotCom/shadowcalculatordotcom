@@ -7,12 +7,35 @@ export function getSolarPosition() {
     // Assumes SunCalc is loaded globally via script tag
     const pos = window.SunCalc.getPosition(dt, state.lat, state.lon);
 
+    // Calculate intermediate values for educational display
+    // These are approximations to match the "math" behind the black box
+    const dayOfYear = getDayOfYear(dt);
+    const B = (360 / 365) * (dayOfYear - 81) * (Math.PI / 180);
+    const equationOfTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+    const declination = 23.45 * Math.sin(B); // Approx declination in degrees
+
+    // Local Solar Time (approx)
+    const timeOffset = equationOfTime + 4 * (state.lon - (15 * Math.round(state.lon / 15)));
+    const lst = state.timeMinutes + timeOffset;
+    const hourAngle = (lst / 4) - 180; // degrees
+
     return {
         altitude: pos.altitude,
         azimuth: pos.azimuth,
         altitudeDeg: pos.altitude * 180 / Math.PI,
-        azimuthDeg: pos.azimuth * 180 / Math.PI
+        azimuthDeg: pos.azimuth * 180 / Math.PI,
+        // Educational params
+        declination: declination,
+        hourAngle: hourAngle,
+        latitude: state.lat
     };
+}
+
+function getDayOfYear(date) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
 }
 
 export function createDateTime(date, minutes, timezone) {

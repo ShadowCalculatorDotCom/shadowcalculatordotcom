@@ -77,6 +77,18 @@ export function cacheDOMElements() {
     dom.calcAlpha = document.getElementById('calc-alpha');
     dom.calcResultFinal = document.getElementById('calc-result-final');
     dom.calcUnit = document.getElementById('calc-unit');
+
+    // Azimuth Formula Elements
+    dom.eqDelta = document.getElementById('eq-delta');
+    dom.eqPhi = document.getElementById('eq-phi');
+    dom.eqAlpha = document.getElementById('eq-alpha');
+    dom.eqPhi2 = document.getElementById('eq-phi-2');
+    dom.eqAlpha2 = document.getElementById('eq-alpha-2');
+    dom.eqAzResult = document.getElementById('eq-az-result');
+
+    // Shadow Direction Elements
+    dom.sdAzVal = document.getElementById('sd-az-val');
+    dom.sdFinalResult = document.getElementById('sd-final-result');
 }
 
 // Global scene/map variables (mutable)

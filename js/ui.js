@@ -340,50 +340,56 @@ export function updateTriangle(solar) {
     }
 
     // Update Quick Calculator Results
-    updateCalculatorResults(shadowText, solar.azimuthDeg, solar.altitudeDeg, height, shadowLength);
+    updateCalculatorResults(shadowText, height, shadowLength, solar);
 }
 
-function updateCalculatorResults(lengthText, azimuth, altitude, heightVal, rawShadowLength) {
-    const quickLength = document.getElementById('quick-shadow-length');
+function updateCalculatorResults(lengthText, heightVal, rawShadowLength, solar) {
     const quickAzimuth = document.getElementById('quick-sun-azimuth');
 
-    if (quickLength && quickAzimuth) {
-        if (altitude <= 0) {
-            quickLength.textContent = "—";
-            quickAzimuth.textContent = "—";
+    if (solar.altitudeDeg <= 0) {
+        if (quickAzimuth) quickAzimuth.textContent = "—";
 
-            if (dom.calcH) {
-                dom.calcH.textContent = heightVal.toFixed(2);
-                dom.calcAlpha.textContent = "—";
-                dom.calcResultFinal.textContent = "—";
+        if (dom.calcH) {
+            dom.calcH.textContent = heightVal.toFixed(2);
+            dom.calcAlpha.textContent = "—";
+            dom.calcResultFinal.textContent = "—";
+        }
+
+        // Clear advanced inputs if sun is down
+        if (dom.eqPhi) dom.eqPhi.textContent = "—";
+        if (dom.eqDelta) dom.eqDelta.textContent = "—";
+        if (dom.eqAlpha) dom.eqAlpha.textContent = "—";
+        if (dom.eqPhi2) dom.eqPhi2.textContent = "—";
+        if (dom.eqAlpha2) dom.eqAlpha2.textContent = "—";
+        if (dom.eqAzResult) dom.eqAzResult.textContent = "—";
+        if (dom.sdAzVal) dom.sdAzVal.textContent = "—";
+        if (dom.sdFinalResult) dom.sdFinalResult.textContent = "—";
+
+    } else {
+        // Live Formula Update
+        if (dom.calcH) {
+            let displayH = heightVal;
+            let displayL = rawShadowLength;
+            let unitText = 'm';
+
+            if (state.units === 'imperial') {
+                // Convert meters to decimal feet
+                displayH = heightVal * 3.28084;
+                displayL = rawShadowLength * 3.28084;
+                unitText = 'ft';
             }
-        } else {
-            quickLength.textContent = lengthText;
 
-            // Live Formula Update
-            if (dom.calcH) {
-                let displayH = heightVal;
-                let displayL = rawShadowLength;
-                let unitText = 'm';
+            dom.calcH.textContent = displayH.toFixed(2);
+            dom.calcAlpha.textContent = `${solar.altitudeDeg.toFixed(1)}°`;
+            dom.calcResultFinal.textContent = displayL.toFixed(2);
+            if (dom.calcUnit) dom.calcUnit.textContent = unitText;
+        }
 
-                if (state.units === 'imperial') {
-                    // Convert meters to decimal feet for formula clarity
-                    // 1 meter = 3.28084 feet
-                    displayH = heightVal * 3.28084;
-                    displayL = rawShadowLength * 3.28084;
-                    unitText = 'ft';
-                }
-
-                dom.calcH.textContent = displayH.toFixed(2);
-                dom.calcAlpha.textContent = `${altitude.toFixed(1)}°`;
-                dom.calcResultFinal.textContent = displayL.toFixed(2);
-                if (dom.calcUnit) dom.calcUnit.textContent = unitText;
-            }
-
+        if (quickAzimuth) {
             // Convert azimuth to cardinal direction roughly
             // 0 = South, 90 = West, 180 = North, 270 = East
             let cardinal = "";
-            const az = (azimuth + 360) % 360;
+            const az = (solar.azimuthDeg + 360) % 360;
             if (az >= 337.5 || az < 22.5) cardinal = "S";
             else if (az >= 22.5 && az < 67.5) cardinal = "SW";
             else if (az >= 67.5 && az < 112.5) cardinal = "W";
@@ -394,6 +400,40 @@ function updateCalculatorResults(lengthText, azimuth, altitude, heightVal, rawSh
             else if (az >= 292.5 && az < 337.5) cardinal = "SE";
 
             quickAzimuth.textContent = `${az.toFixed(1)}° (${cardinal})`;
+        }
+
+        // Update Advanced Formula Inputs
+        // Formula: cos(Az) = (sin(δval) - sin(φval) · sin(αval)) / (cos(φval) · cos(αval))
+        const phiStr = `${solar.latitude.toFixed(1)}°`;
+        const deltaStr = `${solar.declination.toFixed(1)}°`;
+        const alphaStr = `${solar.altitudeDeg.toFixed(1)}°`;
+
+        if (dom.eqPhi) dom.eqPhi.textContent = phiStr;
+        if (dom.eqDelta) dom.eqDelta.textContent = deltaStr;
+        if (dom.eqAlpha) dom.eqAlpha.textContent = alphaStr;
+
+        // Denominator repeats
+        if (dom.eqPhi2) dom.eqPhi2.textContent = phiStr;
+        if (dom.eqAlpha2) dom.eqAlpha2.textContent = alphaStr;
+
+        if (dom.eqAzResult) dom.eqAzResult.textContent = `${solar.azimuthDeg.toFixed(1)}°`;
+
+        // Shadow Direction Update
+        if (dom.sdAzVal) dom.sdAzVal.textContent = `${solar.azimuthDeg.toFixed(1)}°`;
+        if (dom.sdFinalResult) {
+            const shadowDir = (solar.azimuthDeg + 180) % 360;
+            // Cardinal for Shadow
+            let cardinal = "";
+            if (shadowDir >= 337.5 || shadowDir < 22.5) cardinal = "S";
+            else if (shadowDir >= 22.5 && shadowDir < 67.5) cardinal = "SW";
+            else if (shadowDir >= 67.5 && shadowDir < 112.5) cardinal = "W";
+            else if (shadowDir >= 112.5 && shadowDir < 157.5) cardinal = "NW";
+            else if (shadowDir >= 157.5 && shadowDir < 202.5) cardinal = "N";
+            else if (shadowDir >= 202.5 && shadowDir < 247.5) cardinal = "NE";
+            else if (shadowDir >= 247.5 && shadowDir < 292.5) cardinal = "E";
+            else if (shadowDir >= 292.5 && shadowDir < 337.5) cardinal = "SE";
+
+            dom.sdFinalResult.textContent = `${shadowDir.toFixed(1)}° (${cardinal})`;
         }
     }
 }

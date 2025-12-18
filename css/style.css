@@ -497,37 +497,101 @@ input[type="checkbox"] {
     gap: 16px;
 }
 
-#shadow-info {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
+/* Info Panel (Bottom Area) */
+#info-panel {
     z-index: 10;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    padding-bottom: 40px;
+}
 
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-    padding: 8px 12px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0);
+#shadow-info {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    z-index: 1;
 
-    text-align: center;
-    min-width: 200px;
+    padding: 24px;
+    border-radius: var(--radius);
+    background: #fff;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+
+    text-align: left;
+    min-width: 320px;
+    max-width: 100%;
+    flex: 1;
 }
 
 #shadow-info .value {
-    font-size: 1.2rem;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.overlay-details {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.overlay-formula {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.overlay-formula span[title] {
+    cursor: help;
+    text-decoration: underline dotted;
+}
+
+.overlay-formula .calc-line {
+    display: inline;
+}
+
+.overlay-formula .calc-result {
+    display: inline;
     font-weight: 600;
     color: var(--accent);
-    margin-top: 4px;
+}
+
+.overlay-azimuth {
+    font-size: 0.85rem;
+    color: var(--text);
+    font-weight: 500;
 }
 
 .context-info {
     font-size: 0.75rem;
     color: var(--text-muted);
-    margin-top: 8px;
-    line-height: 1.4;
+    margin-top: auto;
+    /* Push to bottom */
+    width: 100%;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
 }
 
 /* Triangle diagram */
@@ -535,11 +599,15 @@ input[type="checkbox"] {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px;
-    background: #f9fafb;
+    padding: 24px;
+    background: #fff;
     border-radius: var(--radius);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    flex: 1;
+    min-width: 320px;
 }
+
 
 #triangle-container h3 {
     font-size: 1rem;
