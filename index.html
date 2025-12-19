@@ -105,13 +105,16 @@
       </div>
 
       <!-- Quick Results Panel moved to overlay -->
-      <h2 style="margin: 0; padding-left: 4px; font-size: 1.8rem; color: var(--text);">Inputs</h2>
+      <h2 class="sidebar-header">
+        <span class="desktop-text">Inputs</span>
+        <span class="mobile-text">More Inputs</span>
+      </h2>
 
       <div class="section" id="location-section">
         <h2>Location</h2>
 
         <!-- Quick preset cities -->
-        <div class="field">
+        <div class="field compact-mobile">
           <h3>Quick Select</h3>
           <select id="city">
             <option value="0">Custom Location</option>
@@ -231,7 +234,7 @@
 
       <div class="section" id="datetime-section">
         <h2>Date & Time</h2>
-        <div class="field">
+        <div class="field compact-mobile">
           <h3>Date</h3>
           <input type="date" id="date">
         </div>
@@ -373,12 +376,14 @@
       <div id="scene-container">
         <!-- Mobile Summary Overlay -->
         <div id="mobile-shadow-summary"
-          style="display: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: auto; min-width: 180px; text-align: center; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); padding: 12px 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.05); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-          <div
-            style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 2px;">
-            Shadow Length</div>
-          <div id="mobile-shadow-value"
-            style="font-size: 1.5rem; font-weight: 800; color: var(--accent); line-height: 1;">—</div>
+          style="display: none; position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: auto; text-align: center; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 8px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.3); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <div style="display: flex; align-items: baseline; gap: 8px; justify-content: center;">
+            <span
+              style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Shadow
+              Length:</span>
+            <span id="mobile-shadow-value"
+              style="font-size: 1.25rem; font-weight: 800; color: var(--accent); line-height: 1;">—</span>
+          </div>
         </div>
         <button id="share-btn" class="share-btn" title="Copy link to clipboard">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -400,10 +405,7 @@
       <div id="info-panel">
         <div id="shadow-info">
           <!-- Header -->
-          <!-- Header -->
-          <h3
-            style="width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; font-size: 1rem; font-weight: 600; color: var(--text); text-align: left;">
-            Calculations</h3>
+          <h3>Calculations</h3>
 
           <div
             style="display: flex; flex-direction: row; align-items: center; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap; margin-bottom: 16px;">
@@ -431,7 +433,7 @@
               <div class="overlay-formula"
                 style="font-size: 0.75rem; line-height: 1.5; text-align: center; padding: 10px; margin-top: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                  <span style="font-weight: 600; color: var(--text);">Solar Azimuth = arccos</span>
+                  <span style="font-weight: 600; color: var(--text); white-space: nowrap;">Solar Azimuth = arccos</span>
                   <div style="display: flex; flex-direction: column; align-items: center;">
                     <div style="border-bottom: 1px solid var(--text-muted); padding-bottom: 2px; margin-bottom: 2px;">
                       sin(<span id="eq-delta"

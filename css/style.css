@@ -142,6 +142,19 @@ a:hover {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding-right: 8px;
+    /* Scrollbar space */
+}
+
+.sidebar-header {
+    margin: 0;
+    padding-left: 4px;
+    font-size: 1.8rem;
+    color: var(--text);
+}
+
+.mobile-text {
+    display: none;
 }
 
 .header {
@@ -231,11 +244,15 @@ h1 {
 }
 
 .section h2 {
-    font-size: 1.15rem;
-    margin-bottom: 12px;
-    font-weight: 700;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--text);
-    letter-spacing: -0.01em;
+    text-align: left;
+    letter-spacing: normal;
 }
 
 .section h3 {
@@ -526,6 +543,17 @@ input[type="checkbox"] {
     min-width: 320px;
     max-width: 100%;
     flex: 1;
+}
+
+#shadow-info h3 {
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    text-align: left;
 }
 
 #shadow-info .value {
@@ -921,7 +949,7 @@ input[type="checkbox"] {
         top: 0;
         left: 0;
         right: 0;
-        padding: 16px 20px;
+        padding: 6px 12px;
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
@@ -932,7 +960,7 @@ input[type="checkbox"] {
     #mobile-header h1,
     #mobile-header .brand-title {
         font-family: 'Inter', sans-serif;
-        font-size: 2rem;
+        font-size: 1.1rem;
         font-weight: 700;
         margin: 0;
         color: black;
@@ -974,17 +1002,7 @@ input[type="checkbox"] {
         transform: translateY(0);
     }
 
-    #shadow-info {
-        position: absolute;
-        bottom: 12px;
-        right: 12px;
-        left: auto;
-        transform: none;
-        z-index: 10;
-
-        text-align: center;
-        min-width: 200px;
-    }
+    /* #shadow-info rule removed to fix mobile layout compliance */
 
 
     /* Header is redundant in sidebar on mobile now that share button is moved */
@@ -993,14 +1011,24 @@ input[type="checkbox"] {
     }
 
     #main {
-        padding: 16px 16px 100px 16px;
+        padding: 8px 12px 100px 12px;
         /* Extra bottom padding for FAB space */
         height: 100vh;
         overflow-y: auto;
     }
 
-    #main .section {
-        margin-bottom: 12px;
+    #sidebar {
+        gap: 4px;
+    }
+
+    #mobile-location-container {
+        gap: 4px !important;
+        margin: 8px !important;
+    }
+
+    .section {
+        margin-bottom: 4px !important;
+        padding: 16px !important;
     }
 
     #main .section:last-child {
@@ -1008,13 +1036,65 @@ input[type="checkbox"] {
     }
 
     #scene-container {
-        min-height: 300px;
-        /* Taller scene on mobile */
-        flex: 0 0 50vh;
+        min-height: 200px;
+        flex: 0 0 35vh;
+        margin-bottom: 8px;
     }
 
     #triangle-container {
         padding: 12px;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    #triangle-container #triangle-svg {
+        width: auto;
+        max-width: 100%;
+        max-height: 200px;
+    }
+
+    #info-panel {
+        margin-top: 8px;
+        gap: 12px;
+        padding-bottom: 20px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #info-panel>div {
+        width: 100%;
+        max-width: none;
+        flex: auto;
+    }
+
+    .desktop-text {
+        display: none;
+    }
+
+    .mobile-text {
+        display: inline;
+    }
+
+    /* Compact inputs for mobile */
+    .compact-mobile {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .compact-mobile h3 {
+        margin: 0;
+        white-space: nowrap;
+        /* prevent wrapping */
+    }
+
+    .compact-mobile select,
+    .compact-mobile input {
+        width: 100%;
+        max-width: 65%;
+        margin-top: 0;
     }
 }
 
@@ -1029,19 +1109,30 @@ input[type="checkbox"] {
     }
 
     .section {
-        padding: 12px;
+        padding: 12px !important;
+    }
+
+    #sidebar {
+        gap: 4px;
+    }
+
+    #mobile-location-container {
+        gap: 4px !important;
+        margin: 4px !important;
     }
 
     #main {
-        padding: 80px 8px 8px 8px;
-        gap: 12px;
+        padding: 8px 8px 8px 8px;
+        gap: 4px;
         overflow-y: auto;
         overflow-x: hidden;
         height: 100vh;
     }
 
     #scene-container {
-        min-height: 250px;
+        min-height: 180px;
+        flex: 0 0 32vh;
+        margin-bottom: 4px;
     }
 
     label {
@@ -1054,6 +1145,17 @@ input[type="checkbox"] {
         padding: 10px;
         font-size: 16px;
         /* Prevents zoom on iOS */
+    }
+
+    #info-panel {
+        margin-top: 4px;
+        gap: 8px;
+        padding-bottom: 12px;
+        flex-direction: column;
+    }
+
+    .section {
+        margin-bottom: 4px !important;
     }
 }
 
@@ -1111,8 +1213,8 @@ input[type="checkbox"] {
         order: 99 !important;
 
         /* Match .section styles exactly on mobile */
-        padding: 20px !important;
-        margin-bottom: 16px !important;
+        padding: 12px !important;
+        margin-bottom: 6px !important;
         border: none !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
         border-radius: 12px !important;
@@ -1133,7 +1235,7 @@ input[type="checkbox"] {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
-        padding: 16px 24px !important;
+        padding: 6px 12px !important;
         width: 100% !important;
         background: #fff !important;
         position: relative !important;

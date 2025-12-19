@@ -1,5 +1,6 @@
 import { state, dom, cacheDOMElements, sceneState } from './state.js';
 import { CITIES, CUSTOM_CITY_INDEX } from './data.js';
+import { DEFAULT_HEIGHTS, BREAKPOINTS, TIME_CONFIG, MAP_CONFIG } from './constants.js';
 import { initScene, onWindowResize } from './scene.js';
 import { initMap, lazyInitMap, updateLocation } from './map.js';
 import {
@@ -15,157 +16,8 @@ import {
 } from './ui.js';
 import { estimateTimezoneFromLongitude, getParamsFromUrl } from './utils.js';
 import { getSolarPosition } from './math.js';
+import { setupEventListeners } from './events.js';
 
-function setupEventListeners() {
-    // Mobile menu toggle
-    dom.menuToggle.addEventListener('click', () => {
-        dom.sidebar.classList.toggle('open');
-        dom.menuToggle.classList.toggle('open');
-    });
-
-    // Close sidebar when clicking outside on mobile
-    document.getElementById('main').addEventListener('click', () => {
-        if (dom.sidebar.classList.contains('open') && window.innerWidth <= 768) {
-            dom.sidebar.classList.remove('open');
-            dom.menuToggle.classList.remove('open');
-        }
-    });
-
-    // City selection
-    // For Custom Location (value 0), this uses the last lat/lon set by sliders
-    dom.city.addEventListener('change', (e) => {
-        state.cityIndex = parseInt(e.target.value);
-        const city = CITIES[state.cityIndex];
-        state.lat = city.lat;
-        state.lon = city.lon;
-
-        updateLatLonDisplay();
-        updateScene();
-
-        initMap(state.lat, state.lon);
-    });
-
-    // Use current location button
-    document.getElementById('use-current-location').addEventListener('click', () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    updateLocation(lat, lon);
-                    sceneState.map.setView([lat, lon], 13);
-                    dom.city.value = '0'; // Set to "Custom Location"
-                },
-                (error) => {
-                    alert('Unable to get your location. Please ensure location permissions are enabled.');
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by your browser.');
-        }
-    });
-
-    // Date
-    dom.date.addEventListener('change', (e) => {
-        state.date = new Date(e.target.value + 'T12:00:00');
-        updateScene();
-    });
-
-    // Time (throttled with RAF for smooth performance)
-    dom.time.addEventListener('input', (e) => {
-        state.timeMinutes = parseInt(e.target.value);
-        updateTimeDisplay(); // Always update display immediately
-
-        // Throttle expensive updates to animation frame
-        if (!sceneState.pendingUpdate) {
-            sceneState.pendingUpdate = true;
-            requestAnimationFrame(() => {
-                updateScene();
-                sceneState.pendingUpdate = false;
-            });
-        }
-    });
-
-    // Object type
-    document.querySelectorAll('input[name="object-type"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            state.objectType = e.target.value;
-
-            // set default heights based on type
-            // Human: 1.75m (approx 5'9")
-            // Tree: 10m (approx 33ft - mature garden tree)
-            // Box/Post: 2m (approx 6.5ft - tall fence)
-            // House: 6m (approx 20ft - 2 story house)
-            switch (state.objectType) {
-                case 'human':
-                    state.height = 1.75;
-                    break;
-                case 'tree':
-                    state.height = 10;
-                    break;
-                case 'box':
-                    state.height = 2;
-                    break;
-                case 'house':
-                    state.height = 6;
-                    break;
-            }
-
-            updateHeightInputsFromState();
-            updateScene();
-        });
-    });
-
-    // Height (Metric)
-    dom.heightMetric.addEventListener('input', (e) => {
-        state.height = parseFloat(e.target.value);
-        updateScene();
-    });
-
-    // Height (Imperial)
-    const updateImperialHeight = () => {
-        const ft = parseFloat(dom.heightFt.value) || 0;
-        const inches = parseFloat(dom.heightIn.value) || 0;
-        // Convert feet/inches to meters
-        state.height = (ft * 0.3048) + (inches * 0.0254);
-        updateScene();
-    };
-    dom.heightFt.addEventListener('input', updateImperialHeight);
-    dom.heightIn.addEventListener('input', updateImperialHeight);
-
-    // Units Change
-    document.querySelectorAll('input[name="units"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            state.units = e.target.value;
-            updateHeightInputsFromState();
-            updateScene();
-        });
-    });
-    // Grid toggle
-    dom.showGrid.addEventListener('change', (e) => {
-        state.showGrid = e.target.checked;
-        updateScene();
-    });
-
-
-
-    // Triangle diagram toggle
-    dom.showTriangle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            dom.triangleContainer.classList.remove('hidden');
-            // Update triangle now that it's visible
-            updateTriangle(getSolarPosition());
-        } else {
-            dom.triangleContainer.classList.add('hidden');
-        }
-        updateInfoPanelVisibility();
-
-        // Resize scene on desktop only
-        if (window.innerWidth > 768) {
-            setTimeout(onWindowResize, 50);
-        }
-    });
-}
 
 function init() {
     // Cache DOM elements first
@@ -229,8 +81,8 @@ function init() {
         dom.city.value = randomCityIndex;
 
         // Set time to mid-day
-        state.timeMinutes = 720;
-        dom.time.value = 720;
+        state.timeMinutes = TIME_CONFIG.defaultMinutes;
+        dom.time.value = TIME_CONFIG.defaultMinutes;
     }
 
 
@@ -256,14 +108,14 @@ function init() {
     window.addEventListener('resize', handleLayoutChange);
 
     // Handle mobile defaults and layout
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= BREAKPOINTS.mobile) {
         // Mobile: true lazy load with IntersectionObserver
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
                 lazyInitMap();
                 observer.disconnect();
             }
-        }, { rootMargin: '100px' }); // Load 100px before it's visible
+        }, { rootMargin: MAP_CONFIG.observerMargin }); // Load 100px before it's visible
 
         observer.observe(dom.map);
 
