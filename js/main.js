@@ -303,7 +303,10 @@ function startSpotlightTour() {
                     // Scroll UP (window scrolls down, content moves down)
                     // We want tooltip top to be at least 80px from top (header space)
                     const offset = 80 - ttRect.top;
-                    window.scrollBy({ top: -offset, behavior: 'auto' }); // Scroll UP (negative value) moves viewport UP, content DOWN
+                    const mainContainer = document.getElementById('main');
+                    if (mainContainer) {
+                        mainContainer.scrollBy({ top: -offset, behavior: 'auto' });
+                    }
                     // Recalculate position
                     updateSpotlightPosition(target, tooltip, step.placement);
                 }
@@ -381,6 +384,9 @@ function startSpotlightTour() {
         tooltip.classList.remove('active');
         document.querySelectorAll('.highlight-element').forEach(el => el.classList.remove('highlight-element'));
         document.body.classList.remove('tour-active');
+
+        // Ensure window scroll is reset
+        window.scrollTo(0, 0);
 
         // Cleanup listeners
         nextBtn.removeEventListener('click', nextHandler);
