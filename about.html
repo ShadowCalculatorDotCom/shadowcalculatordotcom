@@ -117,27 +117,32 @@
 
     <h2>Privacy & Data Usage</h2>
 
-    <h3>What Stays Local (Private)</h3>
+    <h3>What Stays Local</h3>
     <p>
-      The following data never leaves your device:
+      The following processes happen entirely within your browser:
     </p>
     <ul>
-      <li><strong>Your exact location:</strong> When you click "Use My Location," your browser determines your
-        coordinates locally using GPS/WiFi. This location is not transmitted to any server.</li>
-      <li><strong>Shadow calculations:</strong> All sun position math and 3D rendering happens in your browser.</li>
-      <li><strong>Settings:</strong> Date, time, object height, and other parameters are processed locally.</li>
+      <li><strong>Shadow Math:</strong> All calculations for sun position, shadow length, and direction are performed
+        locally on your device using JavaScript.</li>
+      <li><strong>User Settings:</strong> Your selected date, time, and object dimensions are stored in your browser's
+        temporary memory.</li>
+      <li><strong>Raw GPS Data:</strong> When you use geolocation, your specific latitude and longitude coordinates are
+        retrieved by the browser and used for calculations. They are not sent to <em>ShadowCalculator.com</em> servers.
+      </li>
     </ul>
 
-    <h3>What Is Sent to Third Parties</h3>
+    <h3>Data Shared with Third Parties</h3>
     <p>
-      The interactive map feature requires loading resources from external services:
+      To provide map features and site functionality, your browser must request resources from external services.
+      <strong>These requests inherently reveal your IP address and the specific content/location you are
+        accessing.</strong>
     </p>
     <ul>
-      <li><strong>CARTO (map tiles):</strong> When you view the map, your browser requests
-        map image tiles from CARTO's servers. They see your IP address and which map areas
-        you're viewing, similar to visiting any website. The map data comes from OpenStreetMap
-        contributors. CARTO may collect standard web analytics. See CARTO's
-        <a href="https://carto.com/privacy/" target="_blank">Privacy Policy</a>.
+      <li><strong>CARTO (Map Tiles):</strong> To display the map, your browser fetches image tiles for your specific
+        location from CARTO's servers.
+        <br><em>Privacy Implication:</em> At high zoom levels (e.g., viewing a specific house), these tile requests
+        reveal your precise location to the map provider.
+        See CARTO's <a href="https://carto.com/privacy/" target="_blank">Privacy Policy</a>.
       </li>
 
       <li><strong>Nominatim (location search):</strong> When you search for a city or address,
@@ -146,9 +151,16 @@
         <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank">Usage Policy</a>.
       </li>
 
-      <li><strong>Google Fonts:</strong> The Inter font is loaded from Google Fonts, which may
-        log your IP address and browser information. See Google's
-        <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a>.
+      <li><strong>Buy Me a Coffee:</strong> The "Buy me a coffee" button loads a widget from
+        buymeacoffee.com. This service collects data (like your IP address and browser info) to
+        display the button and process any potential payments. See their
+        <a href="https://www.buymeacoffee.com/privacy-policy" target="_blank">Privacy Policy</a>.
+      </li>
+
+      <li><strong>CDNs (unpkg, jsDelivr, Google Fonts):</strong> Educational and code libraries
+        (Three.js, Leaflet, SunCalc, Inter font) are loaded from public Content Delivery Networks.
+        These services see your IP address when your browser requests these files, which is standard
+        for most websites.
       </li>
 
       <li><strong>GitHub Pages (hosting):</strong> This site is hosted on GitHub Pages, which
