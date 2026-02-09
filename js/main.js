@@ -224,11 +224,14 @@ function startSpotlightTour() {
 
     // Mobile specific path
     if (window.innerWidth <= 768) {
-        // Force tooltip placement
+        // Force tooltip placement for all steps first
         steps.forEach(s => s.placement = 'bottom');
 
-        // Replace the 3rd step (Object Dimensions) with Mobile Menu Step
-        // Find index of object-section step
+        // Special: Location Section on Mobile needs to be TOP
+        const locStep = steps.find(s => s.targetId === 'location-section');
+        if (locStep) locStep.placement = 'top';
+
+        // Replace the 3rd step (Object Dimensions) with Mobile Menu Step (existing logic)
         const objStepIndex = steps.findIndex(s => s.targetId === 'object-section');
         if (objStepIndex !== -1) {
             steps[objStepIndex] = {
@@ -274,12 +277,38 @@ function startSpotlightTour() {
         overlay.classList.add('active');
         // Wait for potential scroll jump before showing tooltip to avoid flicker
 
-        // Scroll target into view instantly
-        target.scrollIntoView({ behavior: 'auto', block: 'center' });
+        // Scroll Logic
+        if (window.innerWidth <= 768 && step.placement === 'top') {
+            // If tooltip is top, we need to ensure there is space ABOVE the element visible
+            // Standard scrollIntoView center/start might not account for tooltip height
+            // We want the target's top edge to be at least (TooltipHeight + Gap) down from viewport top
+            // Since we don't know tooltip height exactly yet (it might be hidden), we estimate or calculate after
+
+            // First, scroll target to center to get it roughly right
+            target.scrollIntoView({ behavior: 'auto', block: 'center' });
+
+            // Then adjust if needed after tooltip is positioned
+        } else {
+            target.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
 
         // Update position after a microtask to ensure layout is settled
         setTimeout(() => {
             updateSpotlightPosition(target, tooltip, step.placement);
+
+            // Re-check visibility for 'top' placement on mobile
+            if (window.innerWidth <= 768 && step.placement === 'top') {
+                const ttRect = tooltip.getBoundingClientRect();
+                if (ttRect.top < 60) { // If tooltip is too close to top (or off screen)
+                    // Scroll UP (window scrolls down, content moves down)
+                    // We want tooltip top to be at least 80px from top (header space)
+                    const offset = 80 - ttRect.top;
+                    window.scrollBy({ top: -offset, behavior: 'auto' }); // Scroll UP (negative value) moves viewport UP, content DOWN
+                    // Recalculate position
+                    updateSpotlightPosition(target, tooltip, step.placement);
+                }
+            }
+
             tooltip.classList.add('active');
         }, 10);
     }
