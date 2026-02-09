@@ -102,6 +102,7 @@ a:hover {
 #menu-toggle {
     display: none;
     position: fixed;
+    /* Default Top Left for tablet/desktop if used */
     top: 16px;
     left: 16px;
     z-index: 1000;
@@ -110,7 +111,25 @@ a:hover {
     border-radius: 8px;
     padding: 12px;
     cursor: pointer;
+    padding: 12px;
+    cursor: pointer;
     box-shadow: var(--shadow-md);
+}
+
+/* Ensure menu toggle pops out during welcome tour */
+#menu-toggle.highlight-element {
+    z-index: 2005 !important;
+    position: fixed !important;
+    /* Keep it fixed */
+    background: var(--accent) !important;
+    /* Keep it green */
+    border-color: white !important;
+    box-shadow: 0 0 0 4px white, 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    /* White ring + shadow */
+    transform: translateZ(10px) !important;
+    /* Break stacking context */
+    pointer-events: auto !important;
+    /* Allow clicking */
 }
 
 #menu-toggle span {
@@ -127,6 +146,49 @@ a:hover {
 }
 
 /* Sidebar */
+@media (max-width: 768px) {
+    #menu-toggle {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        top: auto;
+        left: auto;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        padding: 0;
+        /* Remove padding to let flex center */
+        margin: 0;
+        background: var(--accent) !important;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        /* Ensure on top normally */
+        outline: none;
+        /* remove focus outline */
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #menu-toggle span {
+        display: block;
+        background: white;
+        /* White hamburger lines */
+        margin: 4px 0;
+        /* Increase spacing slightly */
+        width: 24px;
+        /* Default width */
+        height: 3px;
+        /* Ensure visible height */
+        border-radius: 2px;
+        /* Smooth ends */
+    }
+}
+
 #sidebar {
     /* Glassmorphism background */
     background: rgba(255, 255, 255, 0.85);
@@ -151,6 +213,14 @@ a:hover {
     padding-left: 4px;
     font-size: 1.8rem;
     color: var(--text);
+    background: #ffffff;
+    /* Ensure background for spotlight */
+    position: relative;
+    z-index: 5;
+    border-radius: 8px;
+    /* Look nice when highlighted */
+    padding: 8px;
+    /* Give it some breathing room for background */
 }
 
 .mobile-text {
@@ -253,6 +323,9 @@ h1 {
     color: var(--text);
     text-align: left;
     letter-spacing: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .section h3 {

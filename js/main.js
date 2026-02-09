@@ -137,9 +137,247 @@ function init() {
     updateScene();
 }
 
+
+
+// Expose reset function for testing
+window.resetWelcome = function () {
+    localStorage.removeItem('shadowcalc_welcome_seen');
+    checkWelcome();
+    console.log('Welcome state reset. Toast banner should appear.');
+};
+
+
+function checkWelcome() {
+    const hasSeen = localStorage.getItem('shadowcalc_welcome_seen');
+    const toast = document.getElementById('welcome-toast');
+    const restartBtn = document.getElementById('restart-tour-btn');
+
+    // Always enable the restart button
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            // Reset state logic if needed? No, just start it.
+            // Maybe close toast if open?
+            if (toast) toast.classList.add('hidden');
+            startSpotlightTour();
+        });
+    }
+
+    if (!hasSeen && toast) {
+        // Show Toast if new user
+        toast.classList.remove('hidden');
+
+        // Close button click (Dismiss completely)
+        const toastClose = toast.querySelector('.welcome-toast-close');
+        if (toastClose) {
+            toastClose.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering the banner click
+                toast.classList.add('hidden');
+                localStorage.setItem('shadowcalc_welcome_seen', 'true');
+            });
+        }
+
+        // Banner click (Open Guide)
+        toast.addEventListener('click', () => {
+            toast.classList.add('hidden');
+            startSpotlightTour();
+        });
+    }
+}
+
+// Spotlight Tour Logic
+function startSpotlightTour() {
+    const overlay = document.getElementById('spotlight-overlay');
+    const tooltip = document.getElementById('spotlight-tooltip');
+
+    document.body.classList.add('tour-active');
+
+    // Elements
+    const titleEl = document.getElementById('spotlight-title');
+    const descEl = document.getElementById('spotlight-description');
+    const progressEl = document.getElementById('spotlight-progress');
+    const nextBtn = document.getElementById('spotlight-next');
+    const skipBtn = document.getElementById('spotlight-skip');
+
+    let currentStepIndex = 0;
+
+    // Define Steps
+    const steps = [
+        {
+            targetId: 'location-section',
+            title: 'Set Location',
+            description: 'Start here! Choose a city from the dropdown, use the map, or click "Use My Location".',
+            placement: 'right'
+        },
+        {
+            targetId: 'datetime-section',
+            title: 'Date & Time',
+            description: 'Pick a data from the calendar and/or adjust the slider to see how shadows change.',
+            placement: 'right'
+        },
+        {
+            targetId: 'object-section',
+            title: 'Object Dimensions',
+            description: 'Define what is casting the shadow. You can switch between 3D models and their heights.',
+            placement: 'right'
+        }
+    ];
+
+    // Mobile specific path
+    if (window.innerWidth <= 768) {
+        // Force tooltip placement
+        steps.forEach(s => s.placement = 'bottom');
+
+        // Replace the 3rd step (Object Dimensions) with Mobile Menu Step
+        // Find index of object-section step
+        const objStepIndex = steps.findIndex(s => s.targetId === 'object-section');
+        if (objStepIndex !== -1) {
+            steps[objStepIndex] = {
+                targetId: 'menu-toggle', // The hamburger button
+                title: 'More Settings',
+                description: 'Tap this menu button to access Object Height, Type, and other advanced settings.',
+                placement: 'mobile-menu-hint' // Special placement
+            };
+        }
+    }
+
+    function showStep(index) {
+        if (index >= steps.length) {
+            endTour();
+            return;
+        }
+
+        const step = steps[index];
+        let target = document.getElementById(step.targetId);
+
+        // Fallback for class selectors if ID not found (specifically for sidebar-header) or if we want to target by class
+        if (!target && step.targetId === 'sidebar-header') {
+            target = document.querySelector('.sidebar-header');
+        }
+
+        if (!target) {
+            // If target missing (e.g. mobile layout changes), skip
+            showStep(index + 1);
+            return;
+        }
+
+        // Highlight Target
+        document.querySelectorAll('.highlight-element').forEach(el => el.classList.remove('highlight-element'));
+        target.classList.add('highlight-element');
+
+        // Update Content
+        titleEl.textContent = step.title;
+        descEl.textContent = step.description;
+        progressEl.textContent = `${index + 1} of ${steps.length}`;
+        nextBtn.textContent = index === steps.length - 1 ? 'Finish' : 'Next';
+
+        // Show UI
+        overlay.classList.add('active');
+        // Wait for potential scroll jump before showing tooltip to avoid flicker
+
+        // Scroll target into view instantly
+        target.scrollIntoView({ behavior: 'auto', block: 'center' });
+
+        // Update position after a microtask to ensure layout is settled
+        setTimeout(() => {
+            updateSpotlightPosition(target, tooltip, step.placement);
+            tooltip.classList.add('active');
+        }, 10);
+    }
+
+    function updateSpotlightPosition(target, tooltip, placement) {
+        const tRect = target.getBoundingClientRect();
+        const ttRect = tooltip.getBoundingClientRect();
+        const gap = 12;
+
+        let top = 0;
+        let left = 0;
+
+        // Basic placement logic
+        // Basic placement logic
+        if (window.innerWidth <= 768) {
+            // Mobile
+            if (placement === 'top') {
+                // Place above target
+                top = tRect.top - ttRect.height - gap;
+                left = tRect.left + (tRect.width / 2) - (ttRect.width / 2);
+                tooltip.setAttribute('data-placement', 'top'); // Arrow points DOWN
+            } else if (placement === 'mobile-menu-hint') {
+                // Place above, aligned right-ish to point to hamburger
+                // User requested moving it up more to avoid covering the button
+                // Now at -20px to bring it closer to the button
+                top = tRect.top - ttRect.height - 20;
+                // Align right edge of tooltip with right edge of screen minus margin
+                left = window.innerWidth - ttRect.width - 20;
+                tooltip.setAttribute('data-placement', 'mobile-menu-hint'); // Arrow points DOWN-RIGHT
+            } else {
+                // Default Bottom
+                top = tRect.bottom + gap;
+                left = (window.innerWidth - ttRect.width) / 2;
+                tooltip.setAttribute('data-placement', 'bottom'); // Arrow points UP
+            }
+        } else {
+            // Desktop
+            if (placement === 'right') {
+                top = tRect.top + (tRect.height / 2) - (ttRect.height / 2);
+                left = tRect.right + gap;
+            }
+        }
+
+        // Bounds check
+        if (top < 10) top = 10;
+        if (left < 10) left = 10;
+        if (left + ttRect.width > window.innerWidth) left = window.innerWidth - ttRect.width - 10;
+
+        tooltip.style.top = `${top}px`;
+        tooltip.style.left = `${left}px`;
+    }
+
+    function recalculatePosition() {
+        if (!overlay.classList.contains('active')) return;
+        const currentStep = steps[currentStepIndex];
+        const target = document.getElementById(currentStep.targetId);
+        if (target) {
+            updateSpotlightPosition(target, tooltip, currentStep.placement);
+        }
+    }
+
+    // Event Handlers
+    function nextHandler() {
+        currentStepIndex++;
+        showStep(currentStepIndex);
+    }
+
+    function endTour() {
+        overlay.classList.remove('active');
+        tooltip.classList.remove('active');
+        document.querySelectorAll('.highlight-element').forEach(el => el.classList.remove('highlight-element'));
+        document.body.classList.remove('tour-active');
+
+        // Cleanup listeners
+        nextBtn.removeEventListener('click', nextHandler);
+        skipBtn.removeEventListener('click', endTour);
+        window.removeEventListener('resize', recalculatePosition);
+        window.removeEventListener('scroll', recalculatePosition, true); // true for capture (sidebar scroll)
+
+        // Save
+        localStorage.setItem('shadowcalc_welcome_seen', 'true');
+    }
+
+    nextBtn.addEventListener('click', nextHandler);
+    skipBtn.addEventListener('click', endTour);
+    window.addEventListener('resize', recalculatePosition);
+    window.addEventListener('scroll', recalculatePosition, true); // Update if user scrolls manually
+
+    // Start
+    showStep(0);
+}
+
 // Start when page loads
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
 }
+
+// Call welcome check after init
+checkWelcome();

@@ -1,0 +1,342 @@
+/* Spotlight Overlay */
+.spotlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000 !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.spotlight-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Highlighted Element */
+.highlight-element {
+    position: relative;
+    z-index: 2002 !important;
+    background: #ffffff !important;
+    /* Ensure it's opaque */
+    border-radius: 8px;
+    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.5) !important;
+    /* Stronger highlight ring */
+    transform: translateZ(10px) !important;
+    /* Force new stacking context */
+    transition: box-shadow 0.3s ease;
+    pointer-events: none;
+    /* Prevent interaction while highlighting, or keep auto if we want user to click? Usually auto is better but user said "highlighted". Let's keep auto inheritance but maybe force it if needed. Actually, if I set pointer-events: none on overlay, the element just needs to be above it. */
+}
+
+/* Tooltip Card */
+.spotlight-tooltip {
+    position: fixed;
+    /* Changed from absolute for better viewport tracking */
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.05);
+    width: 300px;
+    z-index: 2003;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--border);
+}
+
+.spotlight-tooltip.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.spotlight-tooltip h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spotlight-tooltip p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+}
+
+.spotlight-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.spotlight-progress {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.spotlight-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-skip {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.btn-skip:hover {
+    background: #F3F4F6;
+    color: var(--text);
+}
+
+.btn-next {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(21, 128, 61, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-next:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+}
+
+/* Arrow for tooltip */
+.spotlight-tooltip::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+/* Positioning handled by JS usually, but basic arrow positions */
+.spotlight-tooltip[data-placement="right"]::before {
+    left: -6px;
+    top: 20px;
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.spotlight-tooltip[data-placement="left"]::before {
+    right: -6px;
+    top: 20px;
+    border-right: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+}
+
+.spotlight-tooltip[data-placement="bottom"]::before {
+    top: -6px;
+    left: 50%;
+    margin-left: -6px;
+    border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+}
+
+.spotlight-tooltip[data-placement="top"]::before {
+    bottom: -6px;
+    left: 50%;
+    margin-left: -6px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Mobile Menu specific arrow (points to bottom-right) */
+.spotlight-tooltip[data-placement="mobile-menu-hint"]::before {
+    bottom: -6px;
+    right: 40px;
+    /* Offset from right edge to point to the hamburger icon area */
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    left: auto;
+    margin-left: 0;
+}
+
+/* Fix stacking context for sidebar when tour is active (Desktop Only) */
+@media (min-width: 769px) {
+    body.tour-active #sidebar {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: none !important;
+        z-index: auto !important;
+        /* Ensure no transform creates a stacking context */
+        will-change: auto !important;
+    }
+}
+
+/* New: Help Toast / Banner */
+.welcome-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #ffffff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    animation: slideInToast 0.5s ease-out forwards;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    max-width: 320px;
+}
+
+.welcome-toast:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.welcome-toast.hidden {
+    display: none;
+}
+
+.welcome-toast-icon {
+    background: #DCFCE7;
+    /* Light green bg */
+    color: var(--accent);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.welcome-toast-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.welcome-toast-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.welcome-toast-subtitle {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.welcome-toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+}
+
+.welcome-toast-close:hover {
+    opacity: 1;
+    background: #F3F4F6;
+    border-radius: 4px;
+}
+
+@keyframes slideInToast {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Toast adjustments */
+@media (max-width: 768px) {
+    .welcome-toast {
+        bottom: 24px;
+        /* Start at bottom left, aligned with FAB level */
+        left: 16px;
+        right: auto;
+        transform: none;
+        /* Remove centering */
+        width: auto;
+        /* Shrink to fit content */
+        max-width: calc(100vw - 110px);
+        /* Avoid overlapping the FAB on the right */
+    }
+
+    .welcome-toast:hover {
+        transform: translateY(-2px);
+    }
+
+    @keyframes slideInToast {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Restart Tour Button */
+.btn-restart-tour {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 99px;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-restart-tour:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #F0FDF4;
+    /* Light green hover */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.btn-restart-tour svg {
+    stroke-width: 2px;
+}
