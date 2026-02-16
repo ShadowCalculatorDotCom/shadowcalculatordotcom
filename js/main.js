@@ -385,7 +385,18 @@ function startSpotlightTour() {
         document.querySelectorAll('.highlight-element').forEach(el => el.classList.remove('highlight-element'));
         document.body.classList.remove('tour-active');
 
-        // Ensure window scroll is reset
+        // Force layout recalc to clear any rendering artifacts
+        void document.body.offsetHeight;
+
+        // Reset scroll on the correct containers
+        // Mobile uses #main, Desktop uses #sidebar (and sometimes window/body depending on overflow)
+        const mainContainer = document.getElementById('main');
+        if (mainContainer) mainContainer.scrollTo(0, 0);
+
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.scrollTo(0, 0);
+
+        // Ensure window scroll is reset too just in case
         window.scrollTo(0, 0);
 
         // Cleanup listeners
