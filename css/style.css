@@ -590,6 +590,7 @@ input[type="checkbox"] {
     /* Explicitly transparent */
     box-shadow: none;
     border: none;
+    min-height: 200px;
 }
 
 #shadow-info {
@@ -1327,4 +1328,28 @@ input[type="checkbox"] {
     #mobile-location-container {
         display: none !important;
     }
+}
+
+/* Buy Me a Coffee Pure HTML/CSS Button */
+.bmc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--accent);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.bmc-btn:hover {
+    background-color: var(--accent-hover);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
 }

@@ -91,9 +91,6 @@ function init() {
     updateTimeDisplay();
     updateHeightInputsFromState();
 
-    // Initialize Three.js scene
-    initScene();
-
     // Setup event listeners
     setupEventListeners();
 
@@ -133,8 +130,14 @@ function init() {
         lazyInitMap();
     }
 
-    // Initial scene update
-    updateScene();
+    // Initialize Three.js scene and update it without blocking initial render
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            initScene();
+            // Initial scene update
+            updateScene();
+        }, 0);
+    });
 }
 
 

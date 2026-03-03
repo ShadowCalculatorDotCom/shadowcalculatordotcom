@@ -124,7 +124,7 @@
         <!-- Quick preset cities -->
         <div class="field compact-mobile">
           <h3>Quick Select</h3>
-          <select id="city">
+          <select id="city" aria-label="Select City">
             <option value="0">Custom Location</option>
             <optgroup label="USA">
               <option value="1" selected>New York, USA</option>
@@ -253,11 +253,11 @@
         </h2>
         <div class="field compact-mobile">
           <h3>Date</h3>
-          <input type="date" id="date">
+          <input type="date" id="date" aria-label="Date">
         </div>
         <div class="field">
           <h3>Time: <span id="time-display" class="value-display">12:00</span></h3>
-          <input type="range" id="time" min="0" max="1439" step="1" value="720">
+          <input type="range" id="time" min="0" max="1439" step="1" value="720" aria-label="Time">
         </div>
         <div class="status" id="sun-status">Calculating sun position...</div>
       </div>
@@ -301,18 +301,18 @@
           <h3>Height</h3>
           <!-- Metric Input (Hidden by default if starting in Imperial) -->
           <div id="height-metric-container" class="input-with-unit" style="display: none;">
-            <input type="number" id="height-metric" min="0.1" max="100" step="0.01">
+            <input type="number" id="height-metric" min="0.1" max="100" step="0.01" aria-label="Height in meters">
             <span class="unit">m</span>
           </div>
 
           <!-- Imperial Input -->
           <div id="height-imperial-container" class="radio-group" style="gap: 10px;">
             <div class="input-with-unit">
-              <input type="number" id="height-ft" min="0" max="100" step="1">
+              <input type="number" id="height-ft" min="0" max="100" step="1" aria-label="Height in feet">
               <span class="unit">ft</span>
             </div>
             <div class="input-with-unit">
-              <input type="number" id="height-in" min="0" max="11" step="1">
+              <input type="number" id="height-in" min="0" max="11" step="1" aria-label="Height in inches">
               <span class="unit">in</span>
             </div>
           </div>
@@ -546,16 +546,22 @@
           </button>
         </div>
 
-        <div
-          style="width: 100%; display: flex; justify-content: center; transform: scale(0.75); transform-origin: center top;">
-          <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="shadowcalculator" data-color="#15803D" data-emoji="" data-font="Cookie"
-            data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff"
-            data-coffee-color="#B3826C"></script>
+        <div style="width: 100%; display: flex; justify-content: center; min-height: 50px;">
+          <a class="bmc-btn" target="_blank" href="https://www.buymeacoffee.com/shadowcalculator"
+            rel="noopener noreferrer" aria-label="Buy me a coffee">
+            <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+              <line x1="6" y1="1" x2="6" y2="4"></line>
+              <line x1="10" y1="1" x2="10" y2="4"></line>
+              <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
+            <span>Buy me a coffee</span>
+          </a>
         </div>
       </div>
 
-      <div id="mobile-location-container"></div>
       <div id="welcome-toast" class="welcome-toast hidden">
         <div class="welcome-toast-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -589,9 +595,6 @@
       </div>
     </div>
 
-  </div>
-  </div>
-  </div>
   </div>
 
   <!-- External Libraries -->
