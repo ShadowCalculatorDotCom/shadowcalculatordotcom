@@ -59,7 +59,11 @@
 
   <!-- Main Styles -->
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/welcome.css">
+  <link rel="preload" href="css/welcome.css" as="style">
+  <link rel="stylesheet" href="css/welcome.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="css/welcome.css">
+  </noscript>
 
   <script type="application/ld+json">
     {
@@ -81,7 +85,7 @@
 </head>
 
 <body>
-  <button id="menu-toggle">
+  <button id="menu-toggle" aria-label="Menu">
     <span></span>
     <span></span>
     <span></span>
@@ -408,7 +412,7 @@
     </div>
 
     <!-- Main area -->
-    <div id="main">
+    <main id="main">
       <div id="scene-container">
         <!-- Mobile Summary Overlay -->
         <div id="mobile-shadow-summary"
@@ -593,7 +597,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
   </div>
 

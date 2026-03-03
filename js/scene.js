@@ -38,7 +38,7 @@ export function initScene() {
     // Renderer
     sceneState.renderer = new WebGLRenderer({ antialias: true, alpha: true });
     sceneState.renderer.setSize(container.clientWidth, container.clientHeight);
-    sceneState.renderer.setPixelRatio(window.devicePixelRatio);
+    sceneState.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     sceneState.renderer.shadowMap.enabled = true;
     sceneState.renderer.shadowMap.type = PCFSoftShadowMap;
     container.appendChild(sceneState.renderer.domElement);
@@ -49,9 +49,10 @@ export function initScene() {
 
     const directionalLight = new DirectionalLight(0xffffff, 0.5);
     directionalLight.position.set(5, 10, 5);
+    const isMobile = window.innerWidth <= 768;
     directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.mapSize.width = isMobile ? 1024 : 2048;
+    directionalLight.shadow.mapSize.height = isMobile ? 1024 : 2048;
     directionalLight.shadow.camera.near = 0.5;
     directionalLight.shadow.camera.far = 50;
     const d = 10;
@@ -126,11 +127,13 @@ export function initScene() {
     southMarker.position.set(0, 0.01, 4.5); // Position at south edge of grid (positive Z)
     sceneState.scene.add(southMarker);
 
-    // Start animation loop
-    animate();
+    // Initial render
+    requestRender();
 
     // Handle resize
-    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('resize', () => {
+        onWindowResize();
+    });
 }
 
 export function onWindowResize() {
@@ -149,6 +152,7 @@ export function onWindowResize() {
     sceneState.camera.updateProjectionMatrix();
 
     sceneState.renderer.setSize(width, height);
+    requestRender();
 }
 
 // Helper to update camera when object changes
@@ -176,13 +180,20 @@ export function updateCameraSize(height) {
         light.shadow.camera.far = 50 + (height * 5);
 
         light.shadow.camera.updateProjectionMatrix();
+        requestRender();
     }
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    if (sceneState.renderer && sceneState.scene && sceneState.camera) {
-        sceneState.renderer.render(sceneState.scene, sceneState.camera);
+let renderRequested = false;
+export function requestRender() {
+    if (!renderRequested) {
+        renderRequested = true;
+        requestAnimationFrame(() => {
+            if (sceneState.renderer && sceneState.scene && sceneState.camera) {
+                sceneState.renderer.render(sceneState.scene, sceneState.camera);
+            }
+            renderRequested = false;
+        });
     }
 }
 
@@ -207,6 +218,7 @@ export function updateLightPosition(solar) {
         light.position.set(x, y, z);
         light.updateMatrixWorld();
     }
+    requestRender();
 }
 
 // Rotation state
@@ -262,6 +274,7 @@ export function rotateCamera() {
 
         // We rely on the main animate loop to render, but force update matrix
         sceneState.camera.updateMatrixWorld();
+        requestRender();
 
         if (progress < 1) {
             requestAnimationFrame(animateRotation);
