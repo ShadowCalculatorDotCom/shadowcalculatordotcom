@@ -211,7 +211,7 @@ export function updateLightPosition(solar) {
         light.castShadow = true;
         // Position light based on solar position
         const dist = 20;
-        const x = Math.sin(solar.azimuth) * Math.cos(solar.altitude) * dist;
+        const x = -Math.sin(solar.azimuth) * Math.cos(solar.altitude) * dist;
         const y = Math.sin(solar.altitude) * dist;
         const z = Math.cos(solar.azimuth) * Math.cos(solar.altitude) * dist;
 
