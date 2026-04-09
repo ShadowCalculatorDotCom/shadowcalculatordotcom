@@ -17,6 +17,7 @@ export function setupEventListeners() {
     setupObjectListeners();
     setupHeightListeners();
     setupDisplayListeners();
+    setupAnimationListeners();
 }
 
 /**
@@ -174,4 +175,99 @@ function setupDisplayListeners() {
             setTimeout(onWindowResize, 50);
         }
     });
+}
+
+/**
+ * Play/Pause animation for the day
+ */
+function setupAnimationListeners() {
+    if (!dom.playPauseBtn) return;
+
+    dom.playPauseBtn.addEventListener('click', () => {
+        sceneState.isPlaying = !sceneState.isPlaying;
+        
+        if (sceneState.isPlaying) {
+            // Change icon to pause
+            dom.playPauseBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>`;
+            startAnimation();
+        } else {
+            // Change icon to play
+            dom.playPauseBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>`;
+            stopAnimation();
+        }
+    });
+
+    function startAnimation() {
+        let lastTime = performance.now();
+        
+        function tick(now) {
+            if (!sceneState.isPlaying) return;
+            
+            const delta = (now - lastTime) / 1000; // seconds
+            lastTime = now;
+            
+            const solar = getSolarPosition();
+            const isSunUp = solar.altitudeDeg > 0;
+            
+            if (isSunUp) {
+                // 1440 minutes in a day. 15 seconds to complete a full day.
+                state.timeMinutes += 96 * delta;
+            } else {
+                if (dom.timeLoop && dom.timeLoop.checked) {
+                    state.timeMinutes += 960 * delta; // fast forward night
+                } else {
+                    // Sun below horizon and not looping -> Stop
+                    sceneState.isPlaying = false;
+                    dom.playPauseBtn.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>`;
+                    updateTimeDisplay();
+                    updateScene();
+                    return; // stop
+                }
+            }
+            
+            if (state.timeMinutes >= 1440) {
+                state.timeMinutes = 0;
+                if (!dom.timeLoop || !dom.timeLoop.checked) {
+                    sceneState.isPlaying = false;
+                    dom.playPauseBtn.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>`;
+                    
+                    dom.time.value = 0;
+                    updateTimeDisplay();
+                    updateScene();
+                    return; // stop
+                }
+            }
+            
+            // update UI
+            dom.time.value = Math.floor(state.timeMinutes);
+            updateTimeDisplay();
+            
+            // update scene
+            updateScene();
+            
+            sceneState.animationFrameId = requestAnimationFrame(tick);
+        }
+        
+        sceneState.animationFrameId = requestAnimationFrame(tick);
+    }
+
+    function stopAnimation() {
+        if (sceneState.animationFrameId) {
+            cancelAnimationFrame(sceneState.animationFrameId);
+            sceneState.animationFrameId = null;
+        }
+    }
 }

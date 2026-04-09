@@ -260,7 +260,20 @@
           <input type="date" id="date" aria-label="Date">
         </div>
         <div class="field">
-          <h3>Time: <span id="time-display" class="value-display">12:00</span></h3>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Time: <span id="time-display" class="value-display">12:00</span></h3>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label class="radio-item" style="margin: 0; padding: 4px; font-size: 0.8rem; flex-direction: row-reverse; gap: 4px;">
+                <span>Loop</span>
+                <input type="checkbox" id="time-loop" style="width: auto; margin: 0;">
+              </label>
+              <button id="play-pause-btn" class="btn-play" aria-label="Play Day Animation" style="background: var(--accent); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
           <input type="range" id="time" min="0" max="1439" step="1" value="720" aria-label="Time">
         </div>
         <div class="status" id="sun-status">Calculating sun position...</div>

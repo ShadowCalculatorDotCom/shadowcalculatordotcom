@@ -1,7 +1,7 @@
 import { state, dom, sceneState } from './state.js';
 import { CITIES, CUSTOM_CITY_INDEX } from './data.js';
-import { getSolarPosition, calculateShadowLength } from './math.js';
-import { updateLightPosition, onWindowResize, updateCameraSize, rotateCamera } from './scene.js';
+import { getSolarPosition, calculateShadowLength, createDateTime } from './math.js';
+import { updateLightPosition, onWindowResize, updateCameraSize, rotateCamera, setSunPathGeometry } from './scene.js';
 import { createObject } from './objects.js';
 
 import { getShareUrl } from './utils.js';
@@ -80,6 +80,9 @@ export function updateScene() {
 
     // Update light position
     updateLightPosition(solar);
+    
+    // Update daily path
+    updateDailySunPath();
 
     // Update UI
     updateSunStatus(solar);
@@ -91,8 +94,9 @@ export function updateScene() {
 }
 
 function updateSunStatus(solar) {
-    const hours = Math.floor(state.timeMinutes / 60);
-    const minutes = state.timeMinutes % 60;
+    const roundedMinutes = Math.floor(state.timeMinutes);
+    const hours = Math.floor(roundedMinutes / 60);
+    const minutes = roundedMinutes % 60;
     const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
     if (solar.altitudeDeg <= 0) {
@@ -142,8 +146,9 @@ function updateShadowInfo(solar) {
 
 function updateShadowContext() {
     const city = CITIES[state.cityIndex];
-    const hours = Math.floor(state.timeMinutes / 60);
-    const minutes = state.timeMinutes % 60;
+    const roundedMinutes = Math.floor(state.timeMinutes);
+    const hours = Math.floor(roundedMinutes / 60);
+    const minutes = roundedMinutes % 60;
     const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     const dateStr = new Date(state.date.getTime() - state.date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
@@ -474,8 +479,37 @@ export function updateLatLonDisplay() {
 }
 
 export function updateTimeDisplay() {
-    const hours = Math.floor(state.timeMinutes / 60);
-    const minutes = state.timeMinutes % 60;
+    const roundedMinutes = Math.floor(state.timeMinutes);
+    const hours = Math.floor(roundedMinutes / 60);
+    const minutes = roundedMinutes % 60;
     const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
     dom.timeDisplay.textContent = timeStr;
+}
+
+let lastSunPathKey = "";
+function updateDailySunPath() {
+    if (!sceneState.sunPathLine) return;
+    
+    const currentKey = `${state.cityIndex}-${state.lat}-${state.lon}-${state.date.getTime()}`;
+    if (lastSunPathKey === currentKey) return;
+    lastSunPathKey = currentKey;
+    
+    const city = CITIES[state.cityIndex];
+    const points = [];
+    const dist = 20;
+    
+    // Sample every 10 minutes
+    const step = 10;
+    for (let m = 0; m <= 1440; m += step) {
+        const dt = createDateTime(state.date, m, city.tz);
+        const pos = window.SunCalc.getPosition(dt, state.lat, state.lon);
+        
+        if (pos.altitude > -0.05) {
+            const x = -Math.sin(pos.azimuth) * Math.cos(pos.altitude) * dist;
+            const y = Math.max(0, Math.sin(pos.altitude) * dist);
+            const z = Math.cos(pos.azimuth) * Math.cos(pos.altitude) * dist;
+            points.push(x, y, z);
+        }
+    }
+    setSunPathGeometry(points);
 }

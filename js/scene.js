@@ -14,7 +14,12 @@ import {
     Mesh,
     GridHelper,
     CanvasTexture,
-    MeshBasicMaterial
+    MeshBasicMaterial,
+    BufferGeometry,
+    Line,
+    LineBasicMaterial,
+    Float32BufferAttribute,
+    SphereGeometry
 } from 'three';
 
 export function initScene() {
@@ -70,6 +75,18 @@ export function initScene() {
     plane.position.y = 0.001;
     plane.receiveShadow = true;
     sceneState.scene.add(plane);
+
+    // Sun Arc
+    const arcMaterial = new LineBasicMaterial({ color: 0xffe55c, transparent: true, opacity: 0.4, linewidth: 2 });
+    const arcGeometry = new BufferGeometry();
+    sceneState.sunPathLine = new Line(arcGeometry, arcMaterial);
+    sceneState.scene.add(sceneState.sunPathLine);
+
+    // Sun Mesh
+    const sunGeometry = new SphereGeometry(0.5, 16, 16);
+    const sunMaterial = new MeshBasicMaterial({ color: 0xffe55c });
+    sceneState.sunMesh = new Mesh(sunGeometry, sunMaterial);
+    sceneState.scene.add(sceneState.sunMesh);
 
     // Grid
     sceneState.gridHelper = new GridHelper(10, 20, 0xaaaaaa, 0xdddddd);
@@ -205,6 +222,7 @@ export function updateLightPosition(solar) {
         // Sun below horizon - disable light and shadows
         light.intensity = 0;
         light.castShadow = false;
+        if (sceneState.sunMesh) sceneState.sunMesh.visible = false;
     } else {
         // Sun above horizon - enable light and shadows
         light.intensity = 0.5;
@@ -217,6 +235,11 @@ export function updateLightPosition(solar) {
 
         light.position.set(x, y, z);
         light.updateMatrixWorld();
+        
+        if (sceneState.sunMesh) {
+            sceneState.sunMesh.position.set(x, y, z);
+            sceneState.sunMesh.visible = true;
+        }
     }
     requestRender();
 }
@@ -284,4 +307,10 @@ export function rotateCamera() {
     }
 
     requestAnimationFrame(animateRotation);
+}
+
+export function setSunPathGeometry(points) {
+    if (!sceneState.sunPathLine) return;
+    sceneState.sunPathLine.geometry.setAttribute('position', new Float32BufferAttribute(points, 3));
+    requestRender();
 }

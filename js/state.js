@@ -39,6 +39,8 @@ export function cacheDOMElements() {
     dom.date = document.getElementById('date');
     dom.time = document.getElementById('time');
     dom.timeDisplay = document.getElementById('time-display');
+    dom.timeLoop = document.getElementById('time-loop');
+    dom.playPauseBtn = document.getElementById('play-pause-btn');
 
     // Height inputs
     dom.heightMetric = document.getElementById('height-metric');
@@ -108,5 +110,9 @@ export const sceneState = {
     marker: null,
     mapInitialized: false,
     mapLoadPending: false,
-    cameraAngle: 0
+    cameraAngle: 0,
+    sunPathLine: null,
+    sunMesh: null,
+    animationFrameId: null,
+    isPlaying: false
 };
