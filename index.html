@@ -276,7 +276,7 @@
           </div>
           <input type="range" id="time" min="0" max="1439" step="1" value="720" aria-label="Time">
         </div>
-        <div class="status" id="sun-status">Calculating sun position...</div>
+        <div class="status" id="sun-status" style="display: none;">Calculating sun position...</div>
       </div>
 
 
@@ -613,6 +613,19 @@
     </main>
 
   </div>
+
+  <!-- Prevent CLS by rearranging DOM for mobile before first paint -->
+  <script>
+    if (window.innerWidth <= 768) {
+      var mobileContainer = document.getElementById('mobile-location-container');
+      if (mobileContainer) {
+        mobileContainer.appendChild(document.getElementById('datetime-section'));
+        mobileContainer.appendChild(document.getElementById('location-section'));
+        mobileContainer.appendChild(document.getElementById('triangle-container'));
+        mobileContainer.appendChild(document.getElementById('shadow-info'));
+      }
+    }
+  </script>
 
   <!-- External Libraries -->
   <script type="importmap">
