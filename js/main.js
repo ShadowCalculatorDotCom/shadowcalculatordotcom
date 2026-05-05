@@ -130,14 +130,9 @@ function init() {
         lazyInitMap();
     }
 
-    // Initialize Three.js scene and update it without blocking initial render
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            initScene();
-            // Initial scene update
-            updateScene();
-        }, 0);
-    });
+    // Initialize Three.js scene and update it immediately for faster LCP
+    initScene();
+    updateScene();
 }
 
 
