@@ -1330,13 +1330,13 @@ input[type="checkbox"] {
     }
 }
 
-/* Buy Me a Coffee Pure HTML/CSS Button */
+/* Buy Me a Coffee Pure HTML/CSS Button (BMC brand yellow so it reads as support, not navigation) */
 .bmc-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background-color: var(--accent);
-    color: #ffffff;
+    background-color: #FFDD00;
+    color: #0D0C22;
     padding: 8px 16px;
     border-radius: 8px;
     font-weight: 600;
@@ -1347,9 +1347,59 @@ input[type="checkbox"] {
 }
 
 .bmc-btn:hover {
-    background-color: var(--accent-hover);
-    color: #ffffff;
+    background-color: #F2CE00;
+    color: #0D0C22;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     text-decoration: none;
+}
+
+.bmc-btn-compact {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    gap: 6px;
+}
+
+/* Support strip: pitch + button directly below the 3D scene */
+#support-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 12px;
+    padding: 0 12px;
+}
+
+.support-strip-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* Site footer at the bottom of the scrollable main area */
+#site-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 12px 12px 4px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+#site-footer a {
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+#site-footer a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.footer-sep {
+    color: var(--border);
 }
