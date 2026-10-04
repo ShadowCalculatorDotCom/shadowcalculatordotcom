@@ -28,7 +28,9 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--text);
     background: var(--bg);
+    /* dvh = visible viewport, so mobile browser toolbars don't cover the bottom of the page (vh is the fallback) */
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
 }
 
@@ -47,6 +49,7 @@ a:hover {
     display: grid;
     grid-template-columns: 480px 1fr;
     height: 100vh;
+    height: 100dvh;
     width: 100vw;
 }
 
@@ -554,6 +557,7 @@ input[type="checkbox"] {
     overflow-x: hidden;
     overflow-y: auto;
     height: 100vh;
+    height: 100dvh;
 }
 
 #scene-container {
@@ -591,6 +595,8 @@ input[type="checkbox"] {
     box-shadow: none;
     border: none;
     min-height: 200px;
+    /* Don't compress inside the scrolling #main column (the footer would render under the cards) */
+    flex-shrink: 0;
 }
 
 #shadow-info {
@@ -958,8 +964,18 @@ input[type="checkbox"] {
 /* Mobile */
 /* Mobile Experience Upgrade */
 @media (max-width: 768px) {
+    /* The mobile header sits in normal flow, so #app fills the space below it
+       (a full-height #app would push the bottom of #main off-screen) */
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
     #app {
         grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr);
+        flex: 1;
+        min-height: 0;
     }
 
     /* Floating Action Button (FAB) */
@@ -1087,7 +1103,7 @@ input[type="checkbox"] {
     #main {
         padding: 8px 12px 100px 12px;
         /* Extra bottom padding for FAB space */
-        height: 100vh;
+        height: auto;
         overflow-y: auto;
     }
 
@@ -1131,6 +1147,8 @@ input[type="checkbox"] {
         margin-top: 8px;
         gap: 12px;
         padding-bottom: 20px;
+        /* Cards move out of the panel on mobile; only the tour button remains */
+        min-height: 0;
         flex-direction: column;
         align-items: stretch;
     }
@@ -1196,11 +1214,11 @@ input[type="checkbox"] {
     }
 
     #main {
-        padding: 8px 8px 8px 8px;
+        padding: 8px 8px 100px 8px;
+        /* Keep FAB clearance so the footer isn't hidden under it */
         gap: 4px;
         overflow-y: auto;
         overflow-x: hidden;
-        height: 100vh;
     }
 
     #scene-container {

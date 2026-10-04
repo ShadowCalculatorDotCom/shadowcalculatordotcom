@@ -106,8 +106,8 @@
     <p>
       The app uses the open-source library <strong>SunCalc</strong> for solar position
       calculations, <strong>Three.js</strong> for 3D visualization,
-      <strong>Leaflet.js</strong> for interactive maps, and <strong>CARTO</strong>
-      (powered by <strong>OpenStreetMap</strong> data) for map tiles and rendering.
+      <strong>Leaflet.js</strong> for interactive maps, and <strong>OpenStreetMap</strong>
+      for map tiles and data.
       Location search uses <strong>Nominatim</strong> geocoding via Leaflet Control Geocoder.
       All shadow computations happen locally on your device.
     </p>
@@ -155,11 +155,12 @@
         accessing.</strong>
     </p>
     <ul>
-      <li><strong>CARTO (Map Tiles):</strong> To display the map, your browser fetches image tiles for your specific
-        location from CARTO's servers.
+      <li><strong>OpenStreetMap (Map Tiles):</strong> To display the map, your browser fetches image tiles for your
+        specific location from the OpenStreetMap Foundation's tile servers.
         <br><em>Privacy Implication:</em> At high zoom levels (e.g., viewing a specific house), these tile requests
         reveal your precise location to the map provider.
-        See CARTO's <a href="https://carto.com/privacy/" target="_blank">Privacy Policy</a>.
+        See the OpenStreetMap Foundation's <a href="https://osmfoundation.org/wiki/Privacy_Policy"
+          target="_blank">Privacy Policy</a>.
       </li>
 
       <li><strong>Nominatim (location search):</strong> When you search for a city or address,
