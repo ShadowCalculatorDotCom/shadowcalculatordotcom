@@ -78,9 +78,9 @@ export function initMap(lat, lon) {
             gestureHandling: true
         }).setView([lat, lon], 10);
 
-        // Add CartoDB Positron tiles (clean, minimal style)
-        window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors, © CARTO',
+        // OpenStreetMap standard tiles (free, no API key; usage policy: https://operations.osmfoundation.org/policies/tiles/)
+        window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19
         }).addTo(sceneState.map);
 
